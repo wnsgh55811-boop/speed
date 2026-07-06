@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+  --font-serif: "Noto Serif KR", serif;
+
+  --color-ink-950: #14121c;
+  --color-ink-900: #1b1826;
+  --color-ink-800: #262137;
+  --color-ink-700: #362f4c;
+  --color-ink-600: #4a4265;
+  --color-ink-500: #675d85;
+  --color-ink-400: #8b81a6;
+  --color-ink-300: #b3aac8;
+  --color-ink-200: #d7d1e5;
+  --color-ink-100: #ece8f3;
+  --color-ink-50: #f6f4fa;
+
+  --color-plum-900: #2c2050;
+  --color-plum-800: #3a2c66;
+  --color-plum-700: #4a3980;
+  --color-plum-600: #5b4699;
+  --color-plum-500: #7057b3;
+  --color-plum-400: #9683c9;
+  --color-plum-300: #bcb0dd;
+  --color-plum-200: #dcd5ee;
+  --color-plum-100: #eeeaf7;
+
+  --color-gold-600: #a67f34;
+  --color-gold-500: #c9a15a;
+  --color-gold-400: #dbbc80;
+  --color-gold-300: #e9d4a8;
+  --color-gold-100: #f7eeda;
+
+  --color-paper: #faf8f4;
+  --color-paper-dim: #f2eee6;
+
+  --color-rose-600: #b1495a;
+  --color-rose-500: #c66272;
+  --color-rose-100: #f8e6e9;
+
+  --color-signal-low: #6f9c76;
+  --color-signal-watch: #c9a15a;
+  --color-signal-high: #c07a4a;
+  --color-signal-crisis: #b1495a;
+
+  --shadow-card: 0 1px 2px rgba(20, 18, 28, 0.04), 0 8px 24px -8px rgba(20, 18, 28, 0.10);
+  --shadow-card-hover: 0 2px 4px rgba(20, 18, 28, 0.06), 0 16px 40px -12px rgba(20, 18, 28, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background-color: var(--color-gold-300);
+  color: var(--color-ink-950);
+}
+
+.font-serif-kr {
+  font-family: var(--font-serif);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
