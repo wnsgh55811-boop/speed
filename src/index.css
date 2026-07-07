@@ -26,14 +26,19 @@
   --color-plum-200: #dcd5ee;
   --color-plum-100: #eeeaf7;
 
-  --color-gold-600: #a67f34;
+  --color-gold-600: #c98a3a;
   --color-gold-500: #c9a15a;
   --color-gold-400: #dbbc80;
   --color-gold-300: #e9d4a8;
   --color-gold-100: #f7eeda;
 
-  --color-paper: #faf8f4;
-  --color-paper-dim: #f2eee6;
+  --color-coral-600: #d94f70;
+  --color-coral-500: #ec6a86;
+  --color-coral-400: #f28ba1;
+  --color-coral-100: #fdeaee;
+
+  --color-paper: #fff9f4;
+  --color-paper-dim: #fdeee2;
 
   --color-rose-600: #b1495a;
   --color-rose-500: #c66272;
@@ -44,8 +49,10 @@
   --color-signal-high: #c07a4a;
   --color-signal-crisis: #b1495a;
 
-  --shadow-card: 0 1px 2px rgba(20, 18, 28, 0.04), 0 8px 24px -8px rgba(20, 18, 28, 0.10);
-  --shadow-card-hover: 0 2px 4px rgba(20, 18, 28, 0.06), 0 16px 40px -12px rgba(20, 18, 28, 0.16);
+  --gradient-band: linear-gradient(135deg, #ffe4d2 0%, #ffd9e6 55%, #efe0ff 100%);
+
+  --shadow-card: 0 1px 2px rgba(60, 30, 20, 0.05), 0 8px 24px -8px rgba(60, 30, 20, 0.12);
+  --shadow-card-hover: 0 2px 4px rgba(60, 30, 20, 0.07), 0 16px 40px -12px rgba(60, 30, 20, 0.16);
 }
 
 * {

@@ -7,42 +7,50 @@
 <title>MODERN RELATION UX</title>
 <style>
   :root{
-    --bg:#faf8f4; --bg-soft:#f2eee6; --surface:#ffffff; --surface-2:#2c2050;
-    --text:#1b1826; --text-2:#4a4265; --text-3:#8b81a6; --border:#ece8f3;
-    --accent:#4a3980; --accent-strong:#14121c; --accent-contrast:#faf8f4;
-    --gold:#a67f34; --gold-soft:#f7eeda;
-    --card-shadow: 0 1px 2px rgba(20,18,28,.05), 0 8px 24px -8px rgba(20,18,28,.12);
-    --danger-bg:#f8e6e9; --danger-border:rgba(177,73,90,.35); --danger-text:#b1495a;
-    --pill-active-bg:#eeeaf7; --pill-active-border:#5b4699;
+    --bg:#fff9f4; --bg-soft:#fdeee2; --surface:#ffffff;
+    --text:#2b2438; --text-2:#6a5d78; --text-3:#9c8fa8; --border:#f2e4da;
+    --accent:#9c3f6b; --accent-strong:#ec6a86; --accent-contrast:#ffffff;
+    --gold:#c98a3a; --gold-soft:#fdf0dc;
+    --band-bg: linear-gradient(135deg,#ffe4d2 0%,#ffd9e6 55%,#efe0ff 100%);
+    --band-text:#2b2438; --band-text-soft:#6a5d78; --band-card-bg: rgba(255,255,255,.6);
+    --card-shadow: 0 1px 2px rgba(60,30,20,.05), 0 8px 24px -8px rgba(60,30,20,.12);
+    --danger-bg:#fdecef; --danger-border:rgba(177,73,90,.3); --danger-text:#b1495a;
+    --pill-active-bg:#fbeaf1; --pill-active-border:#ec6a86;
     --status-low:#6f9c76; --status-watch:#c9a15a; --status-high:#c07a4a; --status-crisis:#b1495a;
   }
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#15121e; --bg-soft:#1c1829; --surface:#221d31; --surface-2:#241c3d;
+      --bg:#15121e; --bg-soft:#1c1829; --surface:#221d31;
       --text:#f3f1f8; --text-2:#c8c0dc; --text-3:#8f84ad; --border:#332c4a;
-      --accent:#bcb0dd; --accent-strong:#eeeaf7; --accent-contrast:#1b1826;
+      --accent:#e0a0bd; --accent-strong:#eeeaf7; --accent-contrast:#1b1826;
       --gold:#dbbc80; --gold-soft:#3a3020;
+      --band-bg: linear-gradient(135deg,#2c2050 0%,#3a2c66 55%,#241c3d 100%);
+      --band-text:#f3f1f8; --band-text-soft:#d8cfe8; --band-card-bg: rgba(255,255,255,.08);
       --card-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -8px rgba(0,0,0,.55);
       --danger-bg:#3a1d22; --danger-border:rgba(198,98,114,.5); --danger-text:#e08b98;
-      --pill-active-bg:#332a52; --pill-active-border:#9683c9;
+      --pill-active-bg:#3a2540; --pill-active-border:#e0a0bd;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#15121e; --bg-soft:#1c1829; --surface:#221d31; --surface-2:#241c3d;
+    --bg:#15121e; --bg-soft:#1c1829; --surface:#221d31;
     --text:#f3f1f8; --text-2:#c8c0dc; --text-3:#8f84ad; --border:#332c4a;
-    --accent:#bcb0dd; --accent-strong:#eeeaf7; --accent-contrast:#1b1826;
+    --accent:#e0a0bd; --accent-strong:#eeeaf7; --accent-contrast:#1b1826;
     --gold:#dbbc80; --gold-soft:#3a3020;
+    --band-bg: linear-gradient(135deg,#2c2050 0%,#3a2c66 55%,#241c3d 100%);
+    --band-text:#f3f1f8; --band-text-soft:#d8cfe8; --band-card-bg: rgba(255,255,255,.08);
     --card-shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -8px rgba(0,0,0,.55);
     --danger-bg:#3a1d22; --danger-border:rgba(198,98,114,.5); --danger-text:#e08b98;
-    --pill-active-bg:#332a52; --pill-active-border:#9683c9;
+    --pill-active-bg:#3a2540; --pill-active-border:#e0a0bd;
   }
   :root[data-theme="light"]{
-    --bg:#faf8f4; --bg-soft:#f2eee6; --surface:#ffffff; --surface-2:#2c2050;
-    --text:#1b1826; --text-2:#4a4265; --text-3:#8b81a6; --border:#ece8f3;
-    --accent:#4a3980; --accent-strong:#14121c; --accent-contrast:#faf8f4;
-    --gold:#a67f34; --gold-soft:#f7eeda;
-    --danger-bg:#f8e6e9; --danger-border:rgba(177,73,90,.35); --danger-text:#b1495a;
-    --pill-active-bg:#eeeaf7; --pill-active-border:#5b4699;
+    --bg:#fff9f4; --bg-soft:#fdeee2; --surface:#ffffff;
+    --text:#2b2438; --text-2:#6a5d78; --text-3:#9c8fa8; --border:#f2e4da;
+    --accent:#9c3f6b; --accent-strong:#ec6a86; --accent-contrast:#ffffff;
+    --gold:#c98a3a; --gold-soft:#fdf0dc;
+    --band-bg: linear-gradient(135deg,#ffe4d2 0%,#ffd9e6 55%,#efe0ff 100%);
+    --band-text:#2b2438; --band-text-soft:#6a5d78; --band-card-bg: rgba(255,255,255,.6);
+    --danger-bg:#fdecef; --danger-border:rgba(177,73,90,.3); --danger-text:#b1495a;
+    --pill-active-bg:#fbeaf1; --pill-active-border:#ec6a86;
   }
 
   *{box-sizing:border-box;}
@@ -64,7 +72,7 @@
   header.site .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;max-width:1080px;margin:0 auto;}
   .logo{display:flex;align-items:center;gap:8px;text-decoration:none;cursor:pointer;background:none;border:none;padding:0;min-width:0;flex-shrink:1;}
   .logo .dots{display:flex;align-items:center;flex-shrink:0;}
-  .logo .d1{width:22px;height:22px;border-radius:50%;background:var(--surface-2);}
+  .logo .d1{width:22px;height:22px;border-radius:50%;background:var(--accent);}
   .logo .d2{width:22px;height:22px;border-radius:50%;background:var(--gold);margin-left:-9px;opacity:.9;}
   .logo .name{font-weight:700;font-size:14.5px;letter-spacing:-0.2px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   nav.links{display:flex;gap:22px;font-size:14px;color:var(--text-2);flex-shrink:0;}
@@ -99,11 +107,27 @@
   p.lede{max-width:560px;margin:18px auto 0;text-align:center;color:var(--text-2);font-size:15.5px;line-height:1.65;}
   .hero-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:30px;}
   .hero-ctas .btn{flex:1 1 auto;min-width:150px;}
+  .hero-grid{display:grid;grid-template-columns:1fr;gap:36px;align-items:center;max-width:1080px;margin:0 auto;}
+  .hero-media{border-radius:28px;overflow:hidden;box-shadow:var(--card-shadow);aspect-ratio:4/3;background:var(--bg-soft);}
+  .hero-media img{width:100%;height:100%;object-fit:cover;display:block;}
+  @media (min-width:900px){
+    .hero-grid{grid-template-columns:1.05fr .95fr;gap:48px;}
+    .hero-copy .eyebrow, .hero-copy h1.hero, .hero-copy p.lede{text-align:left;margin-left:0;}
+    .hero-copy .hero-ctas{justify-content:flex-start;}
+    .hero-copy .disclaimer{text-align:left;padding:0;}
+  }
+  .closing-grid{display:grid;grid-template-columns:1fr;gap:28px;align-items:center;max-width:960px;margin:0 auto;}
+  .closing-media{border-radius:24px;overflow:hidden;box-shadow:var(--card-shadow);aspect-ratio:4/3;}
+  .closing-media img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;display:block;}
+  @media (min-width:800px){
+    .closing-grid{grid-template-columns:.85fr 1.15fr;gap:40px;text-align:left;}
+    .closing-grid .section-title, .closing-grid p{text-align:left;}
+  }
   .disclaimer{margin-top:20px;text-align:center;font-size:12px;color:var(--text-3);padding:0 10px;}
 
   section.band{padding:70px 20px;}
   section.band.alt{background:var(--surface);border-top:1px solid var(--border);}
-  section.band.dark{background:var(--surface-2);color:#f3f1f8;border-top:1px solid var(--border);}
+  section.band.dark{background:var(--band-bg);color:var(--band-text);border-top:1px solid var(--border);}
   @media (max-width:480px){
     section.band{padding:52px 18px;}
     section.band:first-of-type{padding-top:44px;}
@@ -128,7 +152,7 @@
   .step-card{}
   .step-card .num{font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--gold);}
   .step-card h3{margin:8px 0 0;font-size:16px;}
-  .step-card p{margin:6px 0 0;font-size:13.5px;color:#cfc6e6;}
+  .step-card p{margin:6px 0 0;font-size:13.5px;color:var(--band-text-soft);}
 
   .center{text-align:center;}
 
@@ -181,10 +205,10 @@
   .domain-fill{height:100%;border-radius:999px;}
   .match-list{list-style:none;margin:12px 0 0;padding:0;font-size:14px;color:var(--text-2);}
   .match-list li{display:flex;gap:8px;margin-bottom:8px;}
-  .guide-box{background:rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .guide-box{background:var(--band-card-bg);border-radius:12px;padding:14px;margin-bottom:12px;}
   .guide-box:last-child{margin-bottom:0;}
   .guide-box .label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);}
-  .guide-box p{margin:6px 0 0;font-size:14px;color:#e6e1f2;}
+  .guide-box p{margin:6px 0 0;font-size:14px;color:var(--band-text-soft);}
   .crisis-notice{background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:18px;padding:26px;}
   .hotline-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:16px;}
   @media(min-width:600px){.hotline-grid{grid-template-columns:repeat(3,1fr);}}
@@ -849,6 +873,9 @@
 
   /* ================= PAGES ================= */
 
+  var IMG_HERO = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260707_044331_a480edd5-0285-449a-8b84-a448ad08c688.png";
+  var IMG_BENCH = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260707_044408_c06cc3f3-9eea-451b-a913-a2a445b0ce61.png";
+
   function renderLanding(){
     var reasons = ["사람마다 생활환경이 다르기 때문입니다.","감정과 컨디션이 관계에 영향을 주기 때문입니다.",
       "불안, 우울, ADHD, 불면, 공황, 강박은 연락과 갈등 방식에 영향을 줄 수 있기 때문입니다.","연애 문제는 대화 스킬만으로 해결되지 않기 때문입니다."];
@@ -857,12 +884,17 @@
       ["감정·컨디션","우울·불안·강박·ADHD·불면·공황 가능성 스크리닝"],["진단·약복용 영향","기존 진단과 약 복용이 관계에 주는 실제 영향"]];
     var steps = [["01","사전 동의","민감한 질문을 다루는 방식에 먼저 동의합니다"],["02","관계 흐름 분석","생활환경부터 애착반응, 감정·컨디션까지 단계별로 답합니다"],["03","리포트 확인","막힘의 원인, 위험 신호, 맞는 상대 유형, 행동 가이드를 받습니다"]];
 
-    return '<section class="band fade-up" style="padding-top:96px;">'
+    return '<section class="band fade-up" style="padding-top:72px;">'
+      + '<div class="hero-grid">'
+      + '<div class="hero-copy">'
       + '<p class="eyebrow">Modern Relation UX</p>'
       + '<h1 class="hero serif">연애 문제는<br>성격만의 문제가 아닙니다</h1>'
       + '<p class="lede">생활패턴, 가족환경, 친구관계, 감정기복, 불안, 우울, ADHD, 불면, 공황, 강박 성향까지 — 당신의 생활환경, 감정패턴, 컨디션, 관계반응을 함께 분석합니다.</p>'
       + '<div class="hero-ctas"><button class="btn btn-primary" data-nav="consent">내 관계 흐름 분석하기</button><button class="btn btn-outline" data-act="scrollHow">진단 방식 보기</button></div>'
       + '<p class="disclaimer">본 서비스는 의료기관의 진단을 대체하지 않으며, 자기보고 기반의 관계·심리 패턴 분석을 제공합니다.</p>'
+      + '</div>'
+      + '<div class="hero-media"><img src="'+IMG_HERO+'" alt="따뜻하게 대화를 나누는 커플" loading="eager"></div>'
+      + '</div>'
       + '</section>'
       + '<section class="band alt"><div class="wrap-mid"><h2 class="section-title serif">왜 기존 연애 조언은 효과가 없을까요?</h2>'
       + '<div class="grid2">' + reasons.map(function(r,i){ return '<div class="reason-card"><span class="n">'+String(i+1).padStart(2,"0")+'</span><p>'+r+'</p></div>'; }).join('') + '</div>'
@@ -872,12 +904,15 @@
       + '<div class="grid3">' + dims.map(function(d){ return '<div class="card dim-card"><h3>'+d[0]+'</h3><p>'+d[1]+'</p></div>'; }).join('') + '</div>'
       + '</div></section>'
       + '<section class="band dark"><div class="wrap-mid">'
-      + '<p class="eyebrow" style="color:var(--gold);">Process</p><h2 class="section-title serif" style="margin-top:10px;color:#fff;">3분이면 첫 요약을 받습니다</h2>'
+      + '<p class="eyebrow" style="color:var(--gold);">Process</p><h2 class="section-title serif" style="margin-top:10px;color:var(--band-text);">3분이면 첫 요약을 받습니다</h2>'
       + '<div class="grid3">' + steps.map(function(s){ return '<div class="step-card"><span class="num">'+s[0]+'</span><h3>'+s[1]+'</h3><p>'+s[2]+'</p></div>'; }).join('') + '</div>'
       + '</div></section>'
-      + '<section class="band center"><h2 class="section-title serif">3분 요약 분석부터 시작하세요</h2>'
+      + '<section class="band"><div class="closing-grid">'
+      + '<div class="closing-media"><img src="'+IMG_BENCH+'" alt="진솔한 대화를 나누는 커플" loading="lazy"></div>'
+      + '<div class="center"><h2 class="section-title serif">3분 요약 분석부터 시작하세요</h2>'
       + '<p style="color:var(--text-2);font-size:14.5px;margin-top:10px;">더 깊은 분석은 심화 리포트에서 확인할 수 있습니다.</p>'
-      + '<button class="btn btn-primary" style="margin-top:24px;" data-nav="consent">무료 분석 시작</button></section>';
+      + '<button class="btn btn-primary" style="margin-top:24px;" data-nav="consent">무료 분석 시작</button></div>'
+      + '</div></section>';
   }
 
   function renderConsent(){
@@ -1069,7 +1104,7 @@
         + '<div class="card"><h3 style="font-size:14px;font-weight:700;">조심해야 할 상대 유형</h3><ul class="match-list">' + result.primaryType.badMatch.map(function(m){return '<li><span style="color:var(--status-crisis);">－</span>'+m+'</li>';}).join('') + '</ul></div>'
         + '</div>';
 
-      html += '<div class="card" style="background:var(--surface-2);color:#fff;border:none;"><h3 class="serif" style="font-size:17px;font-weight:700;">행동 가이드</h3><div style="margin-top:14px;">'
+      html += '<div class="card" style="background:var(--band-bg);color:var(--band-text);border:none;"><h3 class="serif" style="font-size:17px;font-weight:700;">행동 가이드</h3><div style="margin-top:14px;">'
         + result.primaryType.actionGuide.map(function(g){ return '<div class="guide-box"><p class="label">'+g.label+'</p><p>'+g.text+'</p></div>'; }).join('') + '</div></div>';
 
       html += '<div class="card" style="border-style:dashed;text-align:center;">'

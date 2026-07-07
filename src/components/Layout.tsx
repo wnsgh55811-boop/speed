@@ -35,7 +35,7 @@ export function Header() {
         {!isTestFlow && (
           <Link
             to="/consent"
-            className="rounded-full bg-ink-950 px-4 py-2 text-sm font-medium text-paper transition hover:bg-plum-800"
+            className="rounded-full bg-coral-500 px-4 py-2 text-sm font-medium text-paper transition hover:bg-coral-600"
           >
             분석 시작하기
           </Link>

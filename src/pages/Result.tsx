@@ -156,13 +156,16 @@ export default function Result() {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-ink-100 bg-plum-900 p-6 text-paper sm:p-8">
+            <section
+              className="rounded-2xl border border-ink-100 p-6 text-ink-900 sm:p-8"
+              style={{ background: "var(--gradient-band)" }}
+            >
               <h3 className="font-serif-kr text-lg font-semibold">행동 가이드</h3>
               <div className="mt-4 space-y-4">
                 {primaryType.actionGuide.map((g) => (
-                  <div key={g.label} className="rounded-xl bg-white/10 p-4">
-                    <p className="text-xs font-semibold tracking-wide text-gold-400 uppercase">{g.label}</p>
-                    <p className="mt-1.5 text-sm leading-relaxed text-plum-100">{g.text}</p>
+                  <div key={g.label} className="rounded-xl bg-white/60 p-4">
+                    <p className="text-xs font-semibold tracking-wide text-gold-600 uppercase">{g.label}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-ink-700">{g.text}</p>
                   </div>
                 ))}
               </div>
@@ -177,7 +180,7 @@ export default function Result() {
               </p>
               <Link
                 to="/expert"
-                className="mt-4 inline-block rounded-full bg-ink-950 px-6 py-3 text-sm font-medium text-paper transition hover:bg-plum-800"
+                className="mt-4 inline-block rounded-full bg-coral-500 px-6 py-3 text-sm font-medium text-paper transition hover:bg-coral-600"
               >
                 심화 리포트 · 1:1 해석 알아보기
               </Link>

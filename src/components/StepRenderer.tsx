@@ -57,7 +57,7 @@ function SingleChoiceView({ step, currentAnswer, onAnswer, onNext, onSkip }: Pro
       <button
         onClick={onNext}
         disabled={selected === null}
-        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+        className="mt-7 w-full rounded-full bg-coral-500 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-30"
       >
         다음
       </button>
@@ -110,7 +110,7 @@ function MultiChoiceView({ step, currentAnswer, onAnswer, onNext, onSkip }: Prop
       <button
         onClick={submit}
         disabled={selected.length === 0}
-        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+        className="mt-7 w-full rounded-full bg-coral-500 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-30"
       >
         다음
       </button>
@@ -131,7 +131,7 @@ function InfoView({ step, onNext }: Props & { step: Extract<Step, { kind: "info"
       </div>
       <button
         onClick={onNext}
-        className="mt-8 rounded-full bg-ink-950 px-8 py-3.5 text-[15px] font-medium text-paper transition hover:bg-plum-800"
+        className="mt-8 rounded-full bg-coral-500 px-8 py-3.5 text-[15px] font-medium text-paper transition hover:bg-coral-600"
       >
         {step.cta}
       </button>
@@ -191,7 +191,7 @@ function ScaleView({ step, currentAnswer, onAnswer, onNext, onSkip }: Props & { 
       <button
         onClick={submit}
         disabled={!allAnswered}
-        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+        className="mt-7 w-full rounded-full bg-coral-500 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-30"
       >
         다음
       </button>
@@ -233,7 +233,7 @@ function CrisisView({ step, currentAnswer, onAnswer, onNext }: Props & { step: E
       <button
         onClick={onNext}
         disabled={selected === null}
-        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+        className="mt-7 w-full rounded-full bg-coral-500 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-30"
       >
         다음
       </button>

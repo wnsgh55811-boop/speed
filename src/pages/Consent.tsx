@@ -80,7 +80,7 @@ export default function Consent() {
         <button
           onClick={start}
           disabled={!allChecked}
-          className="mt-9 w-full rounded-full bg-ink-950 px-7 py-4 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+          className="mt-9 w-full rounded-full bg-coral-500 px-7 py-4 text-[15px] font-medium text-paper transition enabled:hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-30"
         >
           동의하고 시작하기
         </button>
