@@ -913,6 +913,7 @@
       return '<div class="fade-up"><p class="section-tag">'+step.section+'</p><h2 class="question">'+step.question+'</h2>'
         + (step.help? '<p class="help">'+step.help+'</p>' : '')
         + '<div class="opt-list">' + optionButtonsHtml(step, current, "opt-btn") + '</div>'
+        + '<button class="btn btn-primary" style="width:100%;margin-top:22px;" '+(current?'':'disabled')+' data-act="next">다음</button>'
         + '<button class="skip-link" data-act="skip">건너뛰기</button></div>';
     }
     if (step.kind==="crisis"){
@@ -921,7 +922,8 @@
         + '<div class="opt-list">' + step.options.map(function(opt){
             var active = current===opt.value;
             return '<button class="crisis-opt'+(active?' active':'')+'" data-act="answerSingle" data-id="'+step.id+'" data-value="'+encodeURIComponent(opt.value)+'">'+opt.label+'</button>';
-          }).join('') + '</div></div>';
+          }).join('') + '</div>'
+        + '<button class="btn btn-primary" style="width:100%;margin-top:22px;" '+(current?'':'disabled')+' data-act="next">다음</button></div>';
     }
     if (step.kind==="multi"){
       var sel = Array.isArray(current) ? current : [];
@@ -965,7 +967,6 @@
   window.__mru.answerSingle = function(id, encodedValue){
     var value = decodeURIComponent(encodedValue);
     state.answers[id]=value; persist(); renderTestBody();
-    setTimeout(function(){ window.__mru.nextStep(); }, 220);
   };
   window.__mru.toggleMulti = function(id, encodedValue, max){
     var value = decodeURIComponent(encodedValue);

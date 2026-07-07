@@ -26,13 +26,12 @@ function SkipLink({ onSkip }: { onSkip: () => void }) {
   );
 }
 
-function SingleChoiceView({ step, onAnswer, onNext, onSkip }: Props & { step: Extract<Step, { kind: "single" }> }) {
-  const [selected, setSelected] = useState<string | null>(null);
+function SingleChoiceView({ step, currentAnswer, onAnswer, onNext, onSkip }: Props & { step: Extract<Step, { kind: "single" }> }) {
+  const [selected, setSelected] = useState<string | null>(typeof currentAnswer === "string" ? currentAnswer : null);
 
   const pick = (value: string) => {
     setSelected(value);
     onAnswer(value);
-    window.setTimeout(onNext, 220);
   };
 
   return (
@@ -55,6 +54,13 @@ function SingleChoiceView({ step, onAnswer, onNext, onSkip }: Props & { step: Ex
           </button>
         ))}
       </div>
+      <button
+        onClick={onNext}
+        disabled={selected === null}
+        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        다음
+      </button>
       <SkipLink onSkip={onSkip} />
     </div>
   );
@@ -194,13 +200,12 @@ function ScaleView({ step, currentAnswer, onAnswer, onNext, onSkip }: Props & { 
   );
 }
 
-function CrisisView({ step, onAnswer, onNext }: Props & { step: Extract<Step, { kind: "crisis" }> }) {
-  const [selected, setSelected] = useState<string | null>(null);
+function CrisisView({ step, currentAnswer, onAnswer, onNext }: Props & { step: Extract<Step, { kind: "crisis" }> }) {
+  const [selected, setSelected] = useState<string | null>(typeof currentAnswer === "string" ? currentAnswer : null);
 
   const pick = (value: string) => {
     setSelected(value);
     onAnswer(value);
-    window.setTimeout(onNext, 220);
   };
 
   return (
@@ -225,6 +230,13 @@ function CrisisView({ step, onAnswer, onNext }: Props & { step: Extract<Step, { 
           </button>
         ))}
       </div>
+      <button
+        onClick={onNext}
+        disabled={selected === null}
+        className="mt-7 w-full rounded-full bg-ink-950 px-6 py-3.5 text-[15px] font-medium text-paper transition enabled:hover:bg-plum-800 disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        다음
+      </button>
     </div>
   );
 }
