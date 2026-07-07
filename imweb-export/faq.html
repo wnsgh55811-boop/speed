@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ | 러브백 관계 연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfbf7;color:#141b2e;line-height:1.7;padding-bottom:64px}
+.serif{font-family:'Noto Serif KR','Nanum Myeongjo',Georgia,serif}
+a{color:inherit;text-decoration:none}
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+.wrap-sm{max-width:640px;margin:0 auto;padding:0 20px}
+.site-header{position:sticky;top:0;z-index:40;background:rgba(253,251,247,.95);backdrop-filter:blur(6px);border-bottom:1px solid #e7e1d6}
+.site-header .container{height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;color:#141b2e}
+.logo span{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:400;color:#8a7f6c;margin-left:4px}
+.nav-desktop{display:none;gap:28px;align-items:center}
+.nav-desktop a{font-size:14px;font-weight:500;color:#1c2740}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:none;border:none;font-size:22px;cursor:pointer;color:#141b2e}
+.mobile-menu{display:none;flex-direction:column;gap:2px;padding:10px 20px 16px;border-top:1px solid #e7e1d6;background:#fdfbf7}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 4px;font-size:14px;font-weight:500;color:#1c2740}
+@media(min-width:900px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}.header-cta{display:inline-flex!important}}
+.header-cta{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:2px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer}
+.btn-lg{padding:16px 32px;font-size:16px}
+.btn-sm{padding:8px 16px;font-size:13px}
+.btn-primary{background:#7d2334;border-color:#7d2334;color:#fdfbf7}
+.btn-kakao{background:#fee500;border-color:#fee500;color:#391b1b}
+.section{padding:48px 0}
+.section-navy{background:#0f1524;color:#fdfbf7}
+.section-beige{background:#f8f1e3}
+.eyebrow-light{color:rgba(250,246,238,.7);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:14px}
+h1.page-title{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:500}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.muted{color:#8a7f6c}
+.acc-item{border:1px solid #e7e1d6;background:#fff;border-radius:2px;margin-bottom:10px;overflow:hidden}
+.acc-q{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:pointer;font-weight:500}
+.acc-a{padding:0 22px;max-height:0;overflow:hidden;transition:max-height .25s ease;color:#5a5245}
+.acc-item.open .acc-a{padding:0 22px 18px}
+.acc-arrow{transition:transform .2s;color:#8a7f6c}
+.acc-item.open .acc-arrow{transform:rotate(180deg)}
+.site-footer{background:#0f1524;color:rgba(250,246,238,.7);padding:48px 0;font-size:14px}
+.footer-links{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0}
+.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:40;border-top:1px solid #d3ccbd}
+.mobile-cta a{flex:1;text-align:center;padding:16px 0;font-weight:500;border-radius:0}
+@media(min-width:900px){.mobile-cta{display:none}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="logo">러브백<span>관계 연구소</span></a>
+    <nav class="nav-desktop">
+      <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+      <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    </nav>
+    <a href="apply.html" class="btn btn-primary btn-sm header-cta">상담 신청하기</a>
+    <button class="menu-btn" onclick="document.getElementById('mobileMenu').classList.toggle('open')">&#9776;</button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+    <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    <a href="apply.html" class="btn btn-primary" style="margin-top:8px">상담 신청하기</a>
+  </div>
+</header>
+
+<section class="section section-navy">
+  <div class="wrap-sm center">
+    <span class="eyebrow-light">FAQ</span>
+    <h1 class="page-title">자주 묻는 질문</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-sm">
+    <div class="acc-item open">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 재회 가능성을 정확히 알 수 있나요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">재회 가능성은 단정할 수 없습니다. 다만 이별 과정, 상대의 반응, 현재 관계 상태, 마지막 연락 내용, 차단 여부, 감정 소모 정도를 바탕으로 현실적인 가능성과 방향을 분석할 수 있습니다.</div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 상담받으면 무조건 재회할 수 있나요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">무조건적인 결과를 약속하지 않습니다. 러브백은 결과를 보장하기보다 현재 상황에서 가능성을 높이는 방향과 피해야 할 행동을 정리해드립니다.</div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 카톡 내용도 봐주시나요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">네. 필요한 경우 실제 대화 흐름을 함께 보며 어떤 지점에서 상대가 부담을 느꼈는지, 어떤 메시지가 관계 흐름을 악화시켰는지 분석합니다.</div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 상담 전에 무엇을 준비해야 하나요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">관계 기간, 이별 시점, 갈등 원인, 마지막 대화, 현재 연락 상태, 상대의 반응, 본인의 목표를 정리해주시면 좋습니다.</div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 상담은 어떻게 진행되나요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">사전 신청서를 바탕으로 전화 또는 온라인 방식으로 진행됩니다. 상담 방식은 상품별로 다르게 안내할 수 있습니다.</div>
+    </div>
+    <div class="acc-item">
+      <div class="acc-q" onclick="this.parentElement.classList.toggle('open')"><span>Q. 환불은 가능한가요?</span><span class="acc-arrow">▾</span></div>
+      <div class="acc-a">상담 특성상 사전 분석이 시작된 이후에는 환불이 제한될 수 있습니다. 환불 규정은 신청 전 반드시 확인할 수 있도록 별도 안내합니다. 자세한 내용은 환불규정 페이지를 참고해주세요.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-beige">
+  <div class="wrap-sm center">
+    <p class="muted">더 궁금한 점이 있다면 카카오톡으로 편하게 문의해주세요.</p>
+    <a href="apply.html" class="btn btn-primary btn-lg">상담 신청하기</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="policy-terms.html">이용약관</a><a href="policy-privacy.html">개인정보처리방침</a><a href="policy-refund.html">환불규정</a>
+    </div>
+    <p style="font-size:12px;color:rgba(250,246,238,.5)">© 2026 러브백 관계 연구소. All rights reserved.</p>
+  </div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="https://pf.kakao.com/_loveback" target="_blank" class="btn-kakao">카톡 상담 문의</a>
+  <a href="apply.html" class="btn-primary">상담 신청하기</a>
+</div>
+
+<script>
+document.querySelectorAll('.acc-a').forEach(function(el){
+  el.style.maxHeight = el.parentElement.classList.contains('open') ? el.scrollHeight+40+'px' : '0px';
+});
+document.querySelectorAll('.acc-q').forEach(function(q){
+  q.addEventListener('click', function(){
+    var item = q.parentElement;
+    var a = item.querySelector('.acc-a');
+    setTimeout(function(){
+      a.style.maxHeight = item.classList.contains('open') ? a.scrollHeight+40+'px' : '0px';
+    }, 10);
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 칼럼 | 러브백 관계 연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfbf7;color:#141b2e;line-height:1.7;padding-bottom:64px}
+.serif{font-family:'Noto Serif KR','Nanum Myeongjo',Georgia,serif}
+a{color:inherit;text-decoration:none}
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+.wrap-sm{max-width:640px;margin:0 auto;padding:0 20px}
+.site-header{position:sticky;top:0;z-index:40;background:rgba(253,251,247,.95);backdrop-filter:blur(6px);border-bottom:1px solid #e7e1d6}
+.site-header .container{height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;color:#141b2e}
+.logo span{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:400;color:#8a7f6c;margin-left:4px}
+.nav-desktop{display:none;gap:28px;align-items:center}
+.nav-desktop a{font-size:14px;font-weight:500;color:#1c2740}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:none;border:none;font-size:22px;cursor:pointer;color:#141b2e}
+.mobile-menu{display:none;flex-direction:column;gap:2px;padding:10px 20px 16px;border-top:1px solid #e7e1d6;background:#fdfbf7}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 4px;font-size:14px;font-weight:500;color:#1c2740}
+@media(min-width:900px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}.header-cta{display:inline-flex!important}}
+.header-cta{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:2px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer}
+.btn-lg{padding:16px 32px;font-size:16px}
+.btn-sm{padding:8px 16px;font-size:13px}
+.btn-primary{background:#7d2334;border-color:#7d2334;color:#fdfbf7}
+.btn-kakao{background:#fee500;border-color:#fee500;color:#391b1b}
+.section{padding:48px 0}
+.section-navy{background:#0f1524;color:#fdfbf7}
+.eyebrow-light{color:rgba(250,246,238,.7);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:14px}
+h1.page-title{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:500}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.muted{color:#8a7f6c}
+.muted-light{color:rgba(250,246,238,.8)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.chip{border:1px solid #d3ccbd;border-radius:999px;padding:7px 16px;font-size:13px;cursor:pointer;background:#fff;color:#1c2740}
+.chip.active{background:#141b2e;border-color:#141b2e;color:#fdfbf7}
+.grid{display:grid;gap:20px;grid-template-columns:1fr}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.grid{grid-template-columns:1fr 1fr 1fr}}
+.ccard{background:#fff;border:1px solid #e7e1d6;border-radius:2px;padding:22px;cursor:pointer}
+.badge2{display:inline-block;background:#f0e5cd;color:#1c2740;font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;margin-bottom:12px}
+.ccard-title{font-family:'Noto Serif KR',serif;font-size:16px;margin-bottom:8px}
+.ccard-excerpt{font-size:14px;color:#6b6152}
+.ccard-meta{font-size:12px;color:#8a7f6c;margin-top:10px}
+.cdetail{display:none;margin-top:12px;padding-top:14px;border-top:1px solid #e7e1d6;font-size:14px}
+.cdetail.open{display:block}
+.cdetail p{margin-bottom:12px}
+.cta-box{display:flex;flex-direction:column;align-items:center;gap:14px;background:#f8f1e3;border:1px solid rgba(211,204,189,.6);border-radius:2px;padding:24px;text-align:center;margin-top:14px}
+.site-footer{background:#0f1524;color:rgba(250,246,238,.7);padding:48px 0;font-size:14px}
+.footer-links{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0}
+.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:40;border-top:1px solid #d3ccbd}
+.mobile-cta a{flex:1;text-align:center;padding:16px 0;font-weight:500;border-radius:0}
+@media(min-width:900px){.mobile-cta{display:none}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="logo">러브백<span>관계 연구소</span></a>
+    <nav class="nav-desktop">
+      <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+      <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    </nav>
+    <a href="apply.html" class="btn btn-primary btn-sm header-cta">상담 신청하기</a>
+    <button class="menu-btn" onclick="document.getElementById('mobileMenu').classList.toggle('open')">&#9776;</button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+    <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    <a href="apply.html" class="btn btn-primary" style="margin-top:8px">상담 신청하기</a>
+  </div>
+</header>
+
+<section class="section section-navy">
+  <div class="wrap-sm center">
+    <span class="eyebrow-light">Column</span>
+    <h1 class="page-title">러브백 칼럼</h1>
+    <p class="muted-light">연애, 재회, 카톡 대화, 관계 심리에 대한 러브백의 분석을 읽어보세요.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="chips" id="chips">
+      <button class="chip active" data-cat="all">전체</button>
+      <button class="chip" data-cat="dating">연애 칼럼</button>
+      <button class="chip" data-cat="reunion">재회 칼럼</button>
+      <button class="chip" data-cat="chat">카톡/대화 칼럼</button>
+      <button class="chip" data-cat="psychology">관계 심리 칼럼</button>
+    </div>
+
+    <div class="grid" id="colGrid">
+
+      <div class="ccard" data-cat="dating" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">연애 칼럼</span>
+        <p class="ccard-title">남자가 식었을 때 보이는 신호</p>
+        <p class="ccard-excerpt">연락 빈도보다 먼저 봐야 할 변화의 순서가 있습니다.</p>
+        <div class="cdetail">
+          <p>연애 중 상대가 예전 같지 않다고 느껴질 때, 사람들은 보통 연락 빈도부터 확인합니다. 하지만 연락은 관계 변화의 결과일 뿐, 시작점이 아닙니다.</p>
+          <p>가장 먼저 나타나는 신호는 '대화의 깊이'가 얕아지는 것입니다. 감정을 나누는 대화에서 정보를 전달하는 대화로 옮겨가는 겁니다.</p>
+          <p>두 번째 신호는 '갈등을 대하는 태도'입니다. 갈등 자체를 피하려 한다면, 이 관계에 더 이상 에너지를 쓰고 싶지 않은 상태일 수 있습니다.</p>
+          <p>중요한 건 확신이 아니라 관찰입니다. 감정적으로 몰아붙이기 전에, 관계가 어느 단계에 있는지부터 정리하는 것이 먼저입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="dating" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">연애 칼럼</span>
+        <p class="ccard-title">연애 중 연락이 줄어드는 이유</p>
+        <p class="ccard-excerpt">연락 빈도는 결과이지, 원인이 아닙니다.</p>
+        <div class="cdetail">
+          <p>연애 중 연락이 줄어들면 대부분 '내가 뭘 잘못했나'부터 생각합니다. 하지만 연락 빈도가 줄어드는 이유는 한 가지가 아닙니다.</p>
+          <p>안정기에 접어들며 자연스럽게 줄어드는 경우도 있고, 실제로 확신이 옅어지며 줄어드는 경우도 있습니다.</p>
+          <p>구분하는 기준은 '연락 외 다른 영역'입니다. 만났을 때 태도, 미래 이야기, 갈등 해결 방식이 그대로인지 확인해야 합니다.</p>
+          <p>연락 빈도 하나만으로 관계를 판단하지 마세요. 흐름 전체를 봐야 정확한 판단이 가능합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="dating" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">연애 칼럼</span>
+        <p class="ccard-title">잘해줄수록 멀어지는 이유</p>
+        <p class="ccard-excerpt">배려가 관계의 균형을 무너뜨릴 수 있습니다.</p>
+        <div class="cdetail">
+          <p>'더 잘해주면 상대도 알아줄 것'이라는 믿음은 연애에서 가장 흔한 착각 중 하나입니다. 관계는 균형이 만들어내는 긴장으로 유지됩니다.</p>
+          <p>과잉배려는 상대에게 '나는 이 관계에서 무엇을 해도 괜찮다'는 신호로 읽힐 수 있습니다.</p>
+          <p>갈등 상황에서 무조건 맞추는 패턴이 반복되면, 상대는 관계를 지키기 위한 노력 자체를 하지 않게 됩니다.</p>
+          <p>잘해주는 것 자체가 문제는 아닙니다. 문제는 내 기준 없이 맞추기만 하는 방식입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="dating" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">연애 칼럼</span>
+        <p class="ccard-title">불안형 연애가 힘든 진짜 이유</p>
+        <p class="ccard-excerpt">불안한 게 문제가 아니라, 불안을 다루는 방식이 문제입니다.</p>
+        <div class="cdetail">
+          <p>불안형 애착을 가진 사람은 관계에서 작은 신호에도 크게 반응합니다. 이 자체는 잘못이 아닙니다.</p>
+          <p>문제는 그 불안을 다루는 방식입니다. 확인받기 위해 연락을 계속하면 오히려 상대를 더 멀어지게 만듭니다.</p>
+          <p>확인을 받으려 하기 전에 스스로 불안을 조절하는 훈련이 먼저 필요합니다.</p>
+          <p>내 애착 패턴이 관계에서 어떻게 작동하는지부터 진단받아보는 것을 권합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="dating" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">연애 칼럼</span>
+        <p class="ccard-title">회피형 남자를 대하는 법</p>
+        <p class="ccard-excerpt">밀어붙일수록 더 멀리 도망갑니다.</p>
+        <div class="cdetail">
+          <p>회피형 성향의 남자는 갈등이나 감정적 대화 상황에서 물러나는 방식으로 스스로를 지킵니다.</p>
+          <p>다가가는 방식보다 '여지를 주는 방식'이 더 효과적입니다. 대답을 재촉하지 않고 시간을 주는 것입니다.</p>
+          <p>무조건 기다리기만 하는 것도 답은 아닙니다. 내가 어디까지 기다릴 수 있는지 기준을 세워야 합니다.</p>
+          <p>회피형과의 관계는 밀당이 아니라 거리 조절의 문제입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="reunion" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">재회 칼럼</span>
+        <p class="ccard-title">헤어진 후 연락 타이밍</p>
+        <p class="ccard-excerpt">타이밍보다 먼저 정리해야 할 것이 있습니다.</p>
+        <div class="cdetail">
+          <p>이별 후 가장 많이 받는 질문은 '언제 연락해야 하나요'입니다. 타이밍은 이별의 원인, 상대의 반응에 따라 완전히 달라집니다.</p>
+          <p>너무 빠른 연락은 부담을 주고, 너무 늦은 연락은 관계 종료를 인식시킵니다.</p>
+          <p>먼저 봐야 할 것은 '상대가 지금 어떤 감정 상태에 있는가'입니다.</p>
+          <p>혼자 타이밍만 계산하다 오히려 관계를 더 멀어지게 만드는 경우를 많이 봅니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="reunion" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">재회 칼럼</span>
+        <p class="ccard-title">전남친 연락 기다려도 될까?</p>
+        <p class="ccard-excerpt">기다림에도 방향과 기준이 필요합니다.</p>
+        <div class="cdetail">
+          <p>'연락이 올 때까지 기다리면 될까요'라는 질문에는 정답이 없습니다. 중요한 건 '무엇을 기다리는가'입니다.</p>
+          <p>아무 행동 없이 기다리기만 하면 관계는 자연스럽게 정리 쪽으로 흘러갑니다.</p>
+          <p>기다림의 기준은 '기한'이 아니라 '내가 무엇을 준비하고 있는가'여야 합니다.</p>
+          <p>재회 가능성이 어느 정도인지 먼저 진단받는 것이 훨씬 효율적입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="reunion" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">재회 칼럼</span>
+        <p class="ccard-title">이별 후 붙잡으면 안 되는 이유</p>
+        <p class="ccard-excerpt">붙잡을수록 상대의 심리적 저항은 커집니다.</p>
+        <div class="cdetail">
+          <p>이별 직후 상대를 붙잡고 싶은 마음은 자연스러운 감정입니다. 하지만 대부분 역효과를 냅니다.</p>
+          <p>감정적으로 매달리면, 상대는 관계가 다시 무거워질 것이라는 인상을 받습니다.</p>
+          <p>붙잡는 대신 필요한 건 '거리'입니다. 그 사이 이별의 원인을 냉정하게 되짚어보는 것이 실질적인 준비가 됩니다.</p>
+          <p>붙잡고 싶은 마음이 클수록, 전문가와 함께 상황을 정리해보는 것을 권합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="reunion" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">재회 칼럼</span>
+        <p class="ccard-title">재회 가능성이 낮아지는 행동</p>
+        <p class="ccard-excerpt">무심코 하는 행동이 재회 가능성을 갉아먹습니다.</p>
+        <div class="cdetail">
+          <p>재회를 원하는 사람들이 무의식적으로 반복하는 행동들이 있습니다. SNS 간접 신호, 감정적인 연락, 지인을 통한 근황 확인 등입니다.</p>
+          <p>이런 행동들의 공통점은 '상대에게 통제할 수 없는 부담을 준다'는 것입니다.</p>
+          <p>특히 감정이 격할 때 보내는 연락은 재회 가능성을 낮추는 가장 큰 원인입니다.</p>
+          <p>무엇을 하지 말아야 할지 아는 것이 무엇을 해야 할지 아는 것만큼 중요합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="reunion" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">재회 칼럼</span>
+        <p class="ccard-title">환승 이별 후 재회 가능성</p>
+        <p class="ccard-excerpt">감정적으로 가장 힘든 상황이지만, 접근법은 명확해야 합니다.</p>
+        <div class="cdetail">
+          <p>환승 이별은 이별 중에서도 감정적 충격이 가장 큰 상황입니다.</p>
+          <p>이런 상황일수록 감정적인 접근은 절대적으로 피해야 합니다. 비교, 원망 섞인 연락은 재회 가능성을 완전히 닫아버릴 수 있습니다.</p>
+          <p>새로운 관계의 지속 가능성과 상대의 현재 심리 상태를 냉정하게 분석하는 과정이 먼저입니다.</p>
+          <p>이런 케이스는 특히 혼자 판단하기 어려운 영역입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="chat" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">카톡/대화 칼럼</span>
+        <p class="ccard-title">읽씹 당했을 때 대처법</p>
+        <p class="ccard-excerpt">읽씹의 이유부터 구분해야 대응이 명확해집니다.</p>
+        <div class="cdetail">
+          <p>읽씹을 당하면 대부분 곧바로 다시 연락하거나, 반대로 완전히 연락을 끊습니다. 두 방법 모두 성급합니다.</p>
+          <p>바빠서, 대화가 부담스러워서, 거리를 두고 싶어서 등 이유에 따라 대응이 달라져야 합니다.</p>
+          <p>일반적으로는 추가 연락을 서두르지 않는 것이 안전합니다.</p>
+          <p>지금 이 읽씹이 어떤 의미인지 판단이 서지 않는다면, 대화 흐름 전체를 함께 분석해보는 것이 가장 빠른 방법입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="chat" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">카톡/대화 칼럼</span>
+        <p class="ccard-title">장문 카톡을 보내면 안 되는 이유</p>
+        <p class="ccard-excerpt">진심을 담은 장문이 오히려 관계를 무겁게 만듭니다.</p>
+        <div class="cdetail">
+          <p>관계가 불안할수록 사람들은 진심을 다 담은 장문 메시지를 보내고 싶어합니다. 현실은 정반대로 작동하는 경우가 많습니다.</p>
+          <p>장문 메시지는 상대에게 '반드시 답해야 한다'는 부담을 줍니다.</p>
+          <p>진심은 분량이 아니라 타이밍과 톤으로 전달됩니다.</p>
+          <p>이미 장문 메시지를 보냈다면 자책하기보다, 다음 메시지 전략을 세우는 것이 중요합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="chat" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">카톡/대화 칼럼</span>
+        <p class="ccard-title">이별 후 마지막 연락 문장</p>
+        <p class="ccard-excerpt">마지막 메시지가 다음 국면을 결정합니다.</p>
+        <div class="cdetail">
+          <p>이별 상황에서 마지막으로 보내는 메시지는 생각보다 큰 영향력을 가집니다.</p>
+          <p>원망이 담긴 메시지, 매달리는 메시지는 좋지 않은 인상을 남깁니다.</p>
+          <p>감정이 격한 상태라면 시간을 두고 다시 읽어봤을 때도 괜찮은 문장인지 확인해야 합니다.</p>
+          <p>어떤 문장으로 마무리해야 할지 막막하다면, 상담을 통해 방향을 잡는 것을 권합니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="chat" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">카톡/대화 칼럼</span>
+        <p class="ccard-title">썸남 카톡이 느려졌을 때</p>
+        <p class="ccard-excerpt">썸 단계에서의 연락 변화는 더 예민하게 다가옵니다.</p>
+        <div class="cdetail">
+          <p>관계가 확정되지 않은 썸 단계에서는 작은 변화에도 크게 흔들립니다.</p>
+          <p>썸 단계의 연락 빈도는 연애 중인 관계보다 훨씬 유동적입니다.</p>
+          <p>이 시기에 중요한 건 조급함을 드러내지 않는 것입니다.</p>
+          <p>썸 단계는 오히려 여유 있는 태도가 매력으로 작용하는 시기입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="chat" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">카톡/대화 칼럼</span>
+        <p class="ccard-title">소개팅 후 애프터 연락법</p>
+        <p class="ccard-excerpt">첫 만남 이후의 연락이 다음 만남을 결정합니다.</p>
+        <div class="cdetail">
+          <p>소개팅 후 애프터 연락은 첫인상을 다지는 두 번째 기회입니다.</p>
+          <p>핵심은 '첫 만남에서 나눈 대화의 연장선'을 유지하는 것입니다.</p>
+          <p>연락 타이밍도 중요합니다. 다음날 적절한 시간대의 연락이 안정적인 인상을 줍니다.</p>
+          <p>다음 만남까지 자연스럽게 이어가는 흐름이 궁금하다면 상담을 통해 확인해보세요.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="psychology" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">관계 심리 칼럼</span>
+        <p class="ccard-title">불안형과 회피형의 악순환</p>
+        <p class="ccard-excerpt">서로 다른 방식으로 관계를 지키려다 서로를 지치게 만듭니다.</p>
+        <div class="cdetail">
+          <p>불안형과 회피형이 만나면 특유의 패턴이 반복됩니다. 불안형은 다가가고, 회피형은 물러납니다.</p>
+          <p>둘 다 관계가 무너지는 것을 두려워하고 있다는 걸 서로 모른 채 반복되면 관계는 결국 소진됩니다.</p>
+          <p>이 패턴을 깨려면 한쪽이 먼저 자신의 애착 방식을 인식해야 합니다.</p>
+          <p>본인의 애착 패턴을 정확히 알고 싶다면, 구조적으로 진단받아보는 것이 가장 확실한 방법입니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="psychology" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">관계 심리 칼럼</span>
+        <p class="ccard-title">사랑받으려고 애쓸수록 멀어지는 이유</p>
+        <p class="ccard-excerpt">애쓰는 마음이 관계의 무게중심을 무너뜨립니다.</p>
+        <div class="cdetail">
+          <p>사랑받고 싶은 마음이 클수록 사람은 상대에게 맞추고, 확인하고, 증명하려 합니다.</p>
+          <p>한쪽이 사랑받기 위해 계속 애쓰는 순간, 관계의 무게중심은 한쪽으로 완전히 기울어집니다.</p>
+          <p>확인받으려 하기보다, 나 자신의 기준과 삶을 먼저 지키는 태도가 관계를 안정시킵니다.</p>
+          <p>이 패턴이 반복된다면 상대의 문제가 아니라 내 관계 방식의 문제일 가능성이 큽니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="psychology" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">관계 심리 칼럼</span>
+        <p class="ccard-title">남자가 부담을 느끼는 순간</p>
+        <p class="ccard-excerpt">부담은 대부분 속도의 문제에서 시작됩니다.</p>
+        <div class="cdetail">
+          <p>관계에서 남자가 부담을 느끼는 지점은 대부분 '속도'와 관련이 있습니다.</p>
+          <p>준비되지 않은 상태에서 결정을 요구받는다고 느낄 때 부담이 생깁니다.</p>
+          <p>속도를 맞추는 것은 관계가 자연스럽게 다음 단계로 넘어갈 환경을 만드는 것입니다.</p>
+          <p>속도 차이가 느껴진다면, 어떻게 맞춰가야 할지 상담을 통해 잡아볼 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="psychology" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">관계 심리 칼럼</span>
+        <p class="ccard-title">관계에서 기준이 필요한 이유</p>
+        <p class="ccard-excerpt">기준이 없으면 관계는 상대의 속도에 끌려다닙니다.</p>
+        <div class="cdetail">
+          <p>기준 없이 맞추기만 하는 관계는 결국 한쪽의 소진으로 끝납니다.</p>
+          <p>기준이 있는 사람은 관계에서 무엇을 받아들일지 명확하고, 이는 상대에게도 안정감을 줍니다.</p>
+          <p>기준이 없으면 관계는 상대의 감정과 속도에 따라 이리저리 흔들립니다.</p>
+          <p>내게 맞는 관계의 기준을 세우는 것이 막막하다면, 함께 진단하며 정리해볼 수 있습니다.</p>
+        </div>
+      </div>
+
+      <div class="ccard" data-cat="psychology" onclick="this.querySelector('.cdetail').classList.toggle('open')">
+        <span class="badge2">관계 심리 칼럼</span>
+        <p class="ccard-title">연애에서 매력이 떨어지는 순간</p>
+        <p class="ccard-excerpt">매력은 외모가 아니라 태도에서 무너집니다.</p>
+        <div class="cdetail">
+          <p>연애 초반의 매력은 대부분 '여유'에서 나옵니다.</p>
+          <p>감정을 즉각적으로 드러낼 때, 반응에 따라 태도가 크게 달라질 때 매력이 떨어집니다.</p>
+          <p>매력은 타고나는 것이 아니라 관계를 대하는 태도에서 만들어집니다.</p>
+          <p>예전 같은 여유가 없어졌다고 느껴진다면, 그 이유를 함께 짚어보는 것이 도움이 됩니다.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="cta-box">
+      <p>지금 이 글을 읽으며 "내 상황도 여기에 해당되는 것 같다"는 생각이 들었다면, 혼자서 연락 타이밍만 고민하지 마세요.</p>
+      <a href="apply.html" class="btn btn-primary btn-lg">1:1 상담 신청하기</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="policy-terms.html">이용약관</a><a href="policy-privacy.html">개인정보처리방침</a><a href="policy-refund.html">환불규정</a>
+    </div>
+    <p style="font-size:12px;color:rgba(250,246,238,.5)">© 2026 러브백 관계 연구소. All rights reserved.</p>
+  </div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="https://pf.kakao.com/_loveback" target="_blank" class="btn-kakao">카톡 상담 문의</a>
+  <a href="apply.html" class="btn-primary">상담 신청하기</a>
+</div>
+
+<script>
+document.getElementById('chips').addEventListener('click', function(e){
+  var btn = e.target.closest('.chip');
+  if(!btn) return;
+  document.querySelectorAll('#chips .chip').forEach(function(c){ c.classList.remove('active'); });
+  btn.classList.add('active');
+  var cat = btn.dataset.cat;
+  document.querySelectorAll('#colGrid .ccard').forEach(function(card){
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+  });
+});
+</script>
+
+</body>
+</html>

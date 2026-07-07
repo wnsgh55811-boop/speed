@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무료 진단 | 러브백 관계 연구소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfbf7;color:#141b2e;line-height:1.7;padding-bottom:64px}
+.serif{font-family:'Noto Serif KR','Nanum Myeongjo',Georgia,serif}
+a{color:inherit;text-decoration:none}
+.container{max-width:960px;margin:0 auto;padding:0 20px}
+.wrap-sm{max-width:600px;margin:0 auto;padding:0 20px}
+.site-header{position:sticky;top:0;z-index:40;background:rgba(253,251,247,.95);backdrop-filter:blur(6px);border-bottom:1px solid #e7e1d6}
+.site-header .container{height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;color:#141b2e}
+.logo span{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:400;color:#8a7f6c;margin-left:4px}
+.nav-desktop{display:none;gap:28px;align-items:center}
+.nav-desktop a{font-size:14px;font-weight:500;color:#1c2740}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:none;border:none;font-size:22px;cursor:pointer;color:#141b2e}
+.mobile-menu{display:none;flex-direction:column;gap:2px;padding:10px 20px 16px;border-top:1px solid #e7e1d6;background:#fdfbf7}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 4px;font-size:14px;font-weight:500;color:#1c2740}
+@media(min-width:900px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:2px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer}
+.btn-lg{padding:16px 32px;font-size:16px}
+.btn-block{width:100%}
+.btn-primary{background:#7d2334;border-color:#7d2334;color:#fdfbf7}
+.btn-secondary{background:transparent;border-color:#141b2e;color:#141b2e}
+.btn-kakao{background:#fee500;border-color:#fee500;color:#391b1b}
+.section{padding:48px 0}
+.section-navy{background:#0f1524;color:#fdfbf7}
+.eyebrow-light{color:rgba(250,246,238,.7);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:14px}
+h1.page-title{font-family:'Noto Serif KR',serif;font-size:28px;font-weight:500}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
+.muted{color:#8a7f6c}
+.muted-light{color:rgba(250,246,238,.8)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:30px}
+.tab{border:1px solid #d3ccbd;border-radius:999px;padding:8px 16px;font-size:13px;cursor:pointer;background:#fff}
+.tab.active{background:#141b2e;border-color:#141b2e;color:#fdfbf7}
+.q-item{display:flex;gap:12px;align-items:center;border:1px solid #e7e1d6;background:#fff;border-radius:2px;padding:16px 20px;margin-bottom:10px;cursor:pointer}
+.q-item input{width:16px;height:16px;accent-color:#922940}
+.result{display:none;text-align:center;border:1px solid #e7e1d6;background:#fff;border-radius:2px;padding:32px 24px}
+.result.show{display:block}
+.site-footer{background:#0f1524;color:rgba(250,246,238,.7);padding:48px 0;font-size:14px}
+.footer-links{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0}
+.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:40;border-top:1px solid #d3ccbd}
+.mobile-cta a{flex:1;text-align:center;padding:16px 0;font-weight:500;border-radius:0}
+@media(min-width:900px){.mobile-cta{display:none}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="logo">러브백<span>관계 연구소</span></a>
+    <nav class="nav-desktop">
+      <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+      <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    </nav>
+    <button class="menu-btn" onclick="document.getElementById('mobileMenu').classList.toggle('open')">&#9776;</button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a>
+    <a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+  </div>
+</header>
+
+<section class="section section-navy">
+  <div class="wrap-sm center">
+    <span class="eyebrow-light">Free Diagnosis</span>
+    <h1 class="page-title">내 관계가 지금 회복 가능한 흐름인지 알고 싶다면?</h1>
+    <p class="muted-light">해당하는 항목을 모두 체크한 뒤 결과를 확인해보세요. (완전히 브라우저 안에서 계산되는 체크리스트입니다)</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap-sm">
+    <div class="tabs" id="tabs"></div>
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-links">
+      <a href="policy-terms.html">이용약관</a><a href="policy-privacy.html">개인정보처리방침</a><a href="policy-refund.html">환불규정</a>
+    </div>
+    <p style="font-size:12px;color:rgba(250,246,238,.5)">© 2026 러브백 관계 연구소. All rights reserved.</p>
+  </div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="https://pf.kakao.com/_loveback" target="_blank" class="btn-kakao">카톡 상담 문의</a>
+  <a href="apply.html" class="btn-primary">상담 신청하기</a>
+</div>
+
+<script>
+var diagnoses = [
+  {
+    slug: 'contact', title: '이별 후 연락 가능성 체크',
+    questions: ['이별한 지 2주 이상 지났다.','이별 당시 서로 큰 소리를 내거나 감정적으로 격했다.','이별 후 상대에게 연락을 한 적이 없다.','상대가 나를 차단하거나 완전히 무반응 상태는 아니다.','이별 이후 내 감정이 어느 정도 진정된 상태다.','상대의 SNS 등에서 특별히 부정적인 신호가 보이지 않는다.','다시 연락할 명확한 이유나 계기가 있다.'],
+    bands: [
+      {min:0,max:2,title:'지금은 연락보다 정리가 먼저인 시기입니다',desc:'아직 감정이 정리되지 않았거나 이별 직후일 가능성이 높습니다. 지금 연락을 시도하면 오히려 상대의 심리적 저항을 키울 수 있습니다.',program:'재회 전략 상담'},
+      {min:3,max:5,title:'조건부로 연락을 고려해볼 수 있는 상태입니다',desc:'일부 조건은 갖춰졌지만, 연락 타이밍과 메시지 방향에 따라 결과가 크게 달라질 수 있는 상태입니다.',program:'재회 전략 상담'},
+      {min:6,max:7,title:'연락을 시도해볼 수 있는 조건에 가깝습니다',desc:'여러 조건이 갖춰진 상태입니다. 다만 메시지 방향과 타이밍을 구체적으로 설계해보세요.',program:'재회 전략 상담'}
+    ]
+  },
+  {
+    slug: 'cooling', title: '상대가 식었을 때 나타나는 신호 체크',
+    questions: ['연락 빈도와 속도가 눈에 띄게 줄었다.','대화 내용이 감정 공유보다 단순 정보 전달 위주로 바뀌었다.','만나는 약속을 상대가 먼저 잡지 않는다.','갈등 상황에서 예전만큼 적극적으로 풀려고 하지 않는다.','미래에 대한 이야기를 꺼리거나 얼버무린다.','스킨십이나 애정 표현이 눈에 띄게 줄었다.','내가 먼저 연락하거나 만나자고 하는 경우가 대부분이다.'],
+    bands: [
+      {min:0,max:2,title:'아직 뚜렷한 신호로 보기는 이릅니다',desc:'일시적인 변화일 가능성이 있습니다. 다만 계속 신경 쓰인다면 관계 흐름을 한 번 점검해보세요.',program:'연애 상담'},
+      {min:3,max:5,title:'관계 흐름 점검이 필요한 시점입니다',desc:'몇 가지 신호가 겹쳐 나타나고 있습니다. 어느 지점에서 흐름이 바뀌었는지 짚어보는 것이 중요합니다.',program:'연애 상담'},
+      {min:6,max:7,title:'구체적인 진단과 전략이 필요합니다',desc:'여러 신호가 동시에 나타나고 있는 상태입니다. 빠른 진단을 권합니다.',program:'연애 상담'}
+    ]
+  },
+  {
+    slug: 'risk', title: '재회 가능성을 낮추는 행동 체크리스트',
+    questions: ['이별 후 감정적인 상태에서 연락한 적이 있다.','SNS에 상대가 볼 만한 의미심장한 게시물을 올린 적이 있다.','공통 지인을 통해 상대의 근황을 자주 확인한다.','상대의 SNS를 하루에도 여러 번 확인한다.','장문의 메시지를 보내 내 감정을 설명하려 한 적이 있다.','우연을 가장해 상대와 마주치려 시도한 적이 있다.','술을 마신 후 연락한 적이 있다.'],
+    bands: [
+      {min:0,max:1,title:'비교적 안정적으로 대처하고 있습니다',desc:'감정 관리가 잘 되고 있는 편입니다. 다음 단계 전략을 준비해보세요.',program:'재회 전략 상담'},
+      {min:2,max:4,title:'몇 가지 행동이 재회 가능성을 갉아먹고 있을 수 있습니다',desc:'무심코 한 행동들이 쌓여 상대에게 부담을 주고 있을 가능성이 있습니다.',program:'재회 전략 상담'},
+      {min:5,max:7,title:'현재 행동 패턴을 즉시 점검해야 합니다',desc:'여러 위험 행동이 반복되고 있는 상태입니다. 전문가와 함께 다음 행동을 결정하는 것을 권합니다.',program:'재회 전략 상담'}
+    ]
+  },
+  {
+    slug: 'anxious', title: '불안형 연애 패턴 자가진단',
+    questions: ['연락이 조금만 늦어져도 불안한 생각이 먼저 든다.','상대의 반응에 따라 내 하루 기분이 크게 좌우된다.','서운한 감정이 생기면 바로 표현해야 마음이 풀린다.','관계에서 확신을 자주 확인받고 싶어한다.','연애할 때마다 비슷한 이유로 갈등이 반복된다.','상대에게 맞추다가 지쳐서 관계를 끝낸 경험이 있다.','사랑받기 위해 애쓰다가 오히려 매달리게 된 적이 있다.'],
+    bands: [
+      {min:0,max:2,title:'비교적 안정적인 관계 패턴을 가지고 있습니다',desc:'큰 불안 패턴은 보이지 않습니다.',program:'연애 상담'},
+      {min:3,max:5,title:'불안형 패턴이 관계에 영향을 주고 있을 가능성이 있습니다',desc:'확인받고 싶어하는 경향이 반복되고 있을 수 있습니다.',program:'프리미엄 관계 분석 상담'},
+      {min:6,max:7,title:'반복되는 관계 패턴에 대한 진단이 필요합니다',desc:'여러 연애에서 비슷한 이유로 어려움을 겪고 있을 가능성이 높습니다. 근본적인 진단을 권합니다.',program:'프리미엄 관계 분석 상담'}
+    ]
+  }
+];
+
+var tabsEl = document.getElementById('tabs');
+var quizArea = document.getElementById('quizArea');
+
+diagnoses.forEach(function(d, i){
+  var t = document.createElement('div');
+  t.className = 'tab' + (i===0?' active':'');
+  t.textContent = d.title;
+  t.onclick = function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    renderQuiz(d);
+  };
+  tabsEl.appendChild(t);
+});
+
+function renderQuiz(d){
+  var html = '<div id="qbox">';
+  d.questions.forEach(function(q, i){
+    html += '<label class="q-item"><input type="checkbox" data-i="'+i+'"><span>'+q+'</span></label>';
+  });
+  html += '<button class="btn btn-primary btn-lg btn-block" id="checkBtn" style="margin-top:14px">결과 확인하기</button>';
+  html += '</div><div class="result" id="resultBox"></div>';
+  quizArea.innerHTML = html;
+
+  document.getElementById('checkBtn').onclick = function(){
+    var checked = document.querySelectorAll('#qbox input:checked').length;
+    var band = d.bands.find(function(b){ return checked >= b.min && checked <= b.max; }) || d.bands[d.bands.length-1];
+    document.getElementById('qbox').style.display = 'none';
+    var rb = document.getElementById('resultBox');
+    rb.classList.add('show');
+    rb.innerHTML = '<p class="muted" style="margin-bottom:10px">'+checked+' / '+d.questions.length+'개 해당</p>'
+      + '<h2 class="serif" style="font-size:22px;margin-bottom:14px">'+band.title+'</h2>'
+      + '<p class="muted" style="margin-bottom:14px">'+band.desc+'</p>'
+      + '<p style="color:#7d2334;font-weight:600;margin-bottom:20px">추천 프로그램: '+band.program+'</p>'
+      + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+      + '<a href="apply.html" class="btn btn-primary btn-lg">추천 상담 신청하기</a>'
+      + '<button class="btn btn-secondary" onclick="renderQuiz(diagnoses['+diagnoses.indexOf(d)+'])">다시 체크하기</button>'
+      + '</div>';
+  };
+}
+
+renderQuiz(diagnoses[0]);
+</script>
+
+</body>
+</html>
