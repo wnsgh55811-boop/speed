@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ReviewCategory {
+  REUNION // 재회 상담 후기
+  DATING // 연애 상담 후기
+  SOME // 썸/소개팅 상담 후기
+  CHAT_ANALYSIS // 카톡 분석 후기
+  PATTERN // 관계 패턴 진단 후기
+  LONGFORM // 장문 후기
+  CHANGE // 상담 후 변화 후기
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  HIDDEN
+}
+
+model Review {
+  id            String       @id @default(cuid())
+  category      ReviewCategory
+  nickname      String
+  ageGroup      String? // e.g. "20대 여성"
+  situationTag  String? // e.g. "이별 후 3주"
+  title         String
+  beforeContent String // 상담 전 상황
+  hardestPart   String // 가장 힘들었던 부분
+  helpfulPart   String // 가장 도움 됐던 부분
+  afterContent  String // 상담 후 변화
+  messageToOthers String? // 비슷한 상황의 사람에게
+  isSecret      Boolean      @default(false)
+  password      String? // 비밀글 확인용 (해시 없이 단순 매칭, 데모용)
+  status        ReviewStatus @default(PENDING)
+  imageUrl      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum ProgramType {
+  DATING
+  REUNION
+  PREMIUM
+  UNSURE
+}
+
+enum ApplicationStatus {
+  NEW
+  CONTACTED
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  program       ProgramType
+  name          String
+  contact       String // 전화번호 or 카카오ID
+  preferredTime String?
+  situation     String // 현재 상황 요약
+  goal          String? // 상담을 통해 원하는 것
+  status        ApplicationStatus @default(NEW)
+  memo          String? // 관리자 메모
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}

@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --color-navy-950: #0f1524;
+  --color-navy-900: #141b2e;
+  --color-navy-800: #1c2740;
+  --color-navy-700: #263352;
+  --color-navy-600: #34456b;
+  --color-navy-500: #4a5c85;
+
+  --color-ivory-50: #fdfbf7;
+  --color-ivory-100: #faf6ee;
+  --color-ivory-200: #f4ecdc;
+
+  --color-warmgray-200: #e7e1d6;
+  --color-warmgray-300: #d3ccbd;
+  --color-warmgray-400: #ab9f8b;
+  --color-warmgray-500: #8a7f6c;
+  --color-warmgray-600: #6b6152;
+
+  --color-burgundy-900: #4a1620;
+  --color-burgundy-800: #641c29;
+  --color-burgundy-700: #7d2334;
+  --color-burgundy-600: #922940;
+  --color-burgundy-500: #a83752;
+
+  --color-beige-100: #f8f1e3;
+  --color-beige-200: #f0e5cd;
+
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-serif:
+    "Noto Serif KR", "Nanum Myeongjo", Georgia, "Apple SD Gothic Neo", serif;
+}
+
+@theme inline {
+  --color-navy-950: var(--color-navy-950);
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-800: var(--color-navy-800);
+  --color-navy-700: var(--color-navy-700);
+  --color-navy-600: var(--color-navy-600);
+  --color-navy-500: var(--color-navy-500);
+
+  --color-ivory-50: var(--color-ivory-50);
+  --color-ivory-100: var(--color-ivory-100);
+  --color-ivory-200: var(--color-ivory-200);
+
+  --color-warmgray-200: var(--color-warmgray-200);
+  --color-warmgray-300: var(--color-warmgray-300);
+  --color-warmgray-400: var(--color-warmgray-400);
+  --color-warmgray-500: var(--color-warmgray-500);
+  --color-warmgray-600: var(--color-warmgray-600);
+
+  --color-burgundy-900: var(--color-burgundy-900);
+  --color-burgundy-800: var(--color-burgundy-800);
+  --color-burgundy-700: var(--color-burgundy-700);
+  --color-burgundy-600: var(--color-burgundy-600);
+  --color-burgundy-500: var(--color-burgundy-500);
+
+  --color-beige-100: var(--color-beige-100);
+  --color-beige-200: var(--color-beige-200);
+
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ivory-50);
+  color: var(--color-navy-900);
+  font-family: var(--font-sans);
+  padding-bottom: 64px;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+.font-serif-kr {
+  font-family: var(--font-serif);
+}
