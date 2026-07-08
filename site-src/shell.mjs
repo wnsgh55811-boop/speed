@@ -1,13 +1,38 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>개인정보처리방침 | 러브백 관계 연구소</title>
+// 러브백 v2 공통 셸: CSS, 헤더, 푸터, 스크롤 리빌 스크립트
+export const KAKAO = "https://pf.kakao.com/_hNYBn/chat";
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-<style>
+export const IMG = {
+  studio:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260708_034119_fc49109e-1a24-4fe1-ae11-a1a795495b7d_min.webp",
+  silk:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260708_034131_bb8a2c57-bb80-4233-bee1-d17b353e7bdc_min.webp",
+  still:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260708_034142_18043132-7ba4-4388-8b2e-55c0fb5a53f8_min.webp",
+};
+
+// LB 모노그램 (원 아크 + 세리프 LB + 스파클)
+export function logoMark(size = 44) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
+</svg>`;
+}
+
+export function logoFull() {
+  return `<svg width="220" height="200" viewBox="0 0 300 270" fill="none" aria-hidden="true" style="max-width:60vw;height:auto">
+<g transform="translate(30,-8)">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="2.5" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
+</g>
+<text x="150" y="252" font-family="'Playfair Display','Noto Serif KR',serif" font-size="30" letter-spacing="10" fill="#1d2743" text-anchor="middle">LOVEBACK</text>
+</svg>`;
+}
+
+export const CSS = `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfcf8;color:#1d2743;line-height:1.85;padding-bottom:62px;font-size:16px;word-break:keep-all}
@@ -117,55 +142,45 @@ button{font-family:inherit}
 .img-frame img{width:100%;height:100%;object-fit:cover}
 .list-plain{list-style:none;padding:0}
 .divider{border:none;border-top:1px solid #ece6d8;margin:26px 0}
-</style>
-</head>
-<body>
-<header class="site-header">
+`;
+
+export const NAV = [
+  ["about.html", "러브백 소개"],
+  ["programs.html", "상담 프로그램"],
+  ["pricing.html", "가격 안내"],
+  ["reviews.html", "상담 후기"],
+  ["columns.html", "칼럼"],
+  ["diagnosis.html", "무료 진단"],
+  ["faq.html", "FAQ"],
+];
+
+export function header(active = "") {
+  const links = NAV.map(
+    ([href, label]) =>
+      `<a href="${href}"${href === active ? ' class="on"' : ""}>${label}</a>`,
+  ).join("");
+  const mlinks = NAV.map(([href, label]) => `<a href="${href}">${label}</a>`).join("");
+  return `<header class="site-header">
   <div class="container">
-    <a href="index.html" class="brand"><svg width="40" height="40" viewBox="0 0 240 240" fill="none" aria-hidden="true">
-<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
-<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
-<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
-<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
-</svg>
+    <a href="index.html" class="brand">${logoMark(40)}
       <span class="brand-name">러브백 관계 연구소<small>LOVEBACK LAB</small></span>
     </a>
-    <nav class="nav-desktop"><a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a></nav>
+    <nav class="nav-desktop">${links}</nav>
     <a href="apply.html" class="btn btn-navy btn-sm header-cta">상담 신청</a>
     <button class="menu-btn" onclick="document.getElementById('mMenu').classList.toggle('open')" aria-label="메뉴">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
-  <div class="mobile-menu" id="mMenu"><a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+  <div class="mobile-menu" id="mMenu">${mlinks}
     <a href="apply.html" class="btn btn-navy" style="margin-top:14px;border-bottom:none">상담 신청하기</a>
   </div>
-</header>
+</header>`;
+}
 
-<section class="section section-white" style="padding-bottom:40px">
-  <div class="wrap-md center reveal">
-    <h1 class="title">개인정보처리방침</h1>
-    <p style="color:#9aa0b4;font-size:13px">시행일: 2026.01.01</p>
-  </div>
-</section>
-<section style="padding-bottom:90px">
-  <div class="wrap-md reveal">
-    <h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">1. 수집하는 개인정보 항목</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">회사는 상담 신청 및 후기 작성을 위해 다음 정보를 수집합니다.</p><p style="color:#5a6380;font-size:14.5px;line-height:2">· 상담 신청: 이름 또는 닉네임, 연락 수단, 상담 희망 시간대, 이용자가 직접 작성한 상황 및 대화 내용<br>· 후기 작성: 닉네임, 간단 정보(선택), 후기 내용</p>
-<h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">2. 수집 및 이용 목적</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">수집한 정보는 상담 신청 확인 및 안내, 상담 진행, 후기 게시판 운영, 서비스 개선 목적으로만 이용하며, 명시한 목적 외의 용도로 사용하지 않습니다.</p>
-<h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">3. 보유 및 이용 기간</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">상담 신청 정보는 상담 종료 후 관련 법령에 따른 보관 의무 기간 동안 보관 후 파기하며, 후기 게시글은 이용자가 삭제를 요청하기 전까지 보관됩니다.</p>
-<h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">4. 제3자 제공</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">회사는 이용자의 동의 없이 개인정보를 제3자에게 제공하지 않습니다.</p>
-<h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">5. 이용자의 권리</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">이용자는 언제든지 본인의 개인정보 열람, 정정, 삭제를 요청할 수 있습니다. 문의는 카카오톡 채널을 통해 접수해주시기 바랍니다.</p>
-<h2 style="font-size:16.5px;font-weight:700;margin:30px 0 10px">6. 문의처</h2><p style="color:#5a6380;font-size:14.5px;line-height:2">카카오톡 채널: 러브백 관계 연구소 · 담당: 메릭 코치</p>
-    <div style="margin-top:44px"><a href="index.html" class="btn btn-line">홈으로 돌아가기</a></div>
-  </div>
-</section>
-<footer class="site-footer">
+export function footer() {
+  return `<footer class="site-footer">
   <div class="container">
-    <div class="f-brand"><svg width="36" height="36" viewBox="0 0 240 240" fill="none" aria-hidden="true">
-<circle cx="120" cy="120" r="94" fill="none" stroke="#e8e2d2" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
-<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#e8e2d2" text-anchor="middle">L</text>
-<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#e8e2d2" text-anchor="middle">B</text>
-<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#e8e2d2"/>
-</svg>
+    <div class="f-brand">${logoMark(36).replace(/#1d2743/g, "#e8e2d2")}
       <span class="f-name">러브백 관계 연구소</span>
     </div>
     <p style="max-width:460px">연애, 이별, 재회를 감정이 아닌 관계의 흐름과 심리 구조로 분석하는 1:1 프리미엄 관계 코칭 연구소입니다.</p>
@@ -173,7 +188,7 @@ button{font-family:inherit}
       <a href="policy-terms.html">이용약관</a>
       <a href="policy-privacy.html">개인정보처리방침</a>
       <a href="policy-refund.html">환불규정</a>
-      <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener">카카오톡 문의</a>
+      <a href="${KAKAO}" target="_blank" rel="noopener">카카오톡 문의</a>
     </div>
     <div class="footer-fine">
       <span>대표 코치 메릭 · 카카오톡 채널 러브백 관계 연구소</span>
@@ -183,10 +198,12 @@ button{font-family:inherit}
   </div>
 </footer>
 <div class="mobile-cta">
-  <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener" class="m-kakao">카톡 상담 문의</a>
+  <a href="${KAKAO}" target="_blank" rel="noopener" class="m-kakao">카톡 상담 문의</a>
   <a href="apply.html" class="m-apply">상담 신청하기</a>
-</div>
-<script>
+</div>`;
+}
+
+export const REVEAL_JS = `
 (function(){
   var els = document.querySelectorAll('.reveal');
   if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in')}); return; }
@@ -194,6 +211,25 @@ button{font-family:inherit}
     entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
   },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
   els.forEach(function(e){ io.observe(e); });
-})();</script>
+})();`;
+
+export function shell({ title, desc = "", active = "", body, extraJs = "" }) {
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title}</title>
+${desc ? `<meta name="description" content="${desc}">` : ""}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>${CSS}</style>
+</head>
+<body>
+${header(active)}
+${body}
+${footer()}
+<script>${REVEAL_JS}${extraJs}</script>
 </body>
-</html>
+</html>`;
+}

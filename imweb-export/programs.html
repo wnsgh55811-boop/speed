@@ -4,161 +4,254 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상담 프로그램 | 러브백 관계 연구소</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfbf7;color:#141b2e;line-height:1.7;padding-bottom:64px}
-.serif{font-family:'Noto Serif KR','Nanum Myeongjo',Georgia,serif}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfcf8;color:#1d2743;line-height:1.85;padding-bottom:62px;font-size:16px;word-break:keep-all}
+.serif{font-family:'Noto Serif KR','Playfair Display',Georgia,serif}
 a{color:inherit;text-decoration:none}
-.container{max-width:960px;margin:0 auto;padding:0 20px}
-.wrap-sm{max-width:640px;margin:0 auto;padding:0 20px}
-.site-header{position:sticky;top:0;z-index:40;background:rgba(253,251,247,.95);backdrop-filter:blur(6px);border-bottom:1px solid #e7e1d6}
-.site-header .container{height:64px;display:flex;align-items:center;justify-content:space-between}
-.logo{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;color:#141b2e}
-.logo span{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:400;color:#8a7f6c;margin-left:4px}
-.nav-desktop{display:none;gap:28px;align-items:center}
-.nav-desktop a{font-size:14px;font-weight:500;color:#1c2740}
-.nav-desktop a:hover{color:#7d2334}
-.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;background:none;border:none;font-size:22px;cursor:pointer;color:#141b2e}
-.mobile-menu{display:none;flex-direction:column;gap:2px;padding:10px 20px 16px;border-top:1px solid #e7e1d6;background:#fdfbf7}
+img{max-width:100%;display:block}
+button{font-family:inherit}
+.container{max-width:1040px;margin:0 auto;padding:0 22px}
+.wrap-md{max-width:760px;margin:0 auto;padding:0 22px}
+.wrap-sm{max-width:620px;margin:0 auto;padding:0 22px}
+
+/* ── header ─────────────────────────── */
+.site-header{position:sticky;top:0;z-index:50;background:rgba(253,252,248,.92);backdrop-filter:blur(10px);border-bottom:1px solid #ece6d8}
+.site-header .container{height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-name{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;letter-spacing:.02em}
+.brand-name small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.28em;color:#b2935b;margin-top:1px}
+.nav-desktop{display:none;gap:26px;align-items:center}
+.nav-desktop a{font-size:14.5px;font-weight:500;color:#39415e;letter-spacing:.01em;padding:4px 0;border-bottom:2px solid transparent;transition:.2s}
+.nav-desktop a:hover,.nav-desktop a.on{color:#1d2743;border-bottom-color:#b2935b}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;background:none;border:none;cursor:pointer;color:#1d2743}
+.menu-btn svg{width:24px;height:24px}
+.mobile-menu{display:none;flex-direction:column;padding:8px 22px 18px;border-top:1px solid #ece6d8;background:#fdfcf8}
 .mobile-menu.open{display:flex}
-.mobile-menu a{padding:12px 4px;font-size:14px;font-weight:500;color:#1c2740}
-@media(min-width:900px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}.header-cta{display:inline-flex!important}}
+.mobile-menu a{padding:13px 4px;font-size:15px;font-weight:500;color:#39415e;border-bottom:1px solid #f2eee3}
 .header-cta{display:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:2px;font-weight:500;font-size:15px;border:1px solid transparent;cursor:pointer;transition:background .15s}
-.btn-lg{padding:16px 32px;font-size:16px}
-.btn-sm{padding:8px 16px;font-size:13px}
-.btn-primary{background:#7d2334;border-color:#7d2334;color:#fdfbf7}
-.btn-kakao{background:#fee500;border-color:#fee500;color:#391b1b}
-.section{padding:64px 0}
-@media(min-width:768px){.section{padding:80px 0}}
-.section-navy{background:#0f1524;color:#fdfbf7}
-.section-beige{background:#f8f1e3}
-.eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#7d2334;display:block;margin-bottom:14px}
-.eyebrow-light{color:rgba(250,246,238,.7)}
-h1.page-title{font-family:'Noto Serif KR',serif;font-size:28px;line-height:1.4;font-weight:500}
-@media(min-width:640px){h1.page-title{font-size:34px}}
-.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px}
-.muted{color:#8a7f6c}
-.muted-light{color:rgba(250,246,238,.8)}
-.card{background:#fff;border:1px solid #e7e1d6;border-radius:2px;padding:28px}
-.step{display:flex;gap:20px;align-items:flex-start;border:1px solid #e7e1d6;background:#fff;padding:24px;border-radius:2px;margin-bottom:16px}
-.step-num{font-family:'Noto Serif KR',serif;font-size:30px;color:#922940;flex-shrink:0}
-.site-footer{background:#0f1524;color:rgba(250,246,238,.7);padding:48px 0;font-size:14px}
-.site-footer .logo2{font-family:'Noto Serif KR',serif;font-size:17px;color:#fdfbf7;display:block;margin-bottom:10px}
-.footer-links{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0}
-.footer-fine{font-size:12px;color:rgba(250,246,238,.5);display:flex;flex-direction:column;gap:4px;margin-top:18px}
-.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:40;border-top:1px solid #d3ccbd}
-.mobile-cta a{flex:1;text-align:center;padding:16px 0;font-weight:500;border-radius:0}
-@media(min-width:900px){.mobile-cta{display:none}}
+@media(min-width:980px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}.header-cta{display:inline-flex!important}}
+
+/* ── buttons ─────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 30px;border-radius:3px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;letter-spacing:.02em;transition:all .22s ease}
+.btn-lg{padding:17px 38px;font-size:16px}
+.btn-sm{padding:9px 18px;font-size:13.5px}
+.btn-navy{background:#1d2743;border-color:#1d2743;color:#fdfcf8}
+.btn-navy:hover{background:#b2935b;border-color:#b2935b}
+.btn-gold{background:#b2935b;border-color:#b2935b;color:#fff}
+.btn-gold:hover{background:#9c7f49}
+.btn-line{background:transparent;border-color:#c8c0ac;color:#1d2743}
+.btn-line:hover{border-color:#1d2743;background:#1d2743;color:#fdfcf8}
+.btn-line-light{background:transparent;border-color:rgba(253,252,248,.4);color:#fdfcf8}
+.btn-line-light:hover{background:#fdfcf8;color:#1d2743}
+.btn-kakao{background:#fee500;border-color:#fee500;color:#3c1e1e}
+.btn-kakao:hover{filter:brightness(.95)}
+.btn-block{width:100%}
+
+/* ── sections ─────────────────────────── */
+.section{padding:84px 0}
+@media(max-width:640px){.section{padding:60px 0}}
+.section-navy{background:linear-gradient(160deg,#161f38 0%,#1d2743 60%,#232f52 100%);color:#f4f1e8}
+.section-cream{background:#f7f3ea}
+.section-white{background:#fff}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:#b2935b;display:block;margin-bottom:16px}
+.eyebrow-light{color:#cbb489}
+.title{font-family:'Noto Serif KR',serif;font-size:clamp(24px,4.6vw,36px);line-height:1.45;font-weight:600;letter-spacing:-.01em}
+.title-sm{font-family:'Noto Serif KR',serif;font-size:clamp(20px,3.4vw,26px);line-height:1.5;font-weight:600}
+.lead{color:#5a6380;font-size:clamp(15px,2.2vw,17px);line-height:1.9}
+.lead-light{color:rgba(244,241,232,.82)}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.gold-bar{width:44px;height:2px;background:#b2935b;border:none}
+.gap-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* ── cards & grid ─────────────────────── */
+.grid{display:grid;gap:22px}
+.grid-2{grid-template-columns:1fr}
+.grid-3{grid-template-columns:1fr}
+@media(min-width:660px){.grid-2{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.grid-3{grid-template-columns:1fr 1fr 1fr}}
+.card{background:#fff;border:1px solid #ece6d8;border-radius:6px;padding:32px;transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:0 14px 40px rgba(29,39,67,.09)}
+.card-flat:hover{box-shadow:none}
+.chip-badge{display:inline-block;background:#f2ecdd;color:#8a6f3e;font-size:12px;font-weight:600;padding:5px 14px;border-radius:999px;letter-spacing:.04em}
+.chip-badge-navy{background:#1d2743;color:#f4f1e8}
+
+/* ── chips filter ─────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{border:1px solid #d9d2c0;border-radius:999px;padding:8px 18px;font-size:13.5px;font-weight:500;cursor:pointer;background:#fff;color:#39415e;transition:.2s}
+.chip:hover{border-color:#b2935b;color:#8a6f3e}
+.chip.active{background:#1d2743;border-color:#1d2743;color:#fdfcf8}
+
+/* ── forms ─────────────────────────── */
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;text-align:left}
+.field label{font-size:14px;font-weight:600;color:#1d2743}
+.field label .req{color:#b2935b;margin-left:3px}
+.field input,.field select,.field textarea{border:1px solid #d9d2c0;border-radius:4px;padding:13px 16px;font-size:15px;font-family:inherit;background:#fff;color:#1d2743;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#b2935b}
+.field textarea{resize:vertical}
+
+/* ── footer & mobile bar ──────────────── */
+.site-footer{background:#141b30;color:rgba(244,241,232,.62);padding:56px 0 48px;font-size:14px}
+.site-footer .f-brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.site-footer .f-name{font-family:'Noto Serif KR',serif;font-size:17px;color:#f4f1e8}
+.footer-links{display:flex;flex-wrap:wrap;gap:8px 22px;margin:20px 0}
+.footer-links a:hover{color:#f4f1e8}
+.footer-fine{font-size:12px;color:rgba(244,241,232,.4);display:flex;flex-direction:column;gap:5px;margin-top:18px;line-height:1.7}
+.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:60;box-shadow:0 -6px 24px rgba(20,27,48,.12)}
+.mobile-cta a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:17px 0;font-weight:700;font-size:15px}
+.mobile-cta .m-kakao{background:#fee500;color:#3c1e1e}
+.mobile-cta .m-apply{background:#1d2743;color:#fdfcf8}
+@media(min-width:980px){.mobile-cta{display:none}body{padding-bottom:0}}
+
+/* ── scroll reveal ─────────────────────── */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,.84,.32,1),transform .9s cubic-bezier(.16,.84,.32,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal-d1{transition-delay:.12s}.reveal-d2{transition-delay:.24s}.reveal-d3{transition-delay:.36s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+.img-frame{border-radius:8px;overflow:hidden;box-shadow:0 24px 60px rgba(29,39,67,.14)}
+.img-frame img{width:100%;height:100%;object-fit:cover}
+.list-plain{list-style:none;padding:0}
+.divider{border:none;border-top:1px solid #ece6d8;margin:26px 0}
 </style>
 </head>
 <body>
-
 <header class="site-header">
   <div class="container">
-    <a href="index.html" class="logo">러브백<span>관계 연구소</span></a>
-    <nav class="nav-desktop">
-      <a href="about.html">러브백 소개</a>
-      <a href="programs.html">상담 프로그램</a>
-      <a href="pricing.html">가격 안내</a>
-      <a href="reviews.html">상담 후기</a>
-      <a href="columns.html">칼럼</a>
-      <a href="diagnosis.html">무료 진단</a>
-      <a href="faq.html">FAQ</a>
-    </nav>
-    <a href="apply.html" class="btn btn-primary btn-sm header-cta">상담 신청하기</a>
-    <button class="menu-btn" onclick="document.getElementById('mobileMenu').classList.toggle('open')">&#9776;</button>
+    <a href="index.html" class="brand"><svg width="40" height="40" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
+</svg>
+      <span class="brand-name">러브백 관계 연구소<small>LOVEBACK LAB</small></span>
+    </a>
+    <nav class="nav-desktop"><a href="about.html">러브백 소개</a><a href="programs.html" class="on">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a></nav>
+    <a href="apply.html" class="btn btn-navy btn-sm header-cta">상담 신청</a>
+    <button class="menu-btn" onclick="document.getElementById('mMenu').classList.toggle('open')" aria-label="메뉴">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
   </div>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="about.html">러브백 소개</a>
-    <a href="programs.html">상담 프로그램</a>
-    <a href="pricing.html">가격 안내</a>
-    <a href="reviews.html">상담 후기</a>
-    <a href="columns.html">칼럼</a>
-    <a href="diagnosis.html">무료 진단</a>
-    <a href="faq.html">FAQ</a>
-    <a href="apply.html" class="btn btn-primary" style="margin-top:8px">상담 신청하기</a>
+  <div class="mobile-menu" id="mMenu"><a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    <a href="apply.html" class="btn btn-navy" style="margin-top:14px;border-bottom:none">상담 신청하기</a>
   </div>
 </header>
 
+<section class="section section-white" style="padding-bottom:56px">
+  <div class="wrap-md center reveal">
+    <span class="eyebrow">Programs</span>
+    <h1 class="title">러브백 1:1 상담 프로그램</h1>
+    <hr class="gold-bar">
+    <p class="lead">상담은 감으로 진행되지 않습니다.<br>아래 6단계 흐름으로 관계를 구조적으로 분석합니다.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="wrap-md" style="display:flex;flex-direction:column;gap:16px">
+    <div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">01</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 1. 사전 상담지 작성</h3>
+      <p style="color:#5a6380;font-size:15px">상담 전 현재 상황, 관계 흐름, 이별 원인, 대화 내용, 상대 반응 등을 작성합니다.</p></div></div>
+<div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">02</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 2. 관계 흐름 분석</h3>
+      <p style="color:#5a6380;font-size:15px">단순히 사건만 보는 것이 아니라 관계가 어떤 단계에서 무너졌는지 분석합니다.</p></div></div>
+<div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">03</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 3. 상대 심리 분석</h3>
+      <p style="color:#5a6380;font-size:15px">상대가 왜 멀어졌는지, 지금 어떤 감정 상태인지, 어떤 접근에 저항이 생기는지 봅니다.</p></div></div>
+<div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">04</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 4. 내 패턴 진단</h3>
+      <p style="color:#5a6380;font-size:15px">내가 어떤 방식으로 관계를 밀거나 당겼는지, 불안·회피·집착·과잉배려 패턴이 있었는지 봅니다.</p></div></div>
+<div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">05</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 5. 실행 전략 제시</h3>
+      <p style="color:#5a6380;font-size:15px">연락 여부와 시점, 메시지 방향, 대화 방식, 기다림의 기준, 관계 회복 루트를 정리합니다.</p></div></div>
+<div class="card reveal" style="display:flex;gap:24px;align-items:flex-start;padding:26px 30px">
+      <span class="serif" style="font-size:30px;color:#b2935b;line-height:1.2;min-width:52px">06</span>
+      <div><h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Step 6. 상담 후 정리</h3>
+      <p style="color:#5a6380;font-size:15px">핵심 방향과 실행 가이드를 정리해 혼자서도 다시 흐름을 잡을 수 있게 합니다.</p></div></div>
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="container center reveal">
+    <span class="eyebrow">Fields</span>
+    <h2 class="title">내 상황에 맞는 상담 분야</h2>
+    <hr class="gold-bar">
+  </div>
+  <div class="container" style="margin-top:38px;display:flex;flex-direction:column;gap:22px">
+    <div id="dating" class="card reveal" style="scroll-margin-top:90px;padding:34px 36px">
+      <h3 class="title-sm" style="margin-bottom:14px">연애 상담</h3>
+      <p style="font-size:12px;font-weight:700;letter-spacing:.18em;color:#b2935b;margin-bottom:8px">이런 분께 추천합니다</p>
+      <p style="color:#5a6380;font-size:15px;line-height:1.95">썸에서 관계가 애매해진 분 · 연애 중 상대가 식은 것 같은 분 · 불안형, 회피형 패턴으로 반복되는 분 · 연락, 표현, 서운함 문제로 자주 싸우는 분</p>
+      <hr class="divider">
+      <p style="font-weight:600;color:#8a6f3e;font-size:15px">지금 관계가 어디서 꼬였는지, 어떤 순서로 풀어야 하는지 진단합니다.</p>
+    </div>
+<div id="reunion" class="card reveal" style="scroll-margin-top:90px;padding:34px 36px">
+      <h3 class="title-sm" style="margin-bottom:14px">재회 상담</h3>
+      <p style="font-size:12px;font-weight:700;letter-spacing:.18em;color:#b2935b;margin-bottom:8px">이런 분께 추천합니다</p>
+      <p style="color:#5a6380;font-size:15px;line-height:1.95">이별 후 연락 타이밍을 고민하는 분 · 차단/읽씹/무반응 상태인 분 · 마지막 연락을 어떻게 해야 할지 모르는 분 · 재회 가능성과 방향성을 알고 싶은 분</p>
+      <hr class="divider">
+      <p style="font-weight:600;color:#8a6f3e;font-size:15px">재회는 감정으로 밀어붙이는 것이 아니라 상대의 심리적 저항을 낮추는 과정입니다.</p>
+    </div>
+<div id="pattern" class="card reveal" style="scroll-margin-top:90px;padding:34px 36px">
+      <h3 class="title-sm" style="margin-bottom:14px">관계 패턴 진단</h3>
+      <p style="font-size:12px;font-weight:700;letter-spacing:.18em;color:#b2935b;margin-bottom:8px">이런 분께 추천합니다</p>
+      <p style="color:#5a6380;font-size:15px;line-height:1.95">연애할 때마다 비슷하게 무너지는 분 · 항상 내가 더 불안해지는 분 · 상대에게 맞추다가 지치는 분 · 사랑받고 싶은데 오히려 매달리게 되는 분</p>
+      <hr class="divider">
+      <p style="font-weight:600;color:#8a6f3e;font-size:15px">반복되는 연애 문제는 상대만의 문제가 아니라 내 관계 패턴에서 시작되는 경우가 많습니다.</p>
+    </div>
+  </div>
+</section>
+
 <section class="section section-navy">
-  <div class="wrap-sm center">
-    <span class="eyebrow eyebrow-light">Programs</span>
-    <h1 class="page-title">러브백 1:1 상담 프로그램</h1>
-    <p class="muted-light">상담은 감으로 진행되지 않습니다. 아래 6단계 흐름으로 관계를 구조적으로 분석합니다.</p>
+  <div class="wrap-md center reveal">
+    <h2 class="title">내게 맞는 상담과 비용이 궁금하다면</h2>
+    <a href="pricing.html" class="btn btn-gold btn-lg" style="margin-top:8px">가격 안내 보기</a>
   </div>
 </section>
-
-<section class="section">
-  <div class="container">
-    <div class="step"><span class="step-num">01</span><div><h3 style="margin-bottom:6px">Step 1. 사전 상담지 작성</h3><p class="muted">상담 전 현재 상황, 관계 흐름, 이별 원인, 대화 내용, 상대 반응 등을 작성합니다.</p></div></div>
-    <div class="step"><span class="step-num">02</span><div><h3 style="margin-bottom:6px">Step 2. 관계 흐름 분석</h3><p class="muted">단순히 사건만 보는 것이 아니라 관계가 어떤 단계에서 무너졌는지 분석합니다.</p></div></div>
-    <div class="step"><span class="step-num">03</span><div><h3 style="margin-bottom:6px">Step 3. 상대 심리 분석</h3><p class="muted">상대가 왜 멀어졌는지, 지금 어떤 감정 상태인지, 어떤 접근에는 저항이 생기는지 봅니다.</p></div></div>
-    <div class="step"><span class="step-num">04</span><div><h3 style="margin-bottom:6px">Step 4. 내 패턴 진단</h3><p class="muted">내가 어떤 방식으로 관계를 밀거나 당겼는지, 불안·회피·집착·통제·과잉배려 패턴이 있었는지 봅니다.</p></div></div>
-    <div class="step"><span class="step-num">05</span><div><h3 style="margin-bottom:6px">Step 5. 실행 전략 제시</h3><p class="muted">연락 여부, 연락 시점, 메시지 방향, 대화 방식, 기다림의 기준, 관계 회복 루트를 정리합니다.</p></div></div>
-    <div class="step"><span class="step-num">06</span><div><h3 style="margin-bottom:6px">Step 6. 상담 후 정리</h3><p class="muted">상담 후 핵심 방향과 실행 가이드를 정리해 혼자서도 다시 흐름을 잡을 수 있게 합니다.</p></div></div>
-  </div>
-</section>
-
-<section class="section section-beige">
-  <div class="container">
-    <span class="eyebrow">상담 분야</span>
-    <h2 class="serif" style="font-size:24px;margin-bottom:24px">내 상황에 맞는 상담 분야를 확인하세요</h2>
-
-    <div id="dating" class="card" style="margin-bottom:20px">
-      <h3 class="serif" style="font-size:20px;margin-bottom:16px">연애 상담</h3>
-      <p style="font-size:12px;font-weight:600;color:#8a7f6c;text-transform:uppercase;margin-bottom:8px">대상</p>
-      <p>· 썸에서 관계가 애매해진 사람 &nbsp;· 연애 중 상대가 식은 것 같은 사람<br>· 불안형, 회피형 패턴으로 반복되는 사람 &nbsp;· 연락, 표현, 서운함 문제로 자주 싸우는 사람</p>
-      <hr style="border:none;border-top:1px solid #e7e1d6;margin:16px 0">
-      <p style="font-weight:600;color:#7d2334">지금 관계가 어디서 꼬였는지, 어떤 순서로 풀어야 하는지 진단합니다.</p>
-    </div>
-
-    <div id="reunion" class="card" style="margin-bottom:20px">
-      <h3 class="serif" style="font-size:20px;margin-bottom:16px">재회 상담</h3>
-      <p style="font-size:12px;font-weight:600;color:#8a7f6c;text-transform:uppercase;margin-bottom:8px">대상</p>
-      <p>· 이별 후 연락 타이밍을 고민하는 사람 &nbsp;· 차단/읽씹/무반응 상태인 사람<br>· 마지막 연락을 어떻게 해야 할지 모르는 사람 &nbsp;· 재회 가능성과 방향성을 알고 싶은 사람</p>
-      <hr style="border:none;border-top:1px solid #e7e1d6;margin:16px 0">
-      <p style="font-weight:600;color:#7d2334">재회는 감정으로 밀어붙이는 것이 아니라 상대의 심리적 저항을 낮추는 과정입니다.</p>
-    </div>
-
-    <div id="pattern" class="card">
-      <h3 class="serif" style="font-size:20px;margin-bottom:16px">관계 패턴 진단</h3>
-      <p style="font-size:12px;font-weight:600;color:#8a7f6c;text-transform:uppercase;margin-bottom:8px">대상</p>
-      <p>· 연애할 때마다 비슷하게 무너지는 사람 &nbsp;· 항상 내가 더 불안해지는 사람<br>· 상대에게 맞추다가 지치는 사람 &nbsp;· 사랑받고 싶은데 오히려 매달리게 되는 사람</p>
-      <hr style="border:none;border-top:1px solid #e7e1d6;margin:16px 0">
-      <p style="font-weight:600;color:#7d2334">반복되는 연애 문제는 상대만의 문제가 아니라 내 관계 패턴에서 시작되는 경우가 많습니다.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section section-navy">
-  <div class="wrap-sm center">
-    <h2 class="serif" style="font-size:22px">내게 맞는 상담 상품과 가격이 궁금하다면</h2>
-    <a href="pricing.html" class="btn btn-primary btn-lg">가격 안내 보기</a>
-  </div>
-</section>
-
 <footer class="site-footer">
   <div class="container">
-    <span class="logo2">러브백 관계 연구소</span>
+    <div class="f-brand"><svg width="36" height="36" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#e8e2d2" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#e8e2d2" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#e8e2d2" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#e8e2d2"/>
+</svg>
+      <span class="f-name">러브백 관계 연구소</span>
+    </div>
+    <p style="max-width:460px">연애, 이별, 재회를 감정이 아닌 관계의 흐름과 심리 구조로 분석하는 1:1 프리미엄 관계 코칭 연구소입니다.</p>
     <div class="footer-links">
       <a href="policy-terms.html">이용약관</a>
       <a href="policy-privacy.html">개인정보처리방침</a>
       <a href="policy-refund.html">환불규정</a>
+      <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener">카카오톡 문의</a>
     </div>
     <div class="footer-fine">
-      <span>© 2026 러브백 관계 연구소. All rights reserved.</span>
+      <span>대표 코치 메릭 · 카카오톡 채널 러브백 관계 연구소</span>
+      <span>본 서비스는 관계 코칭 서비스이며, 특정 결과(재회 등)를 보장하지 않습니다.</span>
+      <span>© 2026 LOVEBACK. All rights reserved.</span>
     </div>
   </div>
 </footer>
-
 <div class="mobile-cta">
-  <a href="https://pf.kakao.com/_loveback" target="_blank" class="btn-kakao">카톡 상담 문의</a>
-  <a href="apply.html" class="btn-primary">상담 신청하기</a>
+  <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener" class="m-kakao">카톡 상담 문의</a>
+  <a href="apply.html" class="m-apply">상담 신청하기</a>
 </div>
-
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in')}); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(function(e){ io.observe(e); });
+})();</script>
 </body>
 </html>
