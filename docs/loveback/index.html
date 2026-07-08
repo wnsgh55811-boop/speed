@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>러브백 관계 연구소 | 연락을 고민하기 전에, 관계의 흐름부터</title>
+<meta name="description" content="누적 6,500건 이상의 연애·재회 상담 분석. 관계 패턴과 상대 심리로 지금 해야 할 선택을 정리해드립니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Noto Sans KR',-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#fdfcf8;color:#1d2743;line-height:1.85;padding-bottom:62px;font-size:16px;word-break:keep-all}
+.serif{font-family:'Noto Serif KR','Playfair Display',Georgia,serif}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{font-family:inherit}
+.container{max-width:1040px;margin:0 auto;padding:0 22px}
+.wrap-md{max-width:760px;margin:0 auto;padding:0 22px}
+.wrap-sm{max-width:620px;margin:0 auto;padding:0 22px}
+
+/* ── header ─────────────────────────── */
+.site-header{position:sticky;top:0;z-index:50;background:rgba(253,252,248,.92);backdrop-filter:blur(10px);border-bottom:1px solid #ece6d8}
+.site-header .container{height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-name{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:600;letter-spacing:.02em}
+.brand-name small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:.28em;color:#b2935b;margin-top:1px}
+.nav-desktop{display:none;gap:26px;align-items:center}
+.nav-desktop a{font-size:14.5px;font-weight:500;color:#39415e;letter-spacing:.01em;padding:4px 0;border-bottom:2px solid transparent;transition:.2s}
+.nav-desktop a:hover,.nav-desktop a.on{color:#1d2743;border-bottom-color:#b2935b}
+.menu-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;background:none;border:none;cursor:pointer;color:#1d2743}
+.menu-btn svg{width:24px;height:24px}
+.mobile-menu{display:none;flex-direction:column;padding:8px 22px 18px;border-top:1px solid #ece6d8;background:#fdfcf8}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:13px 4px;font-size:15px;font-weight:500;color:#39415e;border-bottom:1px solid #f2eee3}
+.header-cta{display:none}
+@media(min-width:980px){.nav-desktop{display:flex}.menu-btn{display:none}.mobile-menu{display:none!important}.header-cta{display:inline-flex!important}}
+
+/* ── buttons ─────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 30px;border-radius:3px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;letter-spacing:.02em;transition:all .22s ease}
+.btn-lg{padding:17px 38px;font-size:16px}
+.btn-sm{padding:9px 18px;font-size:13.5px}
+.btn-navy{background:#1d2743;border-color:#1d2743;color:#fdfcf8}
+.btn-navy:hover{background:#b2935b;border-color:#b2935b}
+.btn-gold{background:#b2935b;border-color:#b2935b;color:#fff}
+.btn-gold:hover{background:#9c7f49}
+.btn-line{background:transparent;border-color:#c8c0ac;color:#1d2743}
+.btn-line:hover{border-color:#1d2743;background:#1d2743;color:#fdfcf8}
+.btn-line-light{background:transparent;border-color:rgba(253,252,248,.4);color:#fdfcf8}
+.btn-line-light:hover{background:#fdfcf8;color:#1d2743}
+.btn-kakao{background:#fee500;border-color:#fee500;color:#3c1e1e}
+.btn-kakao:hover{filter:brightness(.95)}
+.btn-block{width:100%}
+
+/* ── sections ─────────────────────────── */
+.section{padding:84px 0}
+@media(max-width:640px){.section{padding:60px 0}}
+.section-navy{background:linear-gradient(160deg,#161f38 0%,#1d2743 60%,#232f52 100%);color:#f4f1e8}
+.section-cream{background:#f7f3ea}
+.section-white{background:#fff}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:#b2935b;display:block;margin-bottom:16px}
+.eyebrow-light{color:#cbb489}
+.title{font-family:'Noto Serif KR',serif;font-size:clamp(24px,4.6vw,36px);line-height:1.45;font-weight:600;letter-spacing:-.01em}
+.title-sm{font-family:'Noto Serif KR',serif;font-size:clamp(20px,3.4vw,26px);line-height:1.5;font-weight:600}
+.lead{color:#5a6380;font-size:clamp(15px,2.2vw,17px);line-height:1.9}
+.lead-light{color:rgba(244,241,232,.82)}
+.center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.gold-bar{width:44px;height:2px;background:#b2935b;border:none}
+.gap-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+/* ── cards & grid ─────────────────────── */
+.grid{display:grid;gap:22px}
+.grid-2{grid-template-columns:1fr}
+.grid-3{grid-template-columns:1fr}
+@media(min-width:660px){.grid-2{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.grid-3{grid-template-columns:1fr 1fr 1fr}}
+.card{background:#fff;border:1px solid #ece6d8;border-radius:6px;padding:32px;transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:0 14px 40px rgba(29,39,67,.09)}
+.card-flat:hover{box-shadow:none}
+.chip-badge{display:inline-block;background:#f2ecdd;color:#8a6f3e;font-size:12px;font-weight:600;padding:5px 14px;border-radius:999px;letter-spacing:.04em}
+.chip-badge-navy{background:#1d2743;color:#f4f1e8}
+
+/* ── chips filter ─────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{border:1px solid #d9d2c0;border-radius:999px;padding:8px 18px;font-size:13.5px;font-weight:500;cursor:pointer;background:#fff;color:#39415e;transition:.2s}
+.chip:hover{border-color:#b2935b;color:#8a6f3e}
+.chip.active{background:#1d2743;border-color:#1d2743;color:#fdfcf8}
+
+/* ── forms ─────────────────────────── */
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;text-align:left}
+.field label{font-size:14px;font-weight:600;color:#1d2743}
+.field label .req{color:#b2935b;margin-left:3px}
+.field input,.field select,.field textarea{border:1px solid #d9d2c0;border-radius:4px;padding:13px 16px;font-size:15px;font-family:inherit;background:#fff;color:#1d2743;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#b2935b}
+.field textarea{resize:vertical}
+
+/* ── footer & mobile bar ──────────────── */
+.site-footer{background:#141b30;color:rgba(244,241,232,.62);padding:56px 0 48px;font-size:14px}
+.site-footer .f-brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.site-footer .f-name{font-family:'Noto Serif KR',serif;font-size:17px;color:#f4f1e8}
+.footer-links{display:flex;flex-wrap:wrap;gap:8px 22px;margin:20px 0}
+.footer-links a:hover{color:#f4f1e8}
+.footer-fine{font-size:12px;color:rgba(244,241,232,.4);display:flex;flex-direction:column;gap:5px;margin-top:18px;line-height:1.7}
+.mobile-cta{position:fixed;left:0;right:0;bottom:0;display:flex;z-index:60;box-shadow:0 -6px 24px rgba(20,27,48,.12)}
+.mobile-cta a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:17px 0;font-weight:700;font-size:15px}
+.mobile-cta .m-kakao{background:#fee500;color:#3c1e1e}
+.mobile-cta .m-apply{background:#1d2743;color:#fdfcf8}
+@media(min-width:980px){.mobile-cta{display:none}body{padding-bottom:0}}
+
+/* ── scroll reveal ─────────────────────── */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,.84,.32,1),transform .9s cubic-bezier(.16,.84,.32,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal-d1{transition-delay:.12s}.reveal-d2{transition-delay:.24s}.reveal-d3{transition-delay:.36s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+.img-frame{border-radius:8px;overflow:hidden;box-shadow:0 24px 60px rgba(29,39,67,.14)}
+.img-frame img{width:100%;height:100%;object-fit:cover}
+.list-plain{list-style:none;padding:0}
+.divider{border:none;border-top:1px solid #ece6d8;margin:26px 0}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand"><svg width="40" height="40" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
+</svg>
+      <span class="brand-name">러브백 관계 연구소<small>LOVEBACK LAB</small></span>
+    </a>
+    <nav class="nav-desktop"><a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a></nav>
+    <a href="apply.html" class="btn btn-navy btn-sm header-cta">상담 신청</a>
+    <button class="menu-btn" onclick="document.getElementById('mMenu').classList.toggle('open')" aria-label="메뉴">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mMenu"><a href="about.html">러브백 소개</a><a href="programs.html">상담 프로그램</a><a href="pricing.html">가격 안내</a><a href="reviews.html">상담 후기</a><a href="columns.html">칼럼</a><a href="diagnosis.html">무료 진단</a><a href="faq.html">FAQ</a>
+    <a href="apply.html" class="btn btn-navy" style="margin-top:14px;border-bottom:none">상담 신청하기</a>
+  </div>
+</header>
+
+<section class="section section-white" style="padding-top:72px">
+  <div class="container center reveal">
+    <div style="margin-bottom:-6px"><svg width="220" height="200" viewBox="0 0 300 270" fill="none" aria-hidden="true" style="max-width:60vw;height:auto">
+<g transform="translate(30,-8)">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#1d2743" stroke-width="2.5" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#1d2743" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#1d2743" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#1d2743"/>
+</g>
+<text x="150" y="252" font-family="'Playfair Display','Noto Serif KR',serif" font-size="30" letter-spacing="10" fill="#1d2743" text-anchor="middle">LOVEBACK</text>
+</svg></div>
+    <span class="chip-badge">누적 6,500건 이상 · 7년간의 연애·재회 상담 분석</span>
+    <h1 class="title" style="max-width:660px">연락 한 번을 더 보내기 전에,<br>먼저 관계의 흐름부터 봐야 합니다.</h1>
+    <p class="lead" style="max-width:540px">러브백 관계 연구소는 연애, 이별, 재회 상황을<br>감정이 아닌 관계 패턴과 상대 심리로 분석합니다.</p>
+    <div class="gap-btns" style="margin-top:6px">
+      <a href="apply.html" class="btn btn-navy btn-lg">상담 신청하기</a>
+      <a href="reviews.html" class="btn btn-line btn-lg">후기 먼저 보기</a>
+    </div>
+  </div>
+  <div class="container reveal reveal-d1" style="margin-top:52px">
+    <div class="img-frame" style="aspect-ratio:16/7">
+      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260708_034119_fc49109e-1a24-4fe1-ae11-a1a795495b7d_min.webp" alt="러브백 관계 연구소 상담 공간" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container center reveal">
+    <span class="eyebrow">Are you here?</span>
+    <h2 class="title">지금 당신이 힘든 이유는<br>연락 때문만이 아닙니다.</h2>
+    <hr class="gold-bar">
+    <p class="lead">혹시 이런 상황인가요?</p>
+  </div>
+  <div class="container" style="margin-top:38px">
+    <div class="grid grid-2">
+      <div class="card card-flat reveal" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">상대가 예전 같지 않다.</span></div>
+<div class="card card-flat reveal reveal-d1" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">연락 빈도가 줄었는데 이유를 모르겠다.</span></div>
+<div class="card card-flat reveal" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">내가 뭘 잘못했는지 계속 생각하게 된다.</span></div>
+<div class="card card-flat reveal reveal-d1" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">붙잡아야 할지, 기다려야 할지 모르겠다.</span></div>
+<div class="card card-flat reveal" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">재회를 원하지만 먼저 연락하면 더 멀어질까 봐 두렵다.</span></div>
+<div class="card card-flat reveal reveal-d1" style="display:flex;align-items:center;gap:14px;padding:22px 26px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b2935b" stroke-width="2.4" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>
+        <span style="font-size:15.5px">연애할 때마다 비슷한 패턴으로 무너진다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-navy">
+  <div class="wrap-md center reveal">
+    <span class="eyebrow eyebrow-light">Loveback Perspective</span>
+    <h2 class="title">연애도 결국,<br>남녀 간의 인간관계입니다.</h2>
+    <hr class="gold-bar">
+    <p class="lead-light">러브백은 "언제 연락해야 하나요?", "카톡 뭐라고 보내야 하나요?"만 보는 곳이 아닙니다. 관계가 어디서 틀어졌는지, 상대는 지금 어떤 심리 상태인지, 내가 어떤 위치에 서 있는지부터 봅니다.</p>
+    <p class="lead-light">연락은 기술이 아니라 결과물입니다.<br>흐름이 정리되지 않은 상태에서 보내는 연락은<br>오히려 상대를 더 멀어지게 만들 수 있습니다.</p>
+  </div>
+</section>
+
+<section class="section section-white">
+  <div class="container center reveal">
+    <span class="eyebrow">Programs</span>
+    <h2 class="title">지금 상황에 맞는 상담을 찾아보세요</h2>
+    <hr class="gold-bar">
+  </div>
+  <div class="container" style="margin-top:42px">
+    <div class="grid grid-3">
+      <a href="programs.html#dating" class="card reveal reveal-d0">
+        <h3 class="title-sm" style="margin-bottom:16px">연애 상담</h3>
+        <ul class="list-plain" style="color:#5a6380;font-size:14.5px;line-height:2">
+          <li>· 썸에서 관계가 애매해진 분</li><li>· 연애 중 상대가 식은 것 같은 분</li><li>· 불안형·회피형 패턴이 반복되는 분</li><li>· 연락·표현 문제로 자주 다투는 분</li>
+        </ul>
+        <hr class="divider">
+        <p style="font-size:14.5px;font-weight:600;color:#8a6f3e;line-height:1.75">지금 관계가 어디서 꼬였는지, 어떤 순서로 풀어야 하는지 진단합니다.</p>
+        <p style="margin-top:16px;font-size:14px;font-weight:600;color:#1d2743">자세히 보기 →</p>
+      </a>
+<a href="programs.html#reunion" class="card reveal reveal-d1">
+        <h3 class="title-sm" style="margin-bottom:16px">재회 상담</h3>
+        <ul class="list-plain" style="color:#5a6380;font-size:14.5px;line-height:2">
+          <li>· 이별 후 연락 타이밍을 고민하는 분</li><li>· 차단·읽씹·무반응 상태인 분</li><li>· 마지막 연락을 어떻게 할지 모르는 분</li><li>· 재회 가능성과 방향이 궁금한 분</li>
+        </ul>
+        <hr class="divider">
+        <p style="font-size:14.5px;font-weight:600;color:#8a6f3e;line-height:1.75">재회는 감정으로 밀어붙이는 것이 아니라 상대의 심리적 저항을 낮추는 과정입니다.</p>
+        <p style="margin-top:16px;font-size:14px;font-weight:600;color:#1d2743">자세히 보기 →</p>
+      </a>
+<a href="programs.html#pattern" class="card reveal reveal-d2">
+        <h3 class="title-sm" style="margin-bottom:16px">관계 패턴 진단</h3>
+        <ul class="list-plain" style="color:#5a6380;font-size:14.5px;line-height:2">
+          <li>· 연애할 때마다 비슷하게 무너지는 분</li><li>· 항상 내가 더 불안해지는 분</li><li>· 상대에게 맞추다 지치는 분</li><li>· 사랑받고 싶은데 매달리게 되는 분</li>
+        </ul>
+        <hr class="divider">
+        <p style="font-size:14.5px;font-weight:600;color:#8a6f3e;line-height:1.75">반복되는 연애 문제는 상대만의 문제가 아니라 내 관계 패턴에서 시작되는 경우가 많습니다.</p>
+        <p style="margin-top:16px;font-size:14px;font-weight:600;color:#1d2743">자세히 보기 →</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="wrap-md center reveal">
+    <h2 class="title">내 상황에는 어떤 상담이 맞을까요?</h2>
+    <hr class="gold-bar">
+  </div>
+  <div class="wrap-md reveal reveal-d1" style="margin-top:34px;display:flex;flex-direction:column;gap:12px">
+    <a href="programs.html#dating" class="card card-flat" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:20px 26px;flex-wrap:wrap">
+      <span style="font-size:15.5px">연애 중인데 불안하다</span>
+      <span style="color:#8a6f3e;font-weight:600;font-size:14.5px;white-space:nowrap">연애 상담 →</span></a>
+<a href="programs.html#reunion" class="card card-flat" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:20px 26px;flex-wrap:wrap">
+      <span style="font-size:15.5px">헤어진 지 얼마 안 됐다</span>
+      <span style="color:#8a6f3e;font-weight:600;font-size:14.5px;white-space:nowrap">재회 상담 →</span></a>
+<a href="programs.html#reunion" class="card card-flat" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:20px 26px;flex-wrap:wrap">
+      <span style="font-size:15.5px">연락을 보내야 할지 모르겠다</span>
+      <span style="color:#8a6f3e;font-weight:600;font-size:14.5px;white-space:nowrap">재회 전략 상담 →</span></a>
+<a href="programs.html#pattern" class="card card-flat" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:20px 26px;flex-wrap:wrap">
+      <span style="font-size:15.5px">매번 같은 연애를 반복한다</span>
+      <span style="color:#8a6f3e;font-weight:600;font-size:14.5px;white-space:nowrap">관계 패턴 진단 →</span></a>
+<a href="reviews.html" class="card card-flat" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:20px 26px;flex-wrap:wrap">
+      <span style="font-size:15.5px">카톡을 어떻게 해야 할지 모르겠다</span>
+      <span style="color:#8a6f3e;font-weight:600;font-size:14.5px;white-space:nowrap">카톡 분석 상담 →</span></a>
+  </div>
+</section>
+
+<section class="section section-white">
+  <div class="container center reveal">
+    <span class="eyebrow">Reviews</span>
+    <h2 class="title">나와 비슷한 사람들의 이야기</h2>
+    <hr class="gold-bar">
+    <p class="lead">후기는 자랑이 아니라, 지금의 내 상황을 대입해보는 공간입니다.</p>
+  </div>
+  <div class="container" style="margin-top:42px">
+    <div class="grid grid-3">
+      <a href="reviews.html" class="card reveal reveal-d0" style="background:#faf7f0">
+        <span class="chip-badge" style="margin-bottom:16px">재회 상담 후기</span>
+        <p class="serif" style="font-size:16.5px;line-height:1.7;margin-bottom:12px">“연락만 고민했는데, 사실은 제 태도와 위치가 문제였다는 걸 알게 됐습니다.”</p>
+        <p style="font-size:14px;color:#5a6380;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">헤어진 지 3주쯤 됐는데 계속 연락 타이밍만 고민하고 있었어요. 언제 연락해야 할지, 뭐라고 보내야 할지 하루 종일 생각만 하다가 잠도 잘 못 잤습니다. 상담을 받고 나니 제가 왜 계속 밀어붙이게 됐는지, 관계 안에서 제 위치가 어땠는지 정리가 됐어요. 연락 문장보다 먼저 봐야 할 게 있다는 걸 알게 됐습니다. 지금은 무작정 붙잡는 게 아니라 제 상황을 정리하면서 접근하고 있어요. 연락 타이밍만 검색하지 마시고, 관계가 왜 이렇게 됐는지부터 정리해보세요.</p>
+        <p style="margin-top:14px;font-size:12.5px;color:#9aa0b4">하늘달 · 20대 여성 · 이별 후 3주</p>
+      </a>
+<a href="reviews.html" class="card reveal reveal-d1" style="background:#faf7f0">
+        <span class="chip-badge" style="margin-bottom:16px">연애 상담 후기</span>
+        <p class="serif" style="font-size:16.5px;line-height:1.7;margin-bottom:12px">“잘해줄수록 멀어지는 이유를 알게 됐어요.”</p>
+        <p style="font-size:14px;color:#5a6380;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">여자친구가 예전 같지 않다는 느낌을 받았습니다. 저는 더 잘해주려고 했는데 오히려 반응이 시큰둥해지는 게 이상했어요. 상담에서 제 과잉배려 패턴과 상대가 부담을 느끼는 지점을 짚어주셔서, 제가 관계에서 어떤 역할을 자처하고 있었는지 알게 됐습니다. 지금은 무조건 맞추기보다 제 기준을 먼저 세우고 대화하려고 합니다. 관계가 훨씬 편해졌어요.</p>
+        <p style="margin-top:14px;font-size:12.5px;color:#9aa0b4">봄날의곰 · 30대 남성 · 연애 8개월차</p>
+      </a>
+<a href="reviews.html" class="card reveal reveal-d2" style="background:#faf7f0">
+        <span class="chip-badge" style="margin-bottom:16px">썸/소개팅 상담 후기</span>
+        <p class="serif" style="font-size:16.5px;line-height:1.7;margin-bottom:12px">“썸 타는 상대의 연락이 느려졌을 때 어떻게 해야 하는지 알게 됐습니다.”</p>
+        <p style="font-size:14px;color:#5a6380;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">소개팅 이후 잘 되어가나 싶었는데 갑자기 연락이 뜸해져서 어떻게 해야 할지 몰랐어요. 먼저 연락하자니 매달리는 것 같고, 안 하자니 이대로 끝날 것 같아 불안했습니다. 지금 단계에서 상대가 어떤 신호를 보내고 있는지, 제가 어떤 포지션으로 대화해야 하는지 구체적으로 알려주셔서 큰 도움이 됐습니다. 조급해하지 않고 적절한 거리에서 대화를 이어가고 있어요.</p>
+        <p style="margin-top:14px;font-size:12.5px;color:#9aa0b4">라떼한잔 · 20대 여성 · 소개팅 후 3주</p>
+      </a>
+    </div>
+    <div class="center reveal" style="margin-top:34px">
+      <a href="reviews.html" class="btn btn-line">후기 전체 보기</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-navy">
+  <div class="container center reveal">
+    <span class="eyebrow eyebrow-light">Why Loveback</span>
+    <h2 class="title">상담소가 아니라, 관계 연구소입니다</h2>
+    <hr class="gold-bar">
+  </div>
+  <div class="container" style="margin-top:38px">
+    <div class="grid grid-2">
+      <div class="reveal" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">01</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">연락 문장보다 관계 흐름을 먼저 봅니다.</span></div>
+<div class="reveal reveal-d1" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">02</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">감정 위로보다 현실적인 전략을 제시합니다.</span></div>
+<div class="reveal" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">03</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">상대 심리와 내 패턴을 함께 분석합니다.</span></div>
+<div class="reveal reveal-d1" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">04</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">재회 가능성을 무조건 긍정하지 않습니다.</span></div>
+<div class="reveal" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">05</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">상담 후 바로 실행할 수 있는 방향을 드립니다.</span></div>
+<div class="reveal reveal-d1" style="display:flex;gap:16px;align-items:flex-start;border:1px solid rgba(244,241,232,.14);border-radius:6px;padding:22px 26px">
+        <span class="serif" style="color:#cbb489;font-size:18px">06</span>
+        <span style="color:rgba(244,241,232,.88);font-size:15px">실제 카톡, 이별 과정, 상대 반응을 바탕으로 분석합니다.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-cream" style="position:relative;overflow:hidden">
+  <div class="wrap-md center reveal" style="position:relative;z-index:1">
+    <span class="eyebrow">Free Check</span>
+    <h2 class="title">내 관계가 지금 회복 가능한<br>흐름인지 알고 싶다면?</h2>
+    <hr class="gold-bar">
+    <p class="lead">결제 전에, 무료 체크리스트로 현재 상태를 먼저 점검해보세요.</p>
+    <a href="diagnosis.html" class="btn btn-navy btn-lg">무료 관계 진단 시작하기</a>
+  </div>
+</section>
+
+<section class="section section-white">
+  <div class="wrap-md center reveal">
+    <h2 class="title">지금 이 관계,<br>혼자 고민하지 마세요.</h2>
+    <hr class="gold-bar">
+    <p class="lead">현재 관계의 흐름, 상대 심리, 내 행동 패턴을 함께 분석해<br>지금 해야 할 선택을 정리해드립니다.</p>
+    <div class="gap-btns">
+      <a href="apply.html" class="btn btn-navy btn-lg">1:1 상담 신청하기</a>
+      <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener" class="btn btn-kakao btn-lg">카카오톡으로 문의하기</a>
+    </div>
+  </div>
+</section>
+<footer class="site-footer">
+  <div class="container">
+    <div class="f-brand"><svg width="36" height="36" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+<circle cx="120" cy="120" r="94" fill="none" stroke="#e8e2d2" stroke-width="3" pathLength="100" stroke-dasharray="42 9 42 7" transform="rotate(24 120 120)"/>
+<text x="92" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="132" font-weight="500" fill="#e8e2d2" text-anchor="middle">L</text>
+<text x="150" y="163" font-family="'Playfair Display','Noto Serif KR',serif" font-size="126" font-weight="500" fill="#e8e2d2" text-anchor="middle">B</text>
+<path d="M121 118 L125.5 141 L146 146 L125.5 151 L121 174 L116.5 151 L96 146 L116.5 141 Z" fill="#e8e2d2"/>
+</svg>
+      <span class="f-name">러브백 관계 연구소</span>
+    </div>
+    <p style="max-width:460px">연애, 이별, 재회를 감정이 아닌 관계의 흐름과 심리 구조로 분석하는 1:1 프리미엄 관계 코칭 연구소입니다.</p>
+    <div class="footer-links">
+      <a href="policy-terms.html">이용약관</a>
+      <a href="policy-privacy.html">개인정보처리방침</a>
+      <a href="policy-refund.html">환불규정</a>
+      <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener">카카오톡 문의</a>
+    </div>
+    <div class="footer-fine">
+      <span>대표 코치 메릭 · 카카오톡 채널 러브백 관계 연구소</span>
+      <span>본 서비스는 관계 코칭 서비스이며, 특정 결과(재회 등)를 보장하지 않습니다.</span>
+      <span>© 2026 LOVEBACK. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+<div class="mobile-cta">
+  <a href="https://pf.kakao.com/_hNYBn/chat" target="_blank" rel="noopener" class="m-kakao">카톡 상담 문의</a>
+  <a href="apply.html" class="m-apply">상담 신청하기</a>
+</div>
+<script>
+(function(){
+  var els = document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){ els.forEach(function(e){e.classList.add('in')}); return; }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(function(e){ io.observe(e); });
+})();</script>
+</body>
+</html>
