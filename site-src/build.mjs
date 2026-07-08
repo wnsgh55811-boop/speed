@@ -66,7 +66,7 @@ const indexBody = `
   </div>
   <div class="container reveal reveal-d1" style="margin-top:52px">
     <div class="img-frame" style="aspect-ratio:16/7">
-      <img src="${IMG.studio}" alt="러브백 관계 연구소 상담 공간" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <img src="${IMG.studio}" alt="러브백 관계 연구소 상담 공간" loading="lazy" data-img-key="hero" data-img-label="메인 상단" onerror="this.parentElement.style.display='none'">
     </div>
   </div>
 </section>
@@ -174,6 +174,9 @@ const indexBody = `
     <hr class="gold-bar">
     <p class="lead">결제 전에, 무료 체크리스트로 현재 상태를 먼저 점검해보세요.</p>
     <a href="diagnosis.html" class="btn btn-navy btn-lg">무료 관계 진단 시작하기</a>
+    <div class="img-frame reveal reveal-d1" style="aspect-ratio:16/6;width:100%;max-width:640px;margin-top:22px">
+      <img src="${IMG.still}" alt="러브백 무료 진단" loading="lazy" data-img-key="teaser" data-img-label="무료진단 배너" onerror="this.parentElement.style.display='none'">
+    </div>
   </div>
 </section>
 
@@ -214,13 +217,14 @@ const aboutBody = `
     <div style="display:grid;gap:44px;align-items:start" class="about-grid">
       <div class="reveal">
         <!-- ── 코치 프로필 사진 ──
-             아임웹에서: 아래 img의 src를 본인 사진 주소로 바꾸면 됩니다.
-             (아임웹 편집기에서 이미지 업로드 → 주소 복사 → src에 붙여넣기) -->
+             관리자 모드([관리자] 클릭 → 비밀번호)에서 [이미지 변경]으로 교체하거나,
+             아래 img의 src를 사진 주소로 직접 바꿔도 됩니다. -->
         <div style="background:linear-gradient(165deg,#1b2542 0%,#22305a 100%);border-radius:10px;padding:34px 30px 30px;box-shadow:0 24px 60px rgba(29,39,67,.18);position:sticky;top:96px">
-          <div style="border-radius:8px;overflow:hidden;aspect-ratio:4/4.4;background:linear-gradient(180deg,#25335e,#1b2542);display:flex;align-items:flex-end;justify-content:center">
+          <div data-img-key="coach" data-img-label="코치 프로필" style="border-radius:8px;overflow:hidden;aspect-ratio:4/4.4;background:linear-gradient(180deg,#25335e,#1b2542);display:flex;align-items:center;justify-content:center">
             <img id="coachPhoto" src="coach.jpg" alt="메릭 코치"
               style="width:100%;height:100%;object-fit:cover"
-              onerror="this.outerHTML='<svg viewBox=\\'0 0 200 220\\' style=\\'width:72%;opacity:.5\\' fill=\\'none\\'><circle cx=\\'100\\' cy=\\'74\\' r=\\'38\\' stroke=\\'#8fa0cc\\' stroke-width=\\'3\\'/><path d=\\'M30 210c8-46 38-70 70-70s62 24 70 70\\' stroke=\\'#8fa0cc\\' stroke-width=\\'3\\'/></svg>'">
+              onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <svg viewBox="0 0 200 220" style="width:72%;opacity:.5;display:none" fill="none"><circle cx="100" cy="74" r="38" stroke="#8fa0cc" stroke-width="3"/><path d="M30 210c8-46 38-70 70-70s62 24 70 70" stroke="#8fa0cc" stroke-width="3"/></svg>
           </div>
           <div style="text-align:center;margin-top:22px">
             <p class="serif" style="color:#f4f1e8;font-size:20px;letter-spacing:.04em">메릭 코치</p>
@@ -441,6 +445,8 @@ const reviewsBody = `
           <div class="field"><label>후기 제목<span class="req">*</span></label><input id="rTitle" required maxlength="80"></div>
           <div class="field"><label>후기 내용<span class="req">*</span></label>
             <textarea id="rContent" rows="5" required maxlength="2000" placeholder="상담 전 상황 → 가장 도움 됐던 부분 → 상담 후 달라진 점 순서로 적어주시면 좋아요."></textarea></div>
+          <div class="field" id="rDateField" style="display:none"><label>작성 날짜 (관리자)</label>
+            <input type="date" id="rDate"></div>
           <button type="submit" class="btn btn-navy btn-block">후기 등록하기</button>
         </form>
       </div>
@@ -474,17 +480,24 @@ function saveLocal(a){ try{ localStorage.setItem(LS_KEY, JSON.stringify(a)); }ca
 function allReviews(){ return loadLocal().concat(SEED); }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 var curCat = 'all';
+function lbDelReview(ts){
+  if(!confirm('이 후기를 삭제할까요?')) return;
+  saveLocal(loadLocal().filter(function(x){ return x.ts !== ts; }));
+  render();
+}
 function render(){
   var grid = document.getElementById('rGrid');
+  var admin = typeof lbIsAdmin==='function' && lbIsAdmin();
   var list = allReviews().filter(function(r){ return curCat==='all' || r.cat===curCat; });
   document.getElementById('rEmpty').style.display = list.length ? 'none':'block';
   grid.innerHTML = list.map(function(r,i){
-    return '<div class="card" style="background:#faf7f0;cursor:pointer" onclick="this.querySelector(\\'.r-body\\').classList.toggle(\\'r-open\\')">'
+    return '<div class="card" style="background:#faf7f0;cursor:pointer;position:relative" onclick="this.querySelector(\\'.r-body\\').classList.toggle(\\'r-open\\')">'
       + '<span class="chip-badge" style="margin-bottom:14px">'+ (CATS[r.cat]||'상담') +' 후기</span>'
       + (r.mine ? '<span class="chip-badge chip-badge-navy" style="margin-left:6px;margin-bottom:14px">내가 쓴 후기</span>' : '')
+      + (admin && r.mine ? '<button onclick="event.stopPropagation();lbDelReview('+r.ts+')" style="position:absolute;top:14px;right:14px;background:#fff;border:1px solid #d9d2c0;color:#b1495a;font-size:12px;padding:4px 10px;border-radius:3px;cursor:pointer">삭제</button>' : '')
       + '<p class="serif" style="font-size:16.5px;line-height:1.7;margin-bottom:10px">“'+ escHtml(r.title) +'”</p>'
       + '<p class="r-body" style="font-size:14px;color:#5a6380;line-height:1.95;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">'+ escHtml(r.content) +'</p>'
-      + '<p style="margin-top:14px;font-size:12.5px;color:#9aa0b4">'+ escHtml(r.nick) + (r.meta? ' · '+escHtml(r.meta):'') +'</p>'
+      + '<p style="margin-top:14px;font-size:12.5px;color:#9aa0b4">'+ escHtml(r.nick) + (r.meta? ' · '+escHtml(r.meta):'') + (r.date? ' · '+escHtml(r.date):'') +'</p>'
       + '<p style="margin-top:6px;font-size:12.5px;color:#b2935b;font-weight:600">눌러서 전체 보기</p>'
       + '</div>';
   }).join('');
@@ -500,11 +513,17 @@ function toggleWrite(){
   w.style.display = w.style.display==='none' ? 'block':'none';
   if(w.style.display==='block') w.scrollIntoView({behavior:'smooth',block:'start'});
 }
+function fmtDate(d){
+  return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+}
 document.getElementById('reviewForm').addEventListener('submit', function(e){
   e.preventDefault();
+  var admin = typeof lbIsAdmin==='function' && lbIsAdmin();
+  var picked = document.getElementById('rDate').value; // YYYY-MM-DD
+  var date = (admin && picked) ? picked.replace(/-/g,'.') : fmtDate(new Date());
   var r = { cat:document.getElementById('rCat').value, nick:document.getElementById('rNick').value.trim(),
     meta:document.getElementById('rMeta').value.trim(), title:document.getElementById('rTitle').value.trim(),
-    content:document.getElementById('rContent').value.trim(), mine:true, ts:Date.now() };
+    content:document.getElementById('rContent').value.trim(), date:date, mine:true, ts:Date.now() };
   if(!r.nick||!r.title||!r.content) return;
   var arr = loadLocal(); arr.unshift(r); saveLocal(arr);
   e.target.reset(); document.getElementById('writeBox').style.display='none';
@@ -513,6 +532,10 @@ document.getElementById('reviewForm').addEventListener('submit', function(e){
   render();
   alert('후기가 등록되었습니다. 소중한 후기 감사합니다!');
 });
+// 관리자 모드에서는 날짜 선택 필드 노출
+if(typeof lbIsAdmin==='function' && lbIsAdmin()){
+  document.getElementById('rDateField').style.display='';
+}
 render();
 `;
 
