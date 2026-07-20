@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>운영 대시보드 | LOVEBACK</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:#f4f1ea;color:#1d2743;line-height:1.75;font-size:15px;word-break:keep-all}
+.serif{font-family:'Noto Serif KR',serif}
+a{color:inherit;text-decoration:none}
+button,input,select{font-family:inherit;font-size:14px}
+.wrap{max-width:920px;margin:0 auto;padding:28px 18px 80px}
+.topbar{background:#1d2743;color:#f4f1e8;padding:16px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar b{color:#cbb489}
+.card{background:#fff;border:1px solid #e5decf;border-radius:8px;padding:24px;margin-top:18px}
+h2{font-family:'Noto Serif KR',serif;font-size:20px;margin-bottom:12px}
+h3{font-size:15px;margin:16px 0 6px;color:#8a6f3e}
+.goalbar{background:#ece6d8;border-radius:999px;height:26px;overflow:hidden;margin:10px 0 6px}
+.goalfill{background:linear-gradient(90deg,#b2935b,#d1b075);height:100%;border-radius:999px;transition:width .5s;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:#fff;font-size:12px;font-weight:700;min-width:34px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
+.stat{background:#faf7f0;border:1px solid #ece6d8;border-radius:6px;padding:14px 16px;text-align:center}
+.stat b{display:block;font-family:'Noto Serif KR',serif;font-size:22px}
+.stat span{font-size:12px;color:#8a92a9}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select{border:1px solid #d9d2c0;border-radius:4px;padding:10px 12px;background:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 18px;border-radius:4px;font-weight:600;border:1px solid transparent;cursor:pointer;transition:.2s}
+.btn-navy{background:#1d2743;color:#fdfcf8}
+.btn-navy:hover{background:#b2935b}
+.btn-gold{background:#b2935b;color:#fff}
+.btn-line{background:#fff;border-color:#d9d2c0;color:#39415e}
+.btn-sm{padding:6px 12px;font-size:12.5px}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px}
+th,td{border-bottom:1px solid #ece6d8;padding:9px 8px;text-align:left}
+th{color:#8a92a9;font-size:12px;font-weight:600}
+.post{background:#faf7f0;border:1px solid #ece6d8;border-radius:6px;padding:16px 18px;margin-top:12px}
+.post pre{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.8;margin:0 0 10px}
+.tag{display:inline-block;background:#1d2743;color:#f4f1e8;font-size:11px;padding:3px 10px;border-radius:999px;margin-bottom:8px;letter-spacing:.06em}
+.sched td:first-child{white-space:nowrap;color:#8a6f3e;font-weight:600}
+.hide{display:none!important}
+.copied{background:#2e7d32!important;color:#fff!important;border-color:#2e7d32!important}
+#gate{max-width:380px;margin:120px auto;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="gate" class="card">
+  <h2 class="serif">운영 대시보드</h2>
+  <p style="font-size:13.5px;color:#8a92a9;margin-bottom:14px">사이트 관리자 비밀번호를 입력하세요.</p>
+  <div class="row" style="justify-content:center">
+    <input type="password" id="gatePw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')gateTry()">
+    <button class="btn btn-navy" onclick="gateTry()">입장</button>
+  </div>
+</div>
+
+<div id="app" class="hide">
+<div class="topbar"><b>LOVEBACK 운영 대시보드</b><span style="opacity:.7;font-size:13px">이 페이지는 검색 노출되지 않으며, 데이터는 이 브라우저에만 저장됩니다. 백업은 [데이터 복사]를 사용하세요.</span></div>
+<div class="wrap">
+
+  <!-- ═══ 1. 수익 트래커 ═══ -->
+  <div class="card">
+    <h2>💰 48시간 목표: 2,000,000원</h2>
+    <div class="goalbar"><div class="goalfill" id="goalFill" style="width:0%">0%</div></div>
+    <div class="stats">
+      <div class="stat"><b id="stTotal">0원</b><span>누적 매출</span></div>
+      <div class="stat"><b id="stLeft">2,000,000원</b><span>목표까지</span></div>
+      <div class="stat"><b id="stCount">0건</b><span>결제 건수</span></div>
+      <div class="stat"><b id="stAvg">0원</b><span>평균 객단가</span></div>
+    </div>
+    <h3>결제 기록 추가 (입금 확인 즉시 기록)</h3>
+    <div class="row">
+      <select id="inProduct">
+        <option value="149000">집중 상담 60분 — 149,000</option>
+        <option value="219000">프리미엄 90분 — 219,000</option>
+        <option value="197000">정상가 60분 — 197,000</option>
+        <option value="269000">정상가 90분 — 269,000</option>
+        <option value="0">직접 입력</option>
+      </select>
+      <input type="number" id="inAmount" placeholder="금액(직접입력)" style="width:130px">
+      <select id="inChannel">
+        <option>스레드</option><option>카톡 채널</option><option>사이트 유입</option><option>지인 소개</option><option>기타</option>
+      </select>
+      <input type="text" id="inMemo" placeholder="메모(닉네임 등)" style="width:140px">
+      <button class="btn btn-gold" onclick="addSale()">+ 기록</button>
+    </div>
+    <table id="salesTable"><thead><tr><th>시각</th><th>금액</th><th>유입경로</th><th>메모</th><th></th></tr></thead><tbody></tbody></table>
+    <div class="row" style="margin-top:14px">
+      <button class="btn btn-line btn-sm" onclick="exportSales()">데이터 복사 (백업)</button>
+      <span style="font-size:12px;color:#8a92a9">결제 기록이 쌓이면 event.html의 "남은 자리" 숫자도 자동으로 줄어듭니다.</span>
+    </div>
+  </div>
+
+  <!-- ═══ 2. 48시간 실행 스케줄 ═══ -->
+  <div class="card">
+    <h2>🗓 48시간 실행 스케줄</h2>
+    <p style="font-size:13.5px;color:#5a6380">스레드 게시는 아래 시간대에 맞추세요. 한국 기준 트래픽 피크는 <b>출근(7~9시) · 점심(12~13시) · 밤(21~24시)</b>입니다.</p>
+    <table class="sched">
+      <tr><td>1일차 07:30</td><td>포스트 ① 게시 (훅: 이별 후 실수) — 프로필 링크를 event 페이지로 교체</td></tr>
+      <tr><td>1일차 12:00</td><td>포스트 ② 게시 + 어제까지 온 DM/댓글 전부 답장</td></tr>
+      <tr><td>1일차 15:00</td><td>포스트 ③ 게시 (인사이트형) · 관련 키워드 스레드에 답글 10개 달기</td></tr>
+      <tr><td>1일차 21:00</td><td>포스트 ④ 게시 (오퍼 공개) — 48시간 카운트다운 언급</td></tr>
+      <tr><td>1일차 23:00</td><td>포스트 ⑤ 게시 (밤 감성 타임) · DM 전원 응대 · 신청서 확인</td></tr>
+      <tr><td>2일차 07:30</td><td>포스트 ⑥ 게시 · 전날 반응 좋았던 글에 셀프 답글로 오퍼 링크</td></tr>
+      <tr><td>2일차 12:00</td><td>포스트 ⑦ 게시 ("남은 자리 N개" 실시간 업데이트)</td></tr>
+      <tr><td>2일차 18:00</td><td>포스트 ⑧ 게시 · 문의만 하고 결제 안 한 사람에게 팔로업 카톡</td></tr>
+      <tr><td>2일차 21:00</td><td>포스트 ⑨ 게시 (마감 6시간 전 라스트콜)</td></tr>
+      <tr><td>2일차 23:30</td><td>포스트 ⑩ 게시 (마감 30분 전) · 최종 팔로업</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ 3. 스레드 포스팅 킷 ═══ -->
+  <div class="card">
+    <h2>🧵 스레드 포스팅 킷 (복사해서 바로 게시)</h2>
+    <p style="font-size:13.5px;color:#5a6380">순서대로 쓰도록 설계되어 있습니다. [링크] 자리에 배포된 event 페이지 주소를 넣으세요. 프로필 소개 링크도 event 페이지로 바꿔두는 것이 전환율이 훨씬 높습니다.</p>
+
+    <div class="post"><span class="tag">① 1일차 아침 · 훅</span><pre>이별하고 가장 많이 하는 실수 1위.
+
+"잘 지내?" 카톡이 아닙니다.
+
+상대가 왜 떠났는지 정리도 안 된 상태에서
+'내 마음'만 담긴 연락을 보내는 것.
+
+받는 사람 입장에선 그게 제일 부담스럽습니다.
+연락은 기술이 아니라 결과물이에요.
+
+7년간 6,500건 상담하면서 이 순서가 바뀐 케이스,
+거의 다 더 멀어졌습니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">② 1일차 점심 · 공감</span><pre>썸이 식는 신호, 순서가 있습니다.
+
+1. 답장 속도가 느려진다
+2. 질문이 사라진다 (대화가 끊겨도 안 물어봄)
+3. 만나자는 말에 "언제 한번~"이 붙는다
+
+3번까지 왔다면 '더 잘해주기'로는 못 돌립니다.
+그 시점에 필요한 건 매력이 아니라 포지션 정리예요.
+
+지금 몇 번 단계인가요?</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">③ 1일차 오후 · 인사이트</span><pre>재회 상담하면서 알게 된 불편한 진실.
+
+사람은 자신을 잃어버린 사람에게
+안정감을 느끼지 않습니다.
+
+"내가 더 노력할게"
+"네가 원하는 대로 다 바꿀게"
+
+이 말이 상대를 붙잡은 케이스를
+6,500건 중에 거의 본 적이 없어요.
+
+관계가 흔들릴 때 가장 먼저 잡아야 할 건
+상대가 아니라 나입니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">④ 1일차 밤 · 오퍼 공개</span><pre>공지 하나만 올립니다.
+
+이번 주말 48시간 동안만
+1:1 재회/연애 집중 상담을 특별 조건으로 엽니다.
+
+- 60분 집중 상담 197,000 → 149,000
+- 카톡 대화 분석 리포트 무료 포함
+- 이번 주 10자리 한정
+
+재회 보장 같은 약속은 안 합니다.
+대신 지금 해도 되는 것과 절대 하면 안 되는 것을
+근거를 가지고 정리해드립니다.
+
+신청: [링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑤ 1일차 심야 · 감성</span><pre>새벽에 상대 프로필 확인하는 거,
+그만하라고 안 할게요. 저도 그랬으니까.
+
+근데 하나만 물을게요.
+프로필을 백 번 보면, 뭐가 달라지나요?
+
+달라지는 건 확인이 아니라 '정리'에서 시작됩니다.
+관계가 어디서 틀어졌는지,
+지금 내 위치가 어디인지.
+
+그게 정리되면 새벽에 폰 잡는 시간이 줄어듭니다.
+
+[링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑥ 2일차 아침 · 사례 패턴</span><pre>상담 신청서에서 제일 자주 보는 문장.
+
+"제가 뭘 잘못했는지 모르겠어요."
+
+근데 분석해보면 잘못한 게 없는 경우가 많습니다.
+잘못이 아니라 '패턴'이에요.
+
+불안해서 연락을 확인하고,
+확인하니까 더 불안해지고,
+불안하니까 상대를 조이게 되는 패턴.
+
+패턴은 혼자서는 안 보입니다.
+보이면, 바꿀 수 있습니다.
+
+오늘까지 특별 조건 신청 받습니다: [링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑦ 2일차 점심 · 희소성</span><pre>어제 열었던 48시간 집중 상담,
+현재 남은 자리 [N]개입니다.
+
+신청서 먼저 받고 검토 후 안내드리는 방식이라
+"일단 궁금한" 분은 신청서만 넣어두셔도 됩니다.
+결제는 그 다음 단계예요.
+
+오늘 자정 마감: [링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑧ 2일차 저녁 · 반박 처리</span><pre>"연애 상담 그거 다 뻔한 얘기 아니에요?"
+
+맞아요. 뻔한 상담이 많습니다.
+"기다리세요" "밀당하세요" "자존감 챙기세요"
+
+제가 하는 건 다릅니다.
+당신의 실제 카톡, 실제 이별 과정, 상대의 실제 반응을 놓고
+어디서 틀어졌고 지금 뭘 해야 하는지 짚는 겁니다.
+
+일반론이 아니라 당신 케이스요.
+
+오늘 밤 12시에 특별 조건 마감합니다: [링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑨ 2일차 밤 · 라스트콜</span><pre>6시간 뒤 마감합니다.
+
+이 글을 보고 "나중에 해야지" 하는 분께.
+
+관계 문제에서 '나중'은 대부분
+선택지가 더 줄어든 상태로 돌아옵니다.
+
+고민은 상담에서 하셔도 됩니다.
+신청서 넣는 데 3분이면 충분해요.
+
+[링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <div class="post"><span class="tag">⑩ 2일차 마감 직전</span><pre>30분 뒤 특별 조건 마감.
+
+이후에는 정상가(197,000원)로 돌아가고
+카톡 분석 리포트 보너스도 종료됩니다.
+
+마지막 안내입니다: [링크]</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3 style="margin-top:24px">보너스: 답글 영업용 (다른 사람 연애 고민 스레드에)</h3>
+    <div class="post"><pre>이 상황, 상담에서 정말 자주 봅니다. 지금 시점에 연락 여부보다 먼저 정리해야 할 게 있어요. 프로필에 무료 진단 링크 있으니 한번 해보세요. 강요는 아닙니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+  </div>
+
+  <!-- ═══ 4. 카톡 응대 스크립트 ═══ -->
+  <div class="card">
+    <h2>💬 카톡 채널 응대 스크립트 (결제 전환용)</h2>
+    <p style="font-size:13.5px;color:#5a6380">문의 → 결제까지 5단계. 핵심은 <b>가격을 먼저 말하지 않고 상황을 먼저 묻는 것</b>, 그리고 <b>입금 안내 후 3시간 내 무응답 시 팔로업 1회</b>입니다.</p>
+
+    <h3>1) 첫 문의 응대 (5분 내 답장 목표)</h3>
+    <div class="post"><pre>안녕하세요, 러브백 관계 연구소입니다 :)
+문의 주셔서 감사합니다.
+
+정확한 안내를 위해 두 가지만 먼저 여쭤볼게요.
+1. 현재 상황이 어떻게 되시나요? (썸 / 연애 중 / 이별 후)
+2. 가장 고민되는 지점이 무엇인가요?
+
+편하게 적어주시면 어떤 상담이 맞을지 바로 안내드리겠습니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3>2) 상황 파악 후 → 상담 제안</h3>
+    <div class="post"><pre>말씀해주신 상황이라면 [재회/연애] 집중 상담 60분이 가장 적합합니다.
+
+이런 걸 정리해드려요.
+· 관계가 어디서 틀어졌는지 흐름 분석
+· 상대의 현재 심리 상태 판단
+· 연락 타이밍과 메시지 방향
+· 지금 절대 하면 안 되는 행동
+
+지금 48시간 이벤트 중이라
+197,000원 → 149,000원 + 카톡 대화 분석 리포트가 무료로 포함됩니다.
+(이번 주 잔여 [N]자리)
+
+일정은 [가능 시간대] 중 선택 가능하신데, 언제가 편하세요?</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3>3) 망설일 때 ("생각해볼게요")</h3>
+    <div class="post"><pre>네, 충분히 고민되실 수 있어요. 당연합니다.
+
+다만 한 가지만 말씀드리면 —
+지금 상황은 시간이 지날수록 쓸 수 있는 선택지가 줄어드는 구조예요.
+상담에서 "지금은 움직이면 안 된다"는 결론이 나올 수도 있는데,
+그것도 알고 기다리는 것과 모르고 기다리는 건 완전히 다릅니다.
+
+특별 조건은 [마감시각]까지고, 이후엔 정상가로 돌아갑니다.
+결정되시면 편하게 말씀 주세요 :)</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3>4) 결제 안내</h3>
+    <div class="post"><pre>좋습니다! 아래로 입금 확인되면 일정 확정해드릴게요.
+
+· 금액: 149,000원 (48시간 특별가)
+· 계좌: [은행 계좌번호 예금주]
+· 입금자명: 신청서와 동일한 성함으로 부탁드립니다
+
+입금 후 "입금했습니다"라고 남겨주시면
+바로 확인 후 사전 상담지를 보내드립니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3>5) 입금 확인 → 확정 안내</h3>
+    <div class="post"><pre>입금 확인되었습니다. 감사합니다 :)
+
+상담 일정: [날짜/시간]
+진행 방식: [전화/보이스톡/대면]
+
+지금 보내드리는 사전 상담지를 상담 전날까지 작성해주시면
+그 내용을 바탕으로 상담을 준비하겠습니다.
+
+작성하시면서 정리 자체가 시작되는 경우가 많아요.
+편하게 솔직하게 적어주세요.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+
+    <h3>+ 팔로업 (안내 후 3시간 무응답 시 1회만)</h3>
+    <div class="post"><pre>안녕하세요 :) 아까 안내드린 상담 건으로 다시 연락드렸어요.
+
+이번 특별 조건 자리가 [N]개 남아서,
+혹시 진행 의사 있으시면 오늘 중으로 확정해드리려고요.
+
+부담은 갖지 마시고, 어려우시면 다음 기회에 편하게 문의 주셔도 됩니다.</pre><button class="btn btn-line btn-sm" onclick="cp(this)">복사</button></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+var PW='merick7';
+function gateTry(){
+  if(document.getElementById('gatePw').value===PW){
+    try{localStorage.setItem('lb_admin','1')}catch(e){}
+    showApp();
+  } else alert('비밀번호가 일치하지 않습니다.');
+}
+function showApp(){document.getElementById('gate').classList.add('hide');document.getElementById('app').classList.remove('hide');render();}
+try{if(localStorage.getItem('lb_admin')==='1')showApp();}catch(e){}
+
+/* ── 수익 트래커 ── */
+var GOAL=2000000;
+function getSales(){try{return JSON.parse(localStorage.getItem('lb_sales_v1')||'[]')}catch(e){return[]}}
+function saveSales(a){try{localStorage.setItem('lb_sales_v1',JSON.stringify(a))}catch(e){}}
+function fmt(n){return n.toLocaleString('ko-KR')+'원'}
+function addSale(){
+  var sel=document.getElementById('inProduct'),amt=parseInt(sel.value,10);
+  if(!amt) amt=parseInt(document.getElementById('inAmount').value,10)||0;
+  if(!amt){alert('금액을 입력하세요');return;}
+  var a=getSales();
+  a.push({t:Date.now(),amt:amt,ch:document.getElementById('inChannel').value,memo:document.getElementById('inMemo').value||''});
+  saveSales(a);document.getElementById('inMemo').value='';render();
+}
+function delSale(i){var a=getSales();a.splice(i,1);saveSales(a);render();}
+function render(){
+  var a=getSales(),total=a.reduce(function(s,x){return s+x.amt},0);
+  var pct=Math.min(100,Math.round(total/GOAL*100));
+  var f=document.getElementById('goalFill');f.style.width=pct+'%';f.textContent=pct+'%';
+  document.getElementById('stTotal').textContent=fmt(total);
+  document.getElementById('stLeft').textContent=fmt(Math.max(0,GOAL-total));
+  document.getElementById('stCount').textContent=a.length+'건';
+  document.getElementById('stAvg').textContent=a.length?fmt(Math.round(total/a.length)):'0원';
+  var tb=document.querySelector('#salesTable tbody');tb.innerHTML='';
+  a.forEach(function(x,i){
+    var d=new Date(x.t),tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+'</td>'
+      +'<td><b>'+fmt(x.amt)+'</b></td><td>'+x.ch+'</td><td>'+x.memo+'</td>'
+      +'<td><button class="btn btn-line btn-sm" onclick="delSale('+i+')">삭제</button></td>';
+    tb.appendChild(tr);
+  });
+}
+function exportSales(){
+  var txt=JSON.stringify({sales:getSales()},null,2);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){alert('복사되었습니다. 메모장 등에 백업해두세요.')});}
+  else prompt('아래 내용을 복사하세요',txt);
+}
+/* ── 복사 버튼 ── */
+function cp(btn){
+  var txt=btn.parentElement.querySelector('pre').textContent;
+  function ok(){btn.classList.add('copied');btn.textContent='복사됨 ✓';setTimeout(function(){btn.classList.remove('copied');btn.textContent='복사';},1600);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok);}
+  else{prompt('아래 내용을 복사하세요',txt);}
+}
+</script>
+</body>
+</html>
