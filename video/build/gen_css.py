@@ -29,8 +29,8 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0b}
 .bg{position:absolute;inset:0;z-index:0}
 .bg .base{position:absolute;inset:0}
 .bg .bloom{position:absolute;inset:0}
-.vig{position:absolute;inset:0;z-index:40;pointer-events:none;
-  background:radial-gradient(130% 100% at 50% 50%, rgba(0,0,0,0) 46%, rgba(0,0,0,.62) 100%)}
+.vig{position:absolute;inset:0;z-index:9;pointer-events:none;
+  background:radial-gradient(132% 102% at 50% 50%, rgba(0,0,0,0) 54%, rgba(0,0,0,.52) 100%)}
 /* deterministic film grain: fixed-seed turbulence tile, stepped offsets on the timeline */
 .grain{position:absolute;inset:-80px;z-index:41;pointer-events:none;opacity:.14;mix-blend-mode:overlay;
   background-repeat:repeat;background-size:320px 320px;will-change:transform}
@@ -60,7 +60,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0b}
 
 /* ---- watermark ---- */
 #mark{position:absolute;top:34px;right:44px;z-index:62;font-size:22px;font-weight:600;
-  color:rgba(233,236,240,.40);letter-spacing:.02em}
+  color:rgba(236,239,243,.74);letter-spacing:.02em}
 
 /* ---- scrim for text over photography (WCAG AA) ---- */
 .scrim{position:absolute;inset:0;z-index:5;

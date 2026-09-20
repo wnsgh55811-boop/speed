@@ -128,7 +128,7 @@ def r_photo(v):
 
 def r_portrait(v):
     return (f'<div class="pcard"><img class="paper" src="assets/img/{v["img"]}.png" '
-            f'width="560" height="700" alt=""></div>'
+            f'width="470" height="590" alt=""></div>'
             f'<div class="h-sm">{e(v["label"])}</div>')
 
 def r_scale(v):

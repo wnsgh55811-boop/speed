@@ -1,9 +1,15 @@
 # 소개팅 첫 1분 — 16:9 explainer (HyperFrames)
 
-## 상태
+## 상태 (2026-09-20)
 - 대본 → 106 scenes / 233 cues (원본 대본과 1:1 검증 완료)
 - 자막: 빌드 시점 Pretendard 실측 → 전부 1줄 보장 (초과 0건, 최대 1558px / 1560px)
-- 컴포지션: `index.html` (build/gen.py 로 생성), lint 0 error
+- 컴포지션: `index.html` (build/gen.py 로 생성) — `npx hyperframes check` 통과 (0 error / 0 info)
+- 나레이션 106개 전부 생성 완료 → audio_ledger.json
+- 이미지 12개 생성 완료 (인물 4 / 사진 4 / 3D 아이콘 4), 인물·아이콘 8개 누끼 완료 → image_ledger.json
+- 실제 프레임 캡처로 눈으로 확인한 항목:
+  ① 자막 1줄 유지 (전 구간 초과 0건, 최대 1558px / 1560px)
+  ② 누끼 + 종이 찢은 테두리 + 가로·세로 중앙 정렬
+  ③ 막대그래프가 실제로 그려짐 (채움 + 등급 점 + 눈금 + 축 라벨)
 - 나레이션: Higgsfield Seed Audio 1.0, voice `내-목소리-v4`
   (element / c02aabbb-e76a-4b36-98a4-28e2fdd5e8d2), speech_rate=18 (≈1.2x),
   mp3 / 24kHz / pitch 0 / loudness 0
