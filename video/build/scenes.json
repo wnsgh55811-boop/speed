@@ -7,7 +7,8 @@
 "big": "첫 1분",
 "sup": "소개팅",
 "icon": "stopwatch",
-"ring": true
+"ring": true,
+"img3d": "i3_stopwatch"
 },
 "cues": [
 "소개팅 첫 1분만에 여자에게 감점되는 남자들이 있습니다"
@@ -58,7 +59,7 @@
 "bg": "photo_cafe",
 "vis": {
 "kind": "photo",
-"img": "cafe",
+"img": "ph_cafe",
 "center": "소개팅 장소 도착"
 },
 "cues": [
@@ -70,7 +71,7 @@
 "bg": "photo_cafe",
 "vis": {
 "kind": "portrait",
-"img": "woman_enter",
+"img": "p_woman_enter",
 "label": "첫인상이 만들어지는 순간"
 },
 "cues": [
@@ -111,7 +112,8 @@
 "eye",
 "반응 확인"
 ]
-]
+],
+"img3d": "i3_brain"
 },
 "cues": [
 "그 순간부터 갑자기 머리가 바빠집니다"
@@ -306,7 +308,8 @@
 "kind": "hero",
 "big": "첫인상",
 "sub2": "보통은 외모부터 떠올린다",
-"icon": "mirror"
+"icon": "mirror",
+"img3d": "i3_mirror"
 },
 "cues": [
 "우리가 첫인상이라고 하면 보통 외모부터 생각합니다"
@@ -438,7 +441,8 @@
 "kind": "hero",
 "big": "한번 생각해보세요",
 "small": true,
-"icon": "brain"
+"icon": "brain",
+"img3d": "i3_brain"
 },
 "cues": [
 "이걸 한번 생각해보세요"
@@ -462,7 +466,7 @@
 "bg": "photo_cafe",
 "vis": {
 "kind": "photo",
-"img": "menu",
+"img": "ph_menu",
 "center": "메뉴를 본다"
 },
 "cues": [
@@ -544,7 +548,8 @@
 "title": "상대",
 "items": [
 "저는 여행할 때 계획 많이 짜는 사람이 좋아요."
-]
+],
+"portrait": null
 },
 "cues": [
 "여자가 말합니다",
@@ -626,7 +631,7 @@
 "bg": "blue",
 "vis": {
 "kind": "portrait",
-"img": "man_fade",
+"img": "p_man_tense",
 "label": "사람이 흐릿해진다",
 "fade": true
 },
@@ -812,7 +817,8 @@
 "kind": "scale",
 "title": "관계의 구조가 기울어진다",
 "up": "상대 : 평가하는 사람",
-"down": "나 : 평가받는 사람"
+"down": "나 : 평가받는 사람",
+"img3d": "i3_balance"
 },
 "cues": [
 "그러다 보니까 관계의 구조가 이상해집니다",
@@ -920,7 +926,7 @@
 "bg": "photo_cafe",
 "vis": {
 "kind": "photo",
-"img": "menu2",
+"img": "ph_table",
 "center": "메뉴를 고른다"
 },
 "cues": [
@@ -1257,10 +1263,9 @@
 "key": "s74",
 "bg": "charcoal",
 "vis": {
-"kind": "hero",
-"big": "공백의 태도",
-"sup": "이전 영상에서 이야기한",
-"icon": "pause"
+"kind": "photo",
+"img": "ph_window",
+"center": "공백의 태도"
 },
 "cues": [
 "여기서 제가 이전 영상에서 이야기했던 공백의 태도와도 연결됩니다"
@@ -1358,10 +1363,9 @@
 "key": "s81",
 "bg": "blue",
 "vis": {
-"kind": "hero",
-"big": "마음에 들면 마음에 드는 겁니다",
-"small": true,
-"icon": "heart"
+"kind": "portrait",
+"img": "p_man_calm",
+"label": "말투까지 바꿀 필요는 없다"
 },
 "cues": [
 "마음에 들면 마음에 드는 겁니다",
@@ -1696,7 +1700,8 @@
 "kind": "hero",
 "big": "첫 1분에 결정된다",
 "sub2": "이 말의 진짜 의미",
-"icon": "stopwatch"
+"icon": "stopwatch",
+"img3d": "i3_stopwatch"
 },
 "cues": [
 "그래서 저는 첫 1분에 모든 게 결정된다는 말을 이렇게 이해했으면 좋겠습니다"

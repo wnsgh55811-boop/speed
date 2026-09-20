@@ -64,11 +64,12 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0b}
 
 /* ---- scrim for text over photography (WCAG AA) ---- */
 .scrim{position:absolute;inset:0;z-index:5;
-  background:linear-gradient(180deg,rgba(6,7,9,.58) 0%,rgba(6,7,9,.30) 38%,rgba(6,7,9,.72) 100%)}
+  background:linear-gradient(180deg,rgba(6,7,9,.46) 0%,rgba(6,7,9,.18) 40%,rgba(6,7,9,.66) 100%)}
 .photo{position:absolute;inset:0;z-index:1;background-size:cover;background-position:center;
-  filter:saturate(.72) contrast(1.02)}
+  filter:saturate(.74) contrast(1.02) brightness(1.12)}
 
 /* ---- cutout media (no background plates) ---- */
+.i3d{filter:drop-shadow(0 22px 40px rgba(0,0,0,.6))}
 .cut{display:block;object-fit:contain;filter:drop-shadow(0 26px 44px rgba(0,0,0,.55))}
 .paper{display:block;object-fit:contain}
 

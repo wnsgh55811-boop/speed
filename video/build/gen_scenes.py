@@ -11,8 +11,15 @@ def _dots(v, color):
 def _ticks(n=10):
     return '<div class="ticks">' + '<i class="tick"></i>'*n + '</div>'
 
+def _art(v, size=200):
+    """Higgsfield 3D cut-out icon when one is assigned, else the vector pictogram."""
+    if v.get("img3d"):
+        return (f'<img class="cut i3d" src="assets/img/{v["img3d"]}.png" '
+                f'width="{size}" height="{size}" alt="">')
+    return icon(v.get("icon","check"), 128)
+
 def r_hero(v):
-    ic = f'<div class="hero-ic">{icon(v.get("icon","check"), 128)}</div>' if v.get("icon") else ""
+    ic = f'<div class="hero-ic">{_art(v)}</div>' if (v.get("icon") or v.get("img3d")) else ""
     sup = f'<div class="kicker">{e(v["sup"])}</div>' if v.get("sup") else ""
     cls = "h-lg" if v.get("small") else "h-xl"
     sub2 = f'<div class="h-sm muted">{e(v["sub2"])}</div>' if v.get("sub2") else ""
@@ -33,7 +40,8 @@ def r_cta(v):
 
 def r_strike(v):
     col = "#e8b46a" if v.get("soft") else "#ef5f8c"
-    return (f'<div class="strikewrap"><div class="h-lg">{e(v["target"])}</div>'
+    top = f'<div class="hero-ic">{_art(v,168)}</div>' if v.get("img3d") else ""
+    return (top + f'<div class="strikewrap"><div class="h-lg">{e(v["target"])}</div>'
             f'<div class="strikeline" style="background:{col}"></div>'
             f'<div class="xmark">{xmark(72,col)}</div></div>'
             f'<div class="h-sm muted">{e(v["note"])}</div>')
@@ -94,10 +102,11 @@ def r_steps(v):
     return f'<div class="h-md">{e(v["title"])}</div><div class="rows">{rows}</div>'
 
 def r_icons(v):
+    lead = f'<div class="hero-ic">{_art(v,176)}</div>' if v.get("img3d") else ""
     cells = "".join(f'<div class="icell">{icon(n,104)}<div class="ilab">{e(l)}</div></div>'
                     for n, l in v["items"])
     grid = " grid4" if v.get("grid4") else ""
-    return f'<div class="h-md">{e(v["title"])}</div><div class="icons{grid}">{cells}</div>'
+    return lead + f'<div class="h-md">{e(v["title"])}</div><div class="icons{grid}">{cells}</div>'
 
 def r_bubbles(v):
     tone = v.get("tone","say")
@@ -119,11 +128,12 @@ def r_photo(v):
 
 def r_portrait(v):
     return (f'<div class="pcard"><img class="paper" src="assets/img/{v["img"]}.png" '
-            f'width="620" height="620" alt=""></div>'
+            f'width="560" height="700" alt=""></div>'
             f'<div class="h-sm">{e(v["label"])}</div>')
 
 def r_scale(v):
-    return (f'<div class="h-md">{e(v["title"])}</div>'
+    top = f'<div class="hero-ic">{_art(v,168)}</div>' if v.get("img3d") else ""
+    return (top + f'<div class="h-md">{e(v["title"])}</div>'
             f'<div class="scale"><div class="beam">'
             f'<div class="pan up"><span>{e(v["up"])}</span></div>'
             f'<div class="pan down"><span>{e(v["down"])}</span></div>'
