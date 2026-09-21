@@ -86,6 +86,11 @@ def split_fit(txt, widths):
     if cur: lines.append(cur)
     return lines
 
+# A handful of quiet cues on key motion beats only — never a bed of effects.
+SFX = [("thump", "s01", 0.06), ("tick", "s03", 0.50), ("tick", "s47", 0.58),
+       ("riser", "s79", 0.04), ("riser", "s82", 0.04), ("riser", "s86", 0.04),
+       ("tick", "s73", 0.58), ("thump", "s106", 0.06)]
+
 def bg_html(fam):
     base, bloom = BG[fam]
     return (f'<div class="bg"><div class="base" style="background:{base}"></div>'
@@ -135,6 +140,16 @@ def main():
         f'data-track-index="3"></audio>' for i, sc in enumerate(S)
         if os.path.exists(f'../assets/audio/s{i:03d}.mp3'))
 
+    idx = {s['key']: s for s in S}
+    sfx_html = ""
+    for n, (name, key, off) in enumerate(SFX):
+        sc = idx.get(key)
+        if not sc or not os.path.exists(f'../assets/audio/sfx_{name}.mp3'):
+            continue
+        sfx_html += (f'<audio id="sfx{n}" src="assets/audio/sfx_{name}.mp3" '
+                     f'data-start="{round(sc["_start"] + LEAD + off, 3)}" '
+                     f'data-track-index="4"></audio>')
+
     grain = ("<div class=\"grain\" id=\"grain\" style=\"background-image:url(&quot;data:image/svg+xml,"
              "%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E"
              "%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='11'/%3E"
@@ -158,7 +173,7 @@ def main():
 <div id="mark">이다사</div>
 <div class="vig"></div>
 {grain}
-{audio_html}
+{audio_html}{sfx_html}
 </div>
 <script>window.__HF_TIMING={timing_js};</script>
 <script>{anim_js}</script>
