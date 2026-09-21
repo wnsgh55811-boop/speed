@@ -21,18 +21,19 @@ sc(107,112,"slate",dict(kind="beforeafter", title="대답을 바꾸면",
                         after="저는 커피 마실 건데 혹시 드시고 싶은 거 있어요?"))
 sc(113,113,"slate",dict(kind="mutual", title="둘 다 남는다", a="내 선택", b="상대의 선택"))
 sc(114,115,"photo",dict(kind="photo", img="ph_restaurant", center="저는 사람 많은 곳 진짜 싫어해요"))
-sc(116,118,"ember",dict(kind="bubbles", tone="say", ok=True, title="나", portrait="p_man_settled",
+sc(116,118,"ember",dict(kind="bubbles", tone="say", title="나", portrait="p_man_settled", pw=430,
                         items=["저는 오히려 조금 북적거리는 데가 좋던데","완전 반대네요."]))
-sc(119,120,"teal",dict(kind="strike", target="이게 공격적인가요?", note="전혀 아닙니다", soft=True))
+sc(119,119,"teal",dict(kind="hero", big="이게 공격적인가요?"))
+sc(120,120,"teal",dict(kind="hero", big="전혀 아닙니다"))
 sc(121,123,"teal",dict(kind="bubbles", tone="mix", title="오히려 대화가 생긴다", bgphoto="ph_woman_laugh",
                        items=["왜 그런 데 좋아하세요?","저는 조용하면 오히려 어색하더라고요."]))
 sc(124,124,"teal",dict(kind="portrait", img="p_woman_smile", label="이제 서로를 알아간다"))
 sc(125,127,"blue",dict(kind="hero3d", img="i3_lock", big="다르면 안 맞는 것 같다",
-                       sub2="많은 남자들이 두려워하는 지점"))
+                       sup="많은 남자들이 두려워하는 것", small=True))
 sc(128,129,"violet",dict(kind="venn", title="관계에서 중요한 것", a="나", b="상대",
                          mid="편하게 말할 수 있는가"))
 sc(130,131,"ember",dict(kind="hero3d", img="i3_mic", big="과한 해명", sup="첫 만남에서 자주 나오는 것"))
-sc(132,135,"slate",dict(kind="bubbles", tone="say", ok=True, title="이러면 끝날 일", portrait="p_man_laugh",
+sc(132,135,"slate",dict(kind="bubbles", tone="say", portrait="p_man_laugh",
                         items=["아 말 꼬였네요."]))
 sc(136,137,"slate",dict(kind="bubbles", tone="say", title="불안하면 바로 설명한다", portrait="p_man_shrug",
                         items=["제가 원래 말은 잘하는데 오늘 좀 긴장했나 봐요."]))
@@ -53,34 +54,34 @@ sc(149,152,"slate",dict(kind="list", title="공백을 못 견딜 때", mark="min
                                "표정이 애매하면 수습한다","의견이 다르면 수정한다"]))
 sc(153,153,"slate",dict(kind="hero3d", img="i3_pause", big="아무것도 안 해도 되는 순간",
                         sub2="그걸 못 견디는 것"))
-sc(154,154,"ember",dict(kind="strike", target="멋있는 첫마디 외우기", note="중요한 건 여기가 아닙니다"))
-sc(155,155,"blue",dict(kind="chapter", num="01", big="나를 낮추지 않기"))
-sc(156,158,"blue",dict(kind="split", title="이건 전혀 다른 얘기입니다",
+sc(154,154,"ember",dict(kind="hero", big="중요한 건 멋진 멘트가 아닙니다", small=True))
+sc(155,156,"blue",dict(kind="chapter", num="01", big="나를 낮추지 않기"))
+sc(157,158,"blue",dict(kind="split", title="이건 전혀 다른 얘기입니다",
                        a="상대가 매력적이다", b="내가 더 낮은 사람이다", cross_b=True))
 sc(159,160,"blue",dict(kind="portrait", img="p_man_calm", label="나를 낮출 필요는 없다"))
-sc(161,161,"teal",dict(kind="chapter", num="02", big="조금씩 나를 보여주기"))
-sc(162,166,"teal",dict(kind="bubbles", tone="say", crossed=True, title="이런 말은 필요 없습니다", portrait="p_man_away",
+sc(161,162,"teal",dict(kind="chapter", num="02", big="조금씩 나를 보여주기"))
+sc(163,166,"teal",dict(kind="bubbles", tone="say", crossed=True, loud=True, title="이런 말은 필요 없습니다", portrait="p_man_away",
                        items=["저는 책임감 있는 남자입니다.","저는 여자친구한테 정말 잘합니다."]))
 sc(167,171,"teal",dict(kind="bubbles", tone="say", ok=True, dense=True, title="작은 취향이면 충분합니다",
                        items=["저는 이건 좋아해요.","저는 그건 좀 별로예요.",
                               "저는 여행할 때 이런 스타일이에요.","저는 주말은 이렇게 보내는 게 좋더라고요."]))
 sc(172,172,"teal",dict(kind="gauge", title="사람이 보이는 정도", lo="흐릿함", hi="또렷함", value=86,
                        caption="작은 정보가 쌓이면서"))
-sc(173,173,"violet",dict(kind="chapter", num="03", big="반응보다 조금 느리게"))
-sc(174,180,"violet",dict(kind="list", title="바로 안 해도 됩니다", mark="pause",
+sc(173,174,"violet",dict(kind="chapter", num="03", big="반응보다 조금 느리게"))
+sc(175,180,"violet",dict(kind="list", title="바로 안 해도 됩니다", mark="pause",
                          items=["조용해졌다고 바로 질문할 필요 없습니다","표정이 바뀌었다고 바로 수습하지 않아도 됩니다",
                                 "의견이 다르다고 바로 철회하지 않아도 됩니다"]))
 sc(181,183,"violet",dict(kind="steps", title="이 순서로",
                          items=["한 번 듣고","한 번 생각하고","그다음 반응한다"]))
-sc(184,184,"violet",dict(kind="portrait", img="p_man_think", label="이게 굉장히 중요합니다"))
+sc(184,184,"violet",dict(kind="portrait", img="p_man_think", w=560))
 sc(185,185,"ember",dict(kind="split", title="완전히 다릅니다",
                         a="선택받으려고 애쓰기", b="서로 선택하기", pick_b=True))
 sc(186,187,"ember",dict(kind="compare", title="상대의 반응이 무엇이 되는가", neutral=True,
                         left=("시험 결과","선택받으려고 할 때",88),
                         right=("하나의 정보","서로 선택할 때",88)))
-sc(188,191,"slate",dict(kind="bubbles", tone="thought", ok=True, title="이렇게 생각하면 됩니다",
+sc(188,191,"slate",dict(kind="bubbles", tone="thought", loud=True, bigbub=True, title="이렇게 생각하면 됩니다",
                         items=["아 이 사람은 이런 걸 별로 안 좋아하는구나."]))
-sc(192,194,"slate",dict(kind="bubbles", tone="thought", crossed=True, portrait="p_woman_flat", title="여기까지 갈 필요 없습니다",
+sc(192,194,"slate",dict(kind="bubbles", tone="thought", crossed=True, portrait="p_woman_flat", tight=True, title="여기까지 갈 필요 없습니다",
                         items=["내가 잘못했나?"]))
 sc(195,197,"teal",dict(kind="hero3d", img="i3_dial", big="그것도 정보입니다", small=True))
 sc(198,198,"charcoal",dict(kind="portrait", img="p_man_full", label="가장 먼저 전달되는 것"))
@@ -103,10 +104,10 @@ sc(218,220,"photo",dict(kind="photo", img="ph_street_rain", center="아주 빠�
 sc(221,225,"violet",dict(kind="list", title="반복되는 태도", mark="minus",
                          items=["눈치","과한 배려","과한 해명","조급함"]))
 sc(226,227,"violet",dict(kind="hero3d", img="i3_hourglass", big="같은 문제가 반복됩니다",
-                         sub2="좋은 말을 아무리 준비해도"))
+                         sup="좋은 말을 아무리 준비해도", small=True))
 sc(228,229,"photo",dict(kind="photo", img="ph_empty_chair", center="다음 관계로 이어지지 않는다"))
 sc(230,231,"slate",dict(kind="bubbles", tone="her", title="반복해서 듣는 말", portrait="p_woman_eval",
                         items=["좋은 사람인데 남자로는 잘 모르겠어요."]))
 sc(232,232,"ember",dict(kind="cta", big="무료 비밀 특강", sub2="설명란에서 확인해보세요"))
 sc(233,235,"photo",dict(kind="photo", img="ph_walk_two",
-                        center="바꿔야 할 건 첫마디가 아니라 태도다"))
+                        seq=["바꿔야 할 건", "첫마디가 아니라", "태도입니다"]))

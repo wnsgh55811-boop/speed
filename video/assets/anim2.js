@@ -50,6 +50,16 @@
     q('.bub', sc).forEach((b, k) => TL.fromTo(b, { opacity: 0, y: 14, scale: .97 },
       { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'back.out(1.5)' },
       when(b, at + 0.18 + k * 0.34)));
+    /* a continuous shot whose centre line changes: each takes over from the last */
+    const seq = q('.seqline', sc);
+    seq.forEach((el, k) => {
+      const t0 = when(el, at + 0.3 + k * 1.1);
+      TL.fromTo(el, { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.34, ease: 'power2.out' }, t0);
+      const nxt = seq[k + 1];
+      if (nxt) TL.to(el, { opacity: 0, y: -14, duration: 0.26, ease: 'power2.in' },
+                     when(nxt, at + 0.3 + (k + 1) * 1.1) - 0.1);
+    });
     q('.chip', sc).forEach((c, k) => TL.fromTo(c, { opacity: 0, y: 14 },
       { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, when(c, at + 0.2 + k * 0.18)));
 

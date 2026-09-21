@@ -10,6 +10,13 @@ def xmark(size=66, color=PK, sw=9):
             f'<path d="M16 16l32 32M48 16L16 48" fill="none" stroke="currentColor" '
             f'stroke-width="{sw}" stroke-linecap="round"/></svg>')
 
+def tick(size=34, color=GR, sw=7):
+    """a tick that actually sits in the middle of its box"""
+    return (f'<svg viewBox="0 0 32 32" width="{size}" height="{size}" style="display:block;color:{color}">'
+            f'<circle cx="16" cy="16" r="13.5" fill="none" stroke="currentColor" stroke-width="2.6" '
+            f'opacity=".85"/><path d="M10 16.4l4 4 8-8.4" fill="none" stroke="currentColor" '
+            f'stroke-width="{sw*0.42}" stroke-linecap="round" stroke-linejoin="round"/></svg>')
+
 def art(v, size=210):
     if not v.get("img"): return ""
     return (f'<div class="hero-ic"><img class="i3d" src="assets/img/{v["img"]}.png" '
@@ -42,7 +49,9 @@ def r_hero(v):
     return f'{sup}<div class="{cls}" style="font-size:{px}px">{txt}</div>{sub2}'
 
 def r_hero3d(v):
-    return art(v, 240 if v.get("small") else 290) + r_hero(v)
+    sup = f'<div class="kicker">{e(v["sup"])}</div>' if v.get("sup") else ""
+    rest = {k: x for k, x in v.items() if k != "sup"}
+    return sup + art(v, 240 if v.get("small") else 290) + r_hero(rest)
 
 def r_quote(v):
     txt, px = one(v["big"], 92, 1400)
@@ -59,20 +68,28 @@ def r_strike(v):
     col = AM if v.get("soft") else PK
     return (art(v, 170) +
             f'<div class="strikewrap"><div class="h-lg">{e(v["target"])}</div>'
-            f'<div class="strikeline" style="background:{col}"></div>'
-            f'<div class="xmark">{xmark(66, col)}</div></div>'
+            f'<div class="strikeline" style="background:{col}"></div></div>'
             f'<div class="h-sm muted">{e(v["note"])}</div>')
 
 def r_photo(v):
+    if v.get("seq"):
+        # one continuous shot; the lines take the centre in turn
+        out = []
+        for i, t in enumerate(v["seq"]):
+            txt, px = one(t, 92, 1500)
+            out.append(f'<div class="seqline h-lg" style="font-size:{px}px"{_at(v,i)}>{txt}</div>')
+        return f'<div class="seq">{"".join(out)}</div>'
     if not v.get("center"):
         return ""
     txt, px = one(v["center"], 92, 1500)
     return f'<div class="h-lg" style="font-size:{px}px">{txt}</div>'
 
 def r_portrait(v):
-    return (f'<div class="pcard"><img class="paper" src="assets/img/{v["img"]}.png" '
-            f'width="460" height="576" alt=""></div>'
-            f'<div class="h-sm">{e(v["label"])}</div>')
+    w = v.get("w", 460)
+    cls = "pcard fade" if v.get("fade") else "pcard"
+    cap = f'<div class="h-sm">{e(v["label"])}</div>' if v.get("label") else ""
+    return (f'<div class="{cls}"><img class="paper" src="assets/img/{v["img"]}.png" '
+            f'width="{w}" height="{round(w * 1.252)}" alt=""></div>{cap}')
 
 def r_chips(v):
     cells = "".join(f'<div class="chip{" on" if v.get("on") and t in v["on"] else ""}"{_at(v,i)}>{e(t)}</div>'
@@ -86,7 +103,7 @@ def _at(v, i):
 def r_list(v):
     marks = {"dot":'<span class="mkdot"></span>', "q":'<span class="mkq">?</span>',
              "minus":'<span class="mkm"></span>', "plus":'<span class="mkp"></span>',
-             "check":'<span class="mkc"></span>', "loop":'<span class="mkm"></span>',
+             "check":tick(40), "loop":'<span class="mkm"></span>',
              "pause":'<span class="mkm"></span>'}
     mk = marks.get(v.get("mark","dot"), marks["dot"])
     rows = "".join(f'<div class="row"{_at(v,i)}><span class="mk">{mk}</span><span>{e(t)}</span></div>'
@@ -104,14 +121,22 @@ def r_bubbles(v):
         c = {"say":"say","her":"her","thought":"thought"}.get(tone,"say")
         if tone == "mix": c = "say" if i % 2 == 0 else "her"
         d = " dense" if v.get("dense") else ""
-        x = f'<div class="bubx">{xmark(50)}</div>' if v.get("crossed") else ""
-        out.append(f'<div class="bub {c}{d}"{_at(v,i)}>{e(t)}{x}</div>')
-    body = (f'<div class="kicker">{e(v["title"])}</div><div class="bubs">{"".join(out)}</div>'
-            + ('<div class="okdot"></div>' if v.get("ok") else ''))
+        k = " crossed" if v.get("crossed") else ""
+        big = ' style="font-size:52px"' if v.get("bigbub") else ""
+        out.append(f'<div class="bub {c}{d}{k}"{_at(v,i)}{big}>{e(t)}</div>')
+    head = ""
+    if v.get("title"):
+        cls = "h-md" if v.get("loud") else "kicker"
+        col = f' style="color:{PK}"' if v.get("loud") else ""
+        head = f'<div class="{cls}"{col}>{e(v["title"])}</div>'
+    body = f'{head}<div class="bubs">{"".join(out)}</div>'
     if v.get("portrait"):
-        return (f'<div class="side"><div class="pcard"><img class="paper sideimg" '
+        w = v.get("pw", 300)
+        gap = " tight" if v.get("tight") else ""
+        return (f'<div class="side{gap}"><div class="pcard"><img class="paper sideimg" '
+                f'style="width:{w}px;height:{round(w * 1.267)}px" '
                 f'src="assets/img/{v["portrait"]}.png" alt=""></div>'
-                f'<div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">'
+                f'<div style="display:flex;flex-direction:column;gap:18px;align-items:center">'
                 f'{body}</div></div>')
     return body
 
@@ -148,13 +173,14 @@ def r_compare(v):
             + col(lt,ls,lv,lc) + '<div class="divider"></div>' + col(rt,rs,rv,rc) + '</div>')
 
 def r_split(v):
-    ax = f'<div class="xmark-s">{xmark(52)}</div>' if v.get("cross_a") else ""
-    bx = f'<div class="xmark-s">{xmark(52)}</div>' if v.get("cross_b") else ""
+    ac = " struck" if v.get("cross_a") else ""
+    bc = " struck" if v.get("cross_b") else ""
     bs = f' style="color:{GR}"' if v.get("pick_b") else ""
+    bm = f'<span class="pickdot">{tick(46, GR)}</span>' if v.get("pick_b") else ""
     return (f'<div class="h-md">{e(v["title"])}</div><div class="cmp">'
-            f'<div class="col"><div class="colt muted">{e(v["a"])}</div>{ax}</div>'
+            f'<div class="col"><div class="colt muted{ac}">{e(v["a"])}</div></div>'
             f'<div class="divider"></div>'
-            f'<div class="col"><div class="colt"{bs}>{e(v["b"])}</div>{bx}</div></div>')
+            f'<div class="col"><div class="colt{bc}"{bs}>{e(v["b"])}</div>{bm}</div></div>')
 
 def r_scale(v):
     return (art(v,150) + f'<div class="h-md">{e(v["title"])}</div>'
@@ -177,8 +203,7 @@ def r_mutual(v):
 
 def r_beforeafter(v):
     return (f'<div class="h-md">{e(v["title"])}</div><div class="bubs">'
-            f'<div class="bub say dense before"{_at(v,0)}>{e(v["before"])}'
-            f'<div class="bubx">{xmark(50)}</div></div>'
+            f'<div class="bub say dense before crossed"{_at(v,0)}>{e(v["before"])}</div>'
             f'<div class="bub say dense after"{_at(v,1)}>{e(v["after"])}</div></div>')
 
 def r_growdot(v):

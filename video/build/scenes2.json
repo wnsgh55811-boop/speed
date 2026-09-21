@@ -781,9 +781,9 @@
   "vis": {
    "kind": "bubbles",
    "tone": "say",
-   "ok": true,
    "title": "나",
    "portrait": "p_man_settled",
+   "pw": 430,
    "items": [
     "저는 오히려 조금 북적거리는 데가 좋던데",
     "완전 반대네요."
@@ -792,13 +792,20 @@
  },
  {
   "a": 119,
+  "b": 119,
+  "bg": "teal",
+  "vis": {
+   "kind": "hero",
+   "big": "이게 공격적인가요?"
+  }
+ },
+ {
+  "a": 120,
   "b": 120,
   "bg": "teal",
   "vis": {
-   "kind": "strike",
-   "target": "이게 공격적인가요?",
-   "note": "전혀 아닙니다",
-   "soft": true
+   "kind": "hero",
+   "big": "전혀 아닙니다"
   }
  },
  {
@@ -834,7 +841,8 @@
    "kind": "hero3d",
    "img": "i3_lock",
    "big": "다르면 안 맞는 것 같다",
-   "sub2": "많은 남자들이 두려워하는 지점"
+   "sup": "많은 남자들이 두려워하는 것",
+   "small": true
   }
  },
  {
@@ -867,8 +875,6 @@
   "vis": {
    "kind": "bubbles",
    "tone": "say",
-   "ok": true,
-   "title": "이러면 끝날 일",
    "portrait": "p_man_laugh",
    "items": [
     "아 말 꼬였네요."
@@ -1023,14 +1029,14 @@
   "b": 154,
   "bg": "ember",
   "vis": {
-   "kind": "strike",
-   "target": "멋있는 첫마디 외우기",
-   "note": "중요한 건 여기가 아닙니다"
+   "kind": "hero",
+   "big": "중요한 건 멋진 멘트가 아닙니다",
+   "small": true
   }
  },
  {
   "a": 155,
-  "b": 155,
+  "b": 156,
   "bg": "blue",
   "vis": {
    "kind": "chapter",
@@ -1039,7 +1045,7 @@
   }
  },
  {
-  "a": 156,
+  "a": 157,
   "b": 158,
   "bg": "blue",
   "vis": {
@@ -1062,7 +1068,7 @@
  },
  {
   "a": 161,
-  "b": 161,
+  "b": 162,
   "bg": "teal",
   "vis": {
    "kind": "chapter",
@@ -1071,13 +1077,14 @@
   }
  },
  {
-  "a": 162,
+  "a": 163,
   "b": 166,
   "bg": "teal",
   "vis": {
    "kind": "bubbles",
    "tone": "say",
    "crossed": true,
+   "loud": true,
    "title": "이런 말은 필요 없습니다",
    "portrait": "p_man_away",
    "items": [
@@ -1119,7 +1126,7 @@
  },
  {
   "a": 173,
-  "b": 173,
+  "b": 174,
   "bg": "violet",
   "vis": {
    "kind": "chapter",
@@ -1128,7 +1135,7 @@
   }
  },
  {
-  "a": 174,
+  "a": 175,
   "b": 180,
   "bg": "violet",
   "vis": {
@@ -1163,7 +1170,7 @@
   "vis": {
    "kind": "portrait",
    "img": "p_man_think",
-   "label": "이게 굉장히 중요합니다"
+   "w": 560
   }
  },
  {
@@ -1205,7 +1212,8 @@
   "vis": {
    "kind": "bubbles",
    "tone": "thought",
-   "ok": true,
+   "loud": true,
+   "bigbub": true,
    "title": "이렇게 생각하면 됩니다",
    "items": [
     "아 이 사람은 이런 걸 별로 안 좋아하는구나."
@@ -1221,6 +1229,7 @@
    "tone": "thought",
    "crossed": true,
    "portrait": "p_woman_flat",
+   "tight": true,
    "title": "여기까지 갈 필요 없습니다",
    "items": [
     "내가 잘못했나?"
@@ -1370,7 +1379,8 @@
    "kind": "hero3d",
    "img": "i3_hourglass",
    "big": "같은 문제가 반복됩니다",
-   "sub2": "좋은 말을 아무리 준비해도"
+   "sup": "좋은 말을 아무리 준비해도",
+   "small": true
   }
  },
  {
@@ -1414,7 +1424,11 @@
   "vis": {
    "kind": "photo",
    "img": "ph_walk_two",
-   "center": "바꿔야 할 건 첫마디가 아니라 태도다"
+   "seq": [
+    "바꿔야 할 건",
+    "첫마디가 아니라",
+    "태도입니다"
+   ]
   }
  }
 ]

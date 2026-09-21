@@ -53,7 +53,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#08090a}
 .sub{position:absolute;white-space:nowrap;font-size:43px;font-weight:600;letter-spacing:-.01em;
  color:#fff;-webkit-text-stroke:5px rgba(0,0,0,.92);paint-order:stroke fill;
  text-shadow:0 2px 16px rgba(0,0,0,.5)}
-#mark{position:absolute;top:32px;right:42px;z-index:62;font-size:21px;font-weight:600;
+#mark{position:absolute;top:40px;right:56px;z-index:62;font-size:63px;font-weight:700;
  color:rgba(236,239,243,.72)}
 
 /* cut-out media */
@@ -61,6 +61,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#08090a}
 .i3d{display:block;object-fit:contain;filter:drop-shadow(0 22px 42px rgba(0,0,0,.62))}
 .pcard{filter:url(#torn) drop-shadow(0 30px 52px rgba(0,0,0,.62))}
 .paper{display:block;object-fit:contain}
+.pcard.fade .paper{filter:blur(11px);opacity:.74}
 
 /* rows */
 .rows{display:flex;flex-direction:column;gap:24px;align-items:flex-start}
@@ -73,9 +74,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#08090a}
 .mkp::before,.mkp::after{content:"";position:absolute;background:""" + GR + """;border-radius:3px}
 .mkp::before{left:0;right:0;top:10px;height:6px}
 .mkp::after{top:0;bottom:0;left:10px;width:6px}
-.mkc{width:28px;height:28px;border-radius:50%;border:3px solid """ + GR + """;display:block;position:relative}
-.mkc::after{content:"";position:absolute;left:6px;top:11px;width:11px;height:5px;
- border-left:4px solid """ + GR + """;border-bottom:4px solid """ + GR + """;transform:rotate(-45deg)}
+.mkc{width:34px;height:34px;display:block}
 .stepn{flex:0 0 auto;width:50px;height:50px;border-radius:50%;border:3px solid rgba(255,255,255,.3);
  display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700}
 
@@ -91,18 +90,20 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#08090a}
 .btag{font-size:24px;font-weight:600;color:#8b95a3}
 .bub{padding:24px 34px;border-radius:26px;font-size:42px;font-weight:600;line-height:1.34;
  position:relative;max-width:1100px}
-.bub.say{align-self:flex-start;background:""" + AM + """;color:#1a1408;border-bottom-left-radius:8px}
-.bub.her{align-self:flex-end;background:rgba(78,90,110,.94);color:#f2f4f8;border-bottom-right-radius:8px}
+.bub.say{align-self:center;background:""" + AM + """;color:#1a1408;border-bottom-left-radius:8px}
+.bub.her{align-self:center;background:rgba(78,90,110,.94);color:#f2f4f8;border-bottom-right-radius:8px}
 .bub.thought{align-self:center;background:rgba(255,255,255,.07);color:#e9ecf1;
  border:2px dashed rgba(255,255,255,.28);border-radius:32px}
 .bub.dense{font-size:36px;padding:18px 28px}
-.bubx{position:absolute;right:-28px;top:50%;margin-top:-24px}
-.okdot{width:50px;height:50px;border-radius:50%;background:rgba(89,194,160,.16);
- border:3px solid """ + GR + """;position:relative}
-.okdot::after{content:"";position:absolute;left:14px;top:22px;width:18px;height:8px;
- border-left:5px solid """ + GR + """;border-bottom:5px solid """ + GR + """;transform:rotate(-45deg)}
+.bub.crossed::after{content:"";position:absolute;left:18px;right:18px;top:50%;height:6px;
+ margin-top:1px;border-radius:3px;background:""" + PK + """;opacity:.95}
 .side{display:flex;align-items:center;gap:56px;justify-content:center}
 .side>*{flex:0 0 auto}
+.side.tight{gap:26px}
+.seq{position:relative;display:flex;align-items:center;justify-content:center;height:150px;width:100%}
+.seqline{position:absolute;left:0;right:0;opacity:0}
+.side.tight .bubs{width:auto;align-items:flex-start}
+.side.tight .bub{align-self:flex-start}
 .side .bubs{width:860px}
 .sideimg{width:300px;height:380px}
 
@@ -144,8 +145,10 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#08090a}
 /* strike */
 .strikewrap{position:relative;display:inline-block;padding:8px 22px}
 .strikeline{position:absolute;left:0;right:0;top:50%;height:8px;border-radius:4px;transform-origin:left center}
-.xmark{position:absolute;right:-88px;top:50%;width:66px;height:66px;margin-top:-33px}
-.xmark-s{margin-top:4px}
+.colt.struck{position:relative}
+.colt.struck::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:6px;
+ margin-top:-3px;border-radius:3px;background:""" + PK + """}
+.pickdot{width:46px;height:46px;display:block;margin-top:6px}
 
 /* chapter / quote / cta */
 .chapnum{font-size:170px;font-weight:900;letter-spacing:-.05em;color:rgba(255,255,255,.13);line-height:.9}

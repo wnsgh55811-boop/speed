@@ -96,7 +96,7 @@ def main():
     over = [x for x in subs if widths.get(x['text'], 0) > SUB_MAX_W]
 
     # ---- markup ----
-    ITEMKEYS = {'bubbles':'items','list':'items','steps':'items','chips':'items'}
+    ITEMKEYS = {'bubbles':'items','list':'items','steps':'items','chips':'items','photo':'seq'}
     for s in scenes:
         v = s['vis']; key = ITEMKEYS.get(v['kind'])
         if key and v.get(key):
