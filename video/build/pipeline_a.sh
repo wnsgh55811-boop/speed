@@ -72,6 +72,6 @@ echo "== bundle =="
 cd /home/user && tar -cf bundle.tar v2
 ls -la bundle.tar
 . /home/user/up_urls.sh
-curl -f -X PUT -H "Content-Type: application/x-tar" --data-binary @bundle.tar "$U_BUNDLE" \
+curl -f -X PUT -H "Content-Type: application/octet-stream" --data-binary @bundle.tar "$U_BUNDLE" \
      -s -o /dev/null -w "bundle:%{http_code} %{size_upload}\n"
 echo PHASE_A_DONE
