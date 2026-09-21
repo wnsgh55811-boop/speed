@@ -21,6 +21,7 @@ def load(p, d=None):
 
 def build_timing(S):
     durs = load('durations.json', {}) or {}
+    bounds = load('cue_bounds.json', {}) or {}
     t = 0.0
     for i, sc in enumerate(S):
         full = ' '.join(sc['cues'])
@@ -31,12 +32,22 @@ def build_timing(S):
         sc['_start'] = round(t, 3)
         sc['_dur'] = round(LEAD + d + TAIL, 3)
         # per-cue windows, proportional by syllable weight inside the measured clip
-        ws = [syl(c) for c in sc['cues']]; tot = sum(ws) or 1.0
-        ct = t + LEAD; sc['_cues'] = []
-        for c, w in zip(sc['cues'], ws):
-            cd = d * (w/tot)
-            sc['_cues'].append({'text': c, 'start': round(ct, 3), 'dur': round(cd, 3)})
-            ct += cd
+        b = bounds.get(str(i))
+        if b and len(b) == len(sc['cues']) - 1:
+            # real speech gaps: cue k runs from one detected pause to the next
+            edges = [0.0] + list(b) + [d]
+            sc['_aligned'] = True
+        else:
+            ws = [syl(c) for c in sc['cues']]; tot = sum(ws) or 1.0
+            edges, acc = [0.0], 0.0
+            for w in ws:
+                acc += d * (w/tot); edges.append(acc)
+            sc['_aligned'] = False
+        sc['_cues'] = []
+        for k, c in enumerate(sc['cues']):
+            st = t + LEAD + edges[k]
+            sc['_cues'].append({'text': c, 'start': round(st, 3),
+                                'dur': round(edges[k+1] - edges[k], 3)})
         t += sc['_dur']
     return round(t, 3)
 
@@ -155,6 +166,7 @@ def main():
     open('../index.html','w').write(html)
     meta = {'total': total, 'scenes': len(S), 'subs': len(subs),
             'measured': sum(1 for s in S if s['_measured']),
+            'aligned': sum(1 for s in S if s.get('_aligned')),
             'timing': [{'i': i, 'key': s['key'], 'start': s['_start'], 'dur': s['_dur'],
                         'audio': s['_audio']} for i, s in enumerate(S)]}
     json.dump(meta, open('timing.json','w'), ensure_ascii=False, indent=1)
