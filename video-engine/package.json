@@ -3,12 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx --yes hyperframes@0.8.51 preview",
-    "check": "npx --yes hyperframes@0.8.51 check",
-    "render": "npx --yes hyperframes@0.8.51 render",
-    "publish": "npx --yes hyperframes@0.8.51 publish"
+    "dev": "npx hyperframes preview",
+    "check": "npx hyperframes check",
+    "render": "npx hyperframes render",
+    "publish": "npx hyperframes publish"
   },
   "dependencies": {
+    "hyperframes": "0.8.52",
     "playwright": "^1.49.1"
   }
 }
