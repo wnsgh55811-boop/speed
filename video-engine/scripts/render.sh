@@ -57,6 +57,12 @@ for k in $(seq 1 "$N"); do
   [ -s "/home/user/part$KK.mp4" ] && { echo "part $KK already rendered"; continue; }
   echo "=== PART $KK START $(date -u +%T) ==="
   export HF_SEGMENTED_CAPTURE=true
+  # The renderer walks its own PPID chain at startup and cancels the job the
+  # moment any ancestor exits. In the media sandbox a command's shell is torn
+  # down after sixty seconds, so a render that outlives one call is killed as
+  # `render_cancelled_parent_exited` with no frames written. Detached mode
+  # drops the ancestor snapshot, which is what lets the job survive.
+  export HYPERFRAMES_RENDER_DETACHED=1
   # The renderer discovers the project's composition rather than taking a
   # file, and every part carries the same composition id, so the part being
   # rendered becomes index.html for the duration.
