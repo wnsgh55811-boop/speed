@@ -56,6 +56,24 @@ sh(f'ffmpeg -hide_banner -loglevel error -i "{VO}/joined.wav" '
    f'-af "loudnorm=I=-15:TP=-1.5:LRA=11,atempo={SPEED}" '
    f'-ar 48000 -ac 2 "{OUT}/master.wav" -y')
 
+# The composition loads this in every render worker, and a 14-minute 48k
+# stereo wav is 160MB — enough to time out page load eight times over. A
+# 192kbps mp3 is a tenth of a percent of the difference to a listener and
+# a twelfth of the bytes.
+sh(f'ffmpeg -hide_banner -loglevel error -i "{OUT}/master.wav" '
+   f'-c:a libmp3lame -b:a 192k -ar 48000 -ac 2 "{OUT}/master.mp3" -y')
+
 d = float(sh('ffprobe -v error -show_entries format=duration -of csv=p=0 '
              'out/master.wav').strip())
-print(f"[audio] master={d:.3f}s  ({d/60:.1f} min)  blocks={n}")
+sz = os.path.getsize(f"{OUT}/master.mp3") / 1e6
+print(f"[audio] master={d:.3f}s  ({d/60:.1f} min)  blocks={n}  mp3={sz:.1f}MB")
+
+# the delivery targets, measured rather than assumed
+m = subprocess.run(
+    f'ffmpeg -hide_banner -nostats -i "{OUT}/master.mp3" '
+    f'-af ebur128=peak=true -f null -', shell=True, text=True,
+    capture_output=True).stderr
+tail = m[m.rfind("Integrated loudness"):] if "Integrated loudness" in m else ""
+for line in tail.splitlines():
+    if any(k in line for k in ("I:", "LRA:", "Peak:")):
+        print("[audio]  " + line.strip())
