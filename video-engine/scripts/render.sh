@@ -18,6 +18,10 @@ mkdir -p assets/audio
 ( cd "examples/$P" && python3 mkaudio.py && cp out/master.mp3 ../../assets/audio/master.mp3 ) || exit 12
 [ -s assets/audio/master.mp3 ] || exit 12
 bash build.sh "$P" --audio assets/audio/master.mp3 || exit 13
+# Send the workers the pixels they actually draw: six of them each fetching
+# and decoding 2688x1520 plates over the network cost about ninety seconds
+# apiece before the first frame.
+python3 scripts/localize.py || exit 14
 
 echo "=== RENDER START $(date -u +%T) ==="
 export HF_SEGMENTED_CAPTURE=true

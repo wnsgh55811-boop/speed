@@ -4,3 +4,5 @@ renders/
 snapshots/
 assets/audio/
 index.html
+assets/img/
+assets/.cache/
