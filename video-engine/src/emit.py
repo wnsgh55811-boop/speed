@@ -882,6 +882,15 @@ def main():
     audio = None
     if "--audio" in sys.argv:
         audio = sys.argv[sys.argv.index("--audio") + 1]
+    # A fourteen-minute capture does not fit in one sandbox lease, so the film
+    # can be emitted as N scene-aligned parts and joined afterwards. Splitting
+    # on a scene boundary is what keeps it honest: no scene is cut through the
+    # middle of its own entrance, so a part renders exactly as it would have
+    # inside the whole.
+    part = None
+    if "--part" in sys.argv:
+        k, _, n = sys.argv[sys.argv.index("--part") + 1].partition("/")
+        part = (int(k), int(n))
 
     raw = open(os.path.join(HERE, "timings.txt"), encoding="utf-8").read()
     total = float(raw.split("TOTAL ")[1].split()[0])
@@ -907,6 +916,20 @@ def main():
         li += span
     assert li == len(lines), f"plan covers {li} lines, script has {len(lines)}"
 
+    # the window this part covers, snapped to the nearest scene boundary
+    w0, w1 = 0.0, total
+    if part:
+        pk, pn = part
+        bounds = [times[x[2]][0] for x in scenes] + [total]
+        w0 = 0.0 if pk == 1 else min(bounds, key=lambda b: abs(b - total * (pk - 1) / pn))
+        w1 = total if pk == pn else min(bounds, key=lambda b: abs(b - total * pk / pn))
+        print(f"part {pk}/{pn}: {w0:.2f}-{w1:.2f}s ({w1 - w0:.2f}s)")
+
+    def keep(s0, dd):
+        """Clip against the window, returned in part-local time."""
+        a, b = max(s0, w0), min(s0 + dd, w1)
+        return (a - w0, b - a) if b - a > 1e-6 else None
+
     bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
     cap_n = 0
     for i, (kind, arg, li, span) in enumerate(scenes):
@@ -915,21 +938,25 @@ def main():
         d = max(0.4, t1 - t0)
         fam, inner = background(i, kind, arg, chunk_of[li])
         background.prev.append(fam)
+        win = keep(t0, d)
+        if win is None:
+            continue
+        ws, wd = win
         bg_html.append(
-            f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
-            f'data-duration="{d:.2f}" data-track-index="0">'
+            f'<div class="clip" id="bgc{i:03d}" data-start="{ws:.2f}" '
+            f'data-duration="{wd:.2f}" data-track-index="0">'
             f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
             f'<div class="grain"></div><div class="vig"></div></div></div>')
 
         body = content(i, kind, arg, line, lines[li:li + span])
         if body:
             fg_html.append(
-                f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
-                f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
+                f'<div class="clip" id="fg{i:03d}" data-start="{ws:.2f}" '
+                f'data-duration="{wd:.2f}" data-track-index="1">{body}</div>')
         # Per-line starts, so a bubble run or a list reveals itself on the
         # words it belongs to rather than on a blind stagger.
-        steps = [round(times[li + k][0], 2) for k in range(span)]
-        anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
+        steps = [round(times[li + k][0] - w0, 2) for k in range(span)]
+        anim.append({"i": i, "t": round(ws, 2), "d": round(wd, 2), "k": kind,
                      "has": bool(body), "s": steps})
 
         # Review note: where the sentence is already set large across the middle
@@ -962,6 +989,10 @@ def main():
                 cards.append(c)
                 spans.append((lt0 + j * per, per))
         for (cs, cd), c in zip(spans, cards):
+            cw = keep(cs, cd)
+            if cw is None:
+                continue
+            cs, cd = cw
             cap_html.append(
                 f'<div class="clip" id="cap{cap_n:03d}" data-start="{cs:.2f}" '
                 f'data-duration="{cd:.2f}" data-track-index="2">'
@@ -985,11 +1016,11 @@ def main():
 </head>
 <body>
 <div id="root" data-composition-id="main" data-width="{W}" data-height="{H}"
-     data-start="0" data-duration="{total:.3f}">
+     data-start="0" data-duration="{w1 - w0:.3f}">
 {chr(10).join(bg_html)}
 {chr(10).join(fg_html)}
 {chr(10).join(cap_html)}
-  <div class="clip" id="wmclip" data-start="0" data-duration="{total:.3f}" data-track-index="3">
+  <div class="clip" id="wmclip" data-start="0" data-duration="{w1 - w0:.3f}" data-track-index="3">
     <div class="wm">이다사</div>
   </div>{audio_tag}
 </div>
@@ -1180,11 +1211,12 @@ window.__timelines["main"] = tl;
 </body>
 </html>
 """
-    open(OUT, "w", encoding="utf-8").write(doc)
-    print(f"wrote {OUT}")
-    print(f"  duration {total:.2f}s · scenes {len(scenes)} · lines {len(lines)}"
+    out = OUT if not part else os.path.join(HERE, "..", f"part{part[0]:02d}.html")
+    open(out, "w", encoding="utf-8").write(doc)
+    print(f"wrote {out}")
+    print(f"  duration {w1 - w0:.2f}s · scenes {len(anim)} · lines {len(lines)}"
           f" · caption cards {cap_n}")
-    print(f"  mean scene {total/len(scenes):.2f}s")
+    print(f"  mean scene {(w1 - w0) / max(1, len(anim)):.2f}s")
     from collections import Counter
     print("  bg families:", dict(Counter(background.prev[2:])))
 
