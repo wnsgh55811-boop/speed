@@ -626,6 +626,45 @@ def g_pingpong(rich):
     return "".join(h)
 
 
+def g_vflow(items):
+    """A topic moving down a path, not a list of topics.
+
+    The script keeps saying the subject *moves* rather than gets swapped, so
+    the steps are joined by a drawn line and each one sits a little lower than
+    the last; the line is what the eye follows.
+    """
+    n = len(items)
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         '<div class="vflow">']
+    for i, it in enumerate(items):
+        if i:
+            h.append('<i class="vflow-arm"></i>')
+        h.append(f'<span class="vflow-node{" last" if i == n - 1 else ""}">'
+                 f'{esc(it)}</span>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_wave():
+    """Light and deep, back and forth — a good conversation is the whole line."""
+    return ("".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        '<div class="hl md gtitle">좋은 대화</div>',
+        '<svg width="1420" height="420" viewBox="0 0 1420 420" style="margin-top:20px">',
+        '<path d="M60 96H1360" stroke="rgba(255,255,255,.16)" stroke-width="2" '
+        'stroke-dasharray="10 12"/>',
+        '<path d="M60 324H1360" stroke="rgba(255,255,255,.16)" stroke-width="2" '
+        'stroke-dasharray="10 12"/>',
+        '<path class="edge-hot glow wavepath" fill="none" '
+        'stroke-dasharray="2400" stroke-dashoffset="2400" '
+        'd="M60 96 C210 96 210 324 360 324 C510 324 510 96 660 96 '
+        'C810 96 810 324 960 324 C1110 324 1110 96 1260 96 L1360 96"/>',
+        '<circle class="node glow wavedot" cx="60" cy="96" r="13"/>',
+        '<text class="dlabel-dim" x="60" y="64">가벼움</text>',
+        '<text class="dlabel-dim" x="60" y="382">깊이</text>',
+        '</svg></div>']))
+
+
 GRAPHICS = {
     "g_cover_anxiety": lambda: g_rows("질문으로 덮고 있는 것", ["어색함", "불안", "재미없어 하나?"], mark="q"),
     "g_question_chain": lambda: g_chain(["질문", "대답", "질문", "대답"]),
@@ -665,6 +704,24 @@ GRAPHICS = {
 }
 
 
+_PRIM = {"rows": g_rows, "chips": g_chips, "bars": g_bars, "chain": g_chain,
+         "twobranch": g_twobranch, "gap": g_gap, "lanes": g_lanes,
+         "stack": g_stack, "pingpong": g_pingpong, "vflow": g_vflow,
+         "wave": g_wave}
+
+
+def _spec(spec):
+    fn, args = _PRIM[spec[0]], spec[1:]
+    return lambda: fn(*args)
+
+
+try:
+    from plan import GRAPHICS_EXTRA as _GE                 # noqa: E402
+    GRAPHICS.update({k: _spec(v) for k, v in _GE.items()})
+except ImportError:
+    pass
+
+
 # ── scene builders ──────────────────────────────────────────────────────────
 def src(key):
     """Asset URL. Keyed figures carry a whole URL; the originals are CDN names."""
@@ -691,8 +748,8 @@ def pick(alias, i):
 
 def background(i, kind, arg, section):
     """Return (css_class, inner_html). Photos own their own plate."""
-    if kind == "B":
-        key = pick(arg, i)
+    if kind in ("B", "Y"):
+        key = pick(arg.partition("|")[0], i)
         return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt="">'
                             f'<div class="tint"></div>')
     fam = FAMILIES[(section * 3 + i // 2) % len(FAMILIES)]
@@ -706,10 +763,34 @@ def background(i, kind, arg, section):
 background.prev = ["", ""]
 
 
-def content(i, kind, arg, line):
+def content(i, kind, arg, line, span_lines=()):
     sid = f"fg{i:03d}"
     if kind == "B":
         return ""
+    if kind == "Y":
+        _, _, head = arg.partition("|")
+        size = "xl" if len(head) <= 12 else ("lg" if len(head) <= 22 else "md")
+        return (f'<div class="stage"><div class="scrim"></div>'
+                f'<div class="hl {size}">{esc(head)}</div></div>')
+    if kind == "Q":
+        # One bubble per quoted line in the span, revealed on the line it
+        # belongs to. Lines that only carry "라고 합니다" extend the scene
+        # without adding a bubble.
+        who = [w for w in arg.split("|") if w]
+        h, k = ['<div class="bub-stack">'], 0
+        for j, ln in enumerate(span_lines):
+            if not ln.startswith('"'):
+                continue
+            w = who[k] if k < len(who) else (who[-1] if who else "m")
+            k += 1
+            tag = "남자" if w == "m" else ("여자" if w == "w" else "내담자")
+            side = "right" if w == "m" else "left"
+            h.append(f'<div class="bub-row {side} q" data-line="{j}">'
+                     f'<div class="bub {w}"><span class="who" '
+                     f'data-layout-allow-overflow>{esc(tag)}</span>'
+                     f'{esc(ln.strip(chr(34)))}</div></div>')
+        h.append("</div>")
+        return "".join(h) if k else ""
     if kind == "C":
         who, _, _bg = arg.partition("@")
         names = who.split("+")
@@ -789,18 +870,33 @@ def main():
     total = float(raw.split("TOTAL ")[1].split()[0])
     times = [tuple(float(x) for x in p.split(","))
              for p in raw.split("TIMES ")[1].split()]
-    lines = [l for c in json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))
-             for l in c["lines"]]
+    chunks = json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))
+    lines = [l for c in chunks for l in c["lines"]]
     chunk_of = []
-    for si, c in enumerate(json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))):
+    for si, c in enumerate(chunks):
         chunk_of.extend([si] * len(c["lines"]))
-    assert len(lines) == len(times) == len(PLAN) == 251
+    assert len(lines) == len(times), f"{len(lines)} lines vs {len(times)} timings"
+
+    # A plan entry may cover more than one narration line. The script for this
+    # film is written in short breath units — one scene per line would flip the
+    # screen every 1.4s, well under the 2-4s the house rules ask for — so a
+    # scene holds a whole thought and the captions keep their own per-line
+    # timing underneath it.
+    scenes, li = [], 0
+    for entry in PLAN:
+        kind, arg = entry[0], entry[1]
+        span = entry[2] if len(entry) > 2 else 1
+        scenes.append((kind, arg, li, span))
+        li += span
+    assert li == len(lines), f"plan covers {li} lines, script has {len(lines)}"
 
     bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
     cap_n = 0
-    for i, ((kind, arg), (t0, t1), line) in enumerate(zip(PLAN, times, lines)):
+    for i, (kind, arg, li, span) in enumerate(scenes):
+        t0, t1 = times[li][0], times[li + span - 1][1]
+        line = lines[li]
         d = max(0.4, t1 - t0)
-        fam, inner = background(i, kind, arg, chunk_of[i])
+        fam, inner = background(i, kind, arg, chunk_of[li])
         background.prev.append(fam)
         bg_html.append(
             f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
@@ -808,24 +904,42 @@ def main():
             f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
             f'<div class="grain"></div><div class="vig"></div></div></div>')
 
-        body = content(i, kind, arg, line)
+        body = content(i, kind, arg, line, lines[li:li + span])
         if body:
             fg_html.append(
                 f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
                 f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
+        # Per-line starts, so a bubble run or a list reveals itself on the
+        # words it belongs to rather than on a blind stagger.
+        steps = [round(times[li + k][0], 2) for k in range(span)]
         anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
-                     "has": bool(body)})
+                     "has": bool(body), "s": steps})
 
         # Review note: where the sentence is already set large across the middle
         # of frame, repeating it along the bottom just stacks the same words on
-        # themselves. Those scenes carry no caption card.
-        if kind in ("T", "H", "P"):
+        # themselves — but a centre line that *summarises* several lines is not
+        # the same words, so those captions stay. Only the duplicated line is
+        # dropped.
+        if kind == "H":
             continue
+        shown = None
+        if kind == "T":
+            shown = arg or line
+        elif kind == "P":
+            shown = arg.partition("|")[2] or line
 
-        cards = caption_cards(line)
-        per = d / len(cards)
-        for j, c in enumerate(cards):
-            cs, cd = t0 + j * per, per
+        cards, spans = [], []
+        for k in range(span):
+            ln = lines[li + k]
+            if shown is not None and ln.strip() == shown.strip():
+                continue
+            lt0, lt1 = times[li + k]
+            cc = caption_cards(ln)
+            per = max(0.3, lt1 - lt0) / len(cc)
+            for j, c in enumerate(cc):
+                cards.append(c)
+                spans.append((lt0 + j * per, per))
+        for (cs, cd), c in zip(spans, cards):
             cap_html.append(
                 f'<div class="clip" id="cap{cap_n:03d}" data-start="{cs:.2f}" '
                 f'data-duration="{cd:.2f}" data-track-index="2">'
@@ -883,6 +997,7 @@ SC.forEach(function (s) {{
 SC.forEach(function (s) {{
   if (!s.has) return;
   var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
+  var f0 = f;
   var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
   if (s.k === "T") {{
     T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
@@ -899,6 +1014,26 @@ SC.forEach(function (s) {{
               {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t);
     T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }}, t + 0.18);
+  }} else if (s.k === "Q") {{
+    // A quote run is a conversation, so each bubble lands when that line is
+    // actually spoken; the earlier ones settle back instead of staying loud.
+    var bubs = document.querySelectorAll(f + " .bub-row.q");
+    for (var bi = 0; bi < bubs.length; bi++) {{
+      var el = bubs[bi];
+      var at = s.s[parseInt(el.getAttribute("data-line"), 10)] || s.t;
+      tl.fromTo(el, {{ opacity: 0, yPercent: 14, scale: 0.955 }},
+                {{ opacity: 1, yPercent: 0, scale: 1, duration: 0.4,
+                   ease: "back.out(1.4)" }}, at + 0.04);
+      if (bi < bubs.length - 1) {{
+        var nxt = s.s[parseInt(bubs[bi + 1].getAttribute("data-line"), 10)];
+        if (nxt) tl.to(el, {{ opacity: 0.46, duration: 0.34,
+                              ease: "sine.inOut" }}, nxt);
+      }}
+    }}
+  }} else if (s.k === "Y") {{
+    T(f + " .hl", {{ yPercent: 36, opacity: 0, scale: 1.04 }},
+              {{ yPercent: 0, opacity: 1, scale: 1, duration: 0.6,
+                 ease: "power3.out" }}, t);
   }} else if (s.k === "C") {{
     T(f + " .cut", {{ yPercent: 8, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out",
@@ -917,10 +1052,29 @@ SC.forEach(function (s) {{
   }} else if (s.k === "G") {{
     T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
-    T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk",
-              {{ yPercent: 36, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
-                 stagger: 0.08 }}, t + 0.14);
+    var items = document.querySelectorAll(f + " .row, " + f + " .chip, "
+                + f + " .bars > div, " + f + " .stk, " + f + " .vflow-node");
+    if (items.length && items.length === s.s.length && s.s.length > 1) {{
+      // one item per spoken line — reveal each on its own line
+      for (var gi = 0; gi < items.length; gi++) {{
+        tl.fromTo(items[gi], {{ yPercent: 34, opacity: 0 }},
+                  {{ yPercent: 0, opacity: 1, duration: 0.44,
+                     ease: "power3.out" }}, s.s[gi] + 0.05);
+      }}
+    }} else {{
+      T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk, "
+        + f + " .vflow-node",
+                {{ yPercent: 36, opacity: 0 }},
+                {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
+                   stagger: 0.08 }}, t + 0.14);
+    }}
+    T(f + " .vflow-arm", {{ scaleY: 0 }},
+              {{ scaleY: 1, duration: 0.34, ease: "power2.out", stagger: 0.1 }},
+              t + 0.3);
+    T(f + " .wavepath", {{ strokeDashoffset: 2400 }},
+              {{ strokeDashoffset: 0, duration: Math.min(2.4, s.d * 0.72),
+                 ease: "none" }}, t + 0.1);
+    T(f + " .wavedot", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3 }}, t + 0.2);
     T(f + " .bar-fill", {{ scaleX: 0 }},
               {{ scaleX: 1, duration: 0.7, ease: "expo.out", stagger: 0.1 }}, t + 0.26);
     T(f + " svg", {{ opacity: 0, scale: 0.95 }},
@@ -948,7 +1102,9 @@ window.__timelines["main"] = tl;
 """
     open(OUT, "w", encoding="utf-8").write(doc)
     print(f"wrote {OUT}")
-    print(f"  duration {total:.2f}s · scenes {len(PLAN)} · caption cards {cap_n}")
+    print(f"  duration {total:.2f}s · scenes {len(scenes)} · lines {len(lines)}"
+          f" · caption cards {cap_n}")
+    print(f"  mean scene {total/len(scenes):.2f}s")
     from collections import Counter
     print("  bg families:", dict(Counter(background.prev[2:])))
 

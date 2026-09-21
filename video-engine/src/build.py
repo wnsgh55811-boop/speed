@@ -111,6 +111,14 @@ KEYED = {
 }
 IMG.update(KEYED)
 
+# A project may add its own stills, cutouts and icons; the shared library above
+# stays the same from film to film.
+try:
+    from plan import IMG_EXTRA as _IE                      # noqa: E402
+    IMG.update(_IE)
+except ImportError:
+    pass
+
 ALIAS = {
     "man_anx": ["man_anx_1", "man_anx_4", "man_anx_2", "man_anx_5",
                 "man_anx_3", "man_anx_6", "man_anx_7"],
@@ -133,6 +141,12 @@ ALIAS = {
     "br_running": ["br_running_1"], "br_coffee": ["br_coffee_1"],
     "br_mirror": ["br_mirror_1"], "br_street": ["br_street_1"],
 }
+try:
+    from plan import ALIAS_EXTRA as _AE                    # noqa: E402
+    ALIAS.update(_AE)
+except ImportError:
+    pass
+
 # neon diagrams are now drawn in SVG, so these map onto coded figures
 NEON_FIG = {
     "neon_qmarks": "qmarks", "neon_loop": "loop4", "neon_branch": "branch",
