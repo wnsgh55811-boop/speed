@@ -1,0 +1,252 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   이다사 — design system
+   Authored against a 1920x1080 canvas.
+
+   Three things this file is deliberately built around, from review notes:
+   1. Captions are ALWAYS one line — `white-space:nowrap`, and the build
+      pre-splits any line too wide to fit, so nothing can wrap at runtime.
+   2. Captions are pure white with a thin dark stroke behind the glyph
+      (`paint-order: stroke fill`), so they stay legible on any plate.
+   3. There are EIGHT background families, not one dark canvas. Every text
+      block also carries a soft scrim so wording never sinks into the plate.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@font-face { font-family:"Pretendard"; font-weight:400; font-style:normal; font-display:block;
+  src:url("assets/fonts/Pretendard-Regular.otf") format("opentype"); }
+@font-face { font-family:"Pretendard"; font-weight:500; font-style:normal; font-display:block;
+  src:url("assets/fonts/Pretendard-Medium.otf") format("opentype"); }
+@font-face { font-family:"Pretendard"; font-weight:600; font-style:normal; font-display:block;
+  src:url("assets/fonts/Pretendard-SemiBold.otf") format("opentype"); }
+@font-face { font-family:"Pretendard"; font-weight:700; font-style:normal; font-display:block;
+  src:url("assets/fonts/Pretendard-Bold.otf") format("opentype"); }
+@font-face { font-family:"Pretendard"; font-weight:800; font-style:normal; font-display:block;
+  src:url("assets/fonts/Pretendard-ExtraBold.otf") format("opentype"); }
+
+:root{
+  --ink:#F4F3EF;          /* headline white */
+  --ink-2:#C9C7C1;        /* secondary */
+  --dim:#918F8A;
+  --cyan:#5AD8F7;
+  --cyan-deep:#1E7C96;
+  --magenta:#F0538F;
+  --amber:#D8B368;        /* highlight plate — warmer + brighter than the old olive */
+  --kakao-y:#FAE34E;
+  --kakao-w:#FCFCFC;
+  --font:"Pretendard", sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--ink);
+  font-family:var(--font);-webkit-font-smoothing:antialiased}
+#root{width:100%;height:100%;position:relative;overflow:hidden;background:#0B0B0D}
+
+.clip{position:absolute;inset:0}
+.layer{position:absolute;inset:0;overflow:hidden}
+
+/* ── shared plate overlays ─────────────────────────────────────────────── */
+.vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 78% 74% at 50% 46%, transparent 0%, transparent 42%, rgba(0,0,0,.42) 78%, rgba(0,0,0,.72) 100%)}
+.grain{position:absolute;inset:0;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:radial-gradient(rgba(255,255,255,.09) 1px, transparent 1.2px),
+                   radial-gradient(rgba(0,0,0,.20) 1px, transparent 1.2px);
+  background-size:3px 3px, 5px 5px; background-position:0 0, 1px 2px}
+
+/* ── background families ───────────────────────────────────────────────── */
+/* 1 — woven charcoal canvas (the original look, now one of eight) */
+.bg-canvas{background:
+  repeating-linear-gradient(90deg, rgba(255,255,255,.016) 0 1px, transparent 1px 3px),
+  repeating-linear-gradient(0deg,  rgba(0,0,0,.20) 0 1px, transparent 1px 3px),
+  radial-gradient(ellipse 90% 80% at 42% 38%, #232025 0%, #17161A 55%, #0C0B0E 100%)}
+
+/* 2 — ink navy with a cyan pool off to one side */
+.bg-ink{background:
+  radial-gradient(ellipse 52% 46% at 26% 30%, rgba(90,216,247,.22) 0%, transparent 62%),
+  radial-gradient(ellipse 96% 86% at 60% 56%, #162030 0%, #0E1420 58%, #070A10 100%)}
+
+/* 3 — ember: deep warm maroon, low pool */
+.bg-ember{background:
+  radial-gradient(ellipse 60% 44% at 34% 76%, rgba(206,84,66,.30) 0%, transparent 68%),
+  radial-gradient(ellipse 96% 88% at 50% 44%, #31201D 0%, #1B1112 56%, #0C0809 100%)}
+
+/* 4 — deep teal with a faint horizon band */
+.bg-teal{background:
+  linear-gradient(180deg, transparent 0 54%, rgba(90,216,247,.13) 55%, transparent 59%),
+  radial-gradient(ellipse 94% 84% at 50% 48%, #122B32 0%, #0B1A20 58%, #060D11 100%)}
+
+/* 5 — blueprint grid, very low contrast */
+.bg-grid{background:
+  repeating-linear-gradient(0deg,  rgba(130,200,225,.085) 0 1px, transparent 1px 72px),
+  repeating-linear-gradient(90deg, rgba(130,200,225,.085) 0 1px, transparent 1px 72px),
+  radial-gradient(ellipse 92% 84% at 50% 46%, #14171C 0%, #0D0F13 60%, #07080B 100%)}
+
+/* 6 — dust field; the motes themselves are emitted by the build, seeded */
+.bg-dust{background:radial-gradient(ellipse 92% 84% at 50% 44%, #191820 0%, #100F15 58%, #08070B 100%)}
+.bg-dust .motes{position:absolute;inset:-6%}
+.bg-dust .mote{position:absolute;border-radius:50%;background:rgba(200,222,236,.55);
+  filter:blur(.4px)}
+
+/* 7 — a single soft light pool on near-black */
+.bg-spot{background:
+  radial-gradient(ellipse 44% 52% at 50% 44%, rgba(236,230,212,.20) 0%, transparent 64%),
+  radial-gradient(ellipse 96% 90% at 50% 50%, #131215 0%, #0A0A0C 62%, #050506 100%)}
+
+/* 8 — photographic plate, pushed far down so type always wins */
+.bg-photo{background:#0E0E11}
+/* Review note: the stills read as black rectangles. brightness .40 + a 2px blur
+   + a heavy tint was three dimmers stacked; one gentle one is enough, and the
+   caption keeps its own scrim, so the photograph can actually be seen. */
+.bg-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:grayscale(.22) brightness(.86) contrast(1.04) saturate(.92) blur(.6px)}
+.bg-photo .tint{position:absolute;inset:0;background:
+  linear-gradient(180deg, rgba(8,9,12,.18) 0%, rgba(8,9,12,.30) 58%, rgba(8,9,12,.62) 100%)}
+
+/* plate wrapper GSAP drifts; oversized so a move never exposes an edge */
+.bgmove{position:absolute;inset:-5%}
+
+/* ── contrast scrim: lifts wording off ANY plate without reading as a box ── */
+.scrim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:1560px;height:560px;pointer-events:none;
+  background:radial-gradient(ellipse 50% 50% at 50% 50%,
+    rgba(0,0,0,.74) 0%, rgba(0,0,0,.58) 38%, rgba(0,0,0,.28) 64%, transparent 82%)}
+.scrim.wide{width:1820px;height:680px}
+.scrim.tight{width:1180px;height:420px}
+
+/* ── captions — one line, white, thin stroke ───────────────────────────── */
+.cap-wrap{position:absolute;left:0;right:0;bottom:66px;display:flex;justify-content:center}
+.cap-scrim{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);
+  width:1840px;height:190px;pointer-events:none;
+  background:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.42) 42%, rgba(0,0,0,.62) 100%)}
+.cap{position:relative;font-weight:600;font-size:44px;line-height:1.3;color:#FFFFFF;
+  white-space:nowrap;                      /* structural guarantee: never wraps */
+  -webkit-text-stroke:3px rgba(0,0,0,.70);
+  paint-order:stroke fill;
+  text-shadow:0 2px 12px rgba(0,0,0,.70), 0 0 2px rgba(0,0,0,.55);
+  letter-spacing:-.005em}
+
+/* ── watermark ─────────────────────────────────────────────────────────── */
+.wm{position:absolute;top:50px;right:56px;font-weight:700;font-size:30px;
+  color:rgba(246,245,242,.62);letter-spacing:.02em;
+  text-shadow:0 2px 10px rgba(0,0,0,.8)}
+
+/* ── headline / typography cards ───────────────────────────────────────── */
+.stage{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:0}
+.hl{font-weight:800;color:var(--ink);text-align:center;line-height:1.22;
+  text-wrap:balance;word-break:keep-all;
+  text-shadow:0 4px 26px rgba(0,0,0,.72);letter-spacing:-.02em}
+.hl.xl{font-size:104px}
+.hl.lg{font-size:82px}
+.hl.md{font-size:66px}
+.sub{font-weight:500;font-size:44px;color:var(--ink-2);text-align:center;
+  text-shadow:0 3px 16px rgba(0,0,0,.66);margin-top:22px}
+.kicker{font-weight:600;font-size:34px;letter-spacing:.24em;color:var(--dim);
+  text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+
+/* ── chapter marker ────────────────────────────────────────────────────── */
+.pearl{width:124px;height:124px;border-radius:50%;
+  background:radial-gradient(circle at 38% 34%, #FFFDF6 0%, #E9E5D9 52%, #CFC9B9 100%);
+  box-shadow:0 0 70px 24px rgba(246,244,232,.30), 0 8px 30px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:54px;color:#26241F}
+.chap-word{margin-top:44px;font-weight:800;font-size:96px;color:var(--ink);
+  text-shadow:0 5px 30px rgba(0,0,0,.75);letter-spacing:-.02em}
+
+/* ── chat bubbles ──────────────────────────────────────────────────────── */
+.bub-row{position:absolute;inset:0;display:flex;align-items:center;padding:0 240px}
+.bub-row.right{justify-content:flex-end}
+.bub-row.left{justify-content:flex-start}
+.bub{position:relative;max-width:1040px;border-radius:30px;padding:34px 46px;
+  text-wrap:balance;word-break:keep-all;
+  font-weight:600;font-size:52px;line-height:1.36;color:#211F1D;
+  box-shadow:0 18px 46px rgba(0,0,0,.52)}
+.bub.m{background:var(--kakao-y)}
+.bub.w{background:var(--kakao-w)}
+/* 내담자 — a counselling quote, not a chat reply: warm paper plate with a rule */
+.bub.n{background:#F1EEE6;border-left:10px solid var(--amber);
+  border-radius:12px 30px 30px 12px;padding-left:56px;font-weight:500;font-style:italic}
+.bub .who{position:absolute;top:-44px;font-weight:500;font-size:32px;
+  color:rgba(235,233,228,.72);letter-spacing:.02em;font-style:normal}
+.bub.m .who{right:6px}
+.bub.w .who{left:6px}
+.bub.n .who{left:6px}
+/* the X sits ON the bubble — a square centred on it, never a full-width stretch */
+.strike{position:absolute;top:50%;left:50%;width:168px;height:168px;
+  transform:translate(-50%,-50%);pointer-events:none}
+.strike line{stroke:var(--magenta);stroke-width:9;stroke-linecap:round}
+
+/* ── diagrams ──────────────────────────────────────────────────────────── */
+.diag{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.diag svg{overflow:visible}
+.node{fill:var(--cyan)}
+.node-dim{fill:var(--cyan-deep)}
+.edge{stroke:var(--cyan-deep);stroke-width:4;fill:none}
+.edge-hot{stroke:var(--cyan);stroke-width:5;fill:none}
+.glow{filter:drop-shadow(0 0 14px rgba(90,216,247,.75))}
+.dlabel{font-family:var(--font);font-weight:700;font-size:46px;fill:var(--ink)}
+.dlabel-dim{font-family:var(--font);font-weight:600;font-size:40px;fill:var(--dim)}
+
+/* chips / tag rows */
+.chips{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:1560px}
+.chip{border-radius:999px;padding:20px 42px;font-weight:600;font-size:50px;
+  color:var(--ink);background:rgba(255,255,255,.10);
+  border:2px solid rgba(255,255,255,.20);text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.chip.hot{background:var(--amber);border-color:transparent;color:#1E1A12;text-shadow:none}
+
+/* list rows */
+.rows{display:flex;flex-direction:column;gap:26px;align-items:flex-start}
+.row{display:flex;align-items:center;gap:26px;font-weight:500;font-size:50px;
+  color:var(--ink-2);text-shadow:0 2px 12px rgba(0,0,0,.66)}
+.row .tick{width:30px;height:5px;border-radius:3px;background:var(--cyan);flex:0 0 auto}
+.row.muted{color:var(--dim)}
+.row.muted .tick{background:var(--cyan-deep);opacity:.55}
+.qmark{font-weight:800;font-size:56px;color:var(--magenta)}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:34px;width:1180px}
+.bar-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.bar-lab{font-weight:500;font-size:44px;color:var(--ink-2);
+  text-shadow:0 2px 10px rgba(0,0,0,.6)}
+/* Review note: the bars showed length but never said how deep — these dots and
+   the axis under them put a readable degree on every bar. */
+.bar-dots{display:flex;gap:9px;align-items:center}
+.bar-dots i{width:15px;height:15px;border-radius:50%;
+  background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.22)}
+.bar-dots i.on{background:var(--cyan);border-color:transparent;
+  box-shadow:0 0 14px rgba(90,216,247,.7)}
+.bar-dots i.on.hot{background:var(--magenta);box-shadow:0 0 14px rgba(240,83,143,.7)}
+.bar-track{position:relative;height:38px;border-radius:19px;
+  background:rgba(255,255,255,.10);overflow:hidden}
+.bar-track .tickline{position:absolute;top:0;bottom:0;width:2px;
+  background:rgba(255,255,255,.16)}
+.bar-axis{display:flex;justify-content:space-between;margin-top:20px;
+  font-weight:500;font-size:32px;color:var(--dim);letter-spacing:.02em;
+  text-shadow:0 2px 10px rgba(0,0,0,.6)}
+/* an <i> is inline, so width/height were being dropped and every track
+   rendered empty — this is why the chart read as "just bars". */
+.bar-fill{display:block;height:100%;border-radius:19px;transform-origin:left center}
+.bar-fill.hot{background:var(--magenta)}
+.bar-fill.calm{background:var(--amber)}
+.bar-fill.cool{background:var(--cyan-deep)}
+.bar-fill.cool-hot{background:var(--cyan)}
+
+/* cutout portrait — a torn-paper card, optically centred in the frame */
+/* Centring lives in the box, never in `transform` — GSAP animates yPercent on
+   this element, and a layout transform here gets overwritten by the tween,
+   which is what dropped every figure to the floor. */
+.cut{position:absolute;top:0;bottom:0;
+  display:flex;align-items:center;justify-content:center}
+.cut img{height:760px;width:auto;object-fit:contain;
+  filter:grayscale(.72) contrast(1.06) brightness(1.06)
+         drop-shadow(0 22px 40px rgba(0,0,0,.58));
+  -webkit-filter:grayscale(.72) contrast(1.06) brightness(1.06)
+         drop-shadow(0 22px 40px rgba(0,0,0,.58))}
+.cut .shadowed{}
+
+/* the gap motif */
+.gapline{display:flex;align-items:center;gap:34px}
+.gapline .seg{height:6px;background:var(--ink);border-radius:3px}
+.gapline .dot{width:20px;height:20px;border-radius:50%;background:var(--cyan)}
+
+/* ── pictogram marks ───────────────────────────────────────────────────── */
+.pmark{display:flex;align-items:center;justify-content:center;color:var(--cyan)}
+.picto{overflow:visible;filter:drop-shadow(0 0 16px rgba(90,216,247,.55))}
