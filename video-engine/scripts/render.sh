@@ -1,69 +1,53 @@
 #!/usr/bin/env bash
-# One continuous delivery render, meant to run inside an ephemeral sandbox.
+# Delivery render for one project, meant to run inside the media sandbox.
 #
-# The sandbox is discarded seconds after a call returns, so fetch, audio, render
-# and upload all have to live in this single background process — and whoever
-# launches it must keep polling without a gap, or the container is reclaimed
-# mid-render and the whole capture is lost.
+#   PROJECT=talk bash scripts/render.sh
 #
-#   PROJECT_ZIP=<url> PUT_URL=<presigned put> bash render.sh
+# The sandbox is reclaimed shortly after a call returns, so whoever launches
+# this has to keep polling without a gap. `--resume` means a restart picks up
+# the frames already captured rather than starting over.
 set -x
-cd /home/user
-
-curl -fsSL --retry 5 -o i.zip "$PROJECT_ZIP" || exit 11
-rm -rf idasa && unzip -q i.zip || exit 12
-
-# hyperframes needs node 22+; most sandboxes ship 20
-[ -d node-v22.11.0-linux-x64 ] || {
-  curl -fsSL --retry 5 -o n22.tar.xz \
-    https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.xz && tar xf n22.tar.xz
-} || exit 13
-export PATH=/home/user/node-v22.11.0-linux-x64/bin:$PATH
+P=${PROJECT:-talk}
+cd "$(dirname "$0")/.."
+export PATH=/home/user/node22/bin:$PATH
 node -v
 
-cd /home/user/idasa
-npm i --no-audit --no-fund --silent hyperframes@0.8.52 || exit 15
-npx hyperframes browser ensure || true
-
-# The composition references assets/audio/master.wav. It has to exist BEFORE the
-# render starts — building it in parallel fails the run in the first minute.
+# The composition references the narration by path, so it has to exist before
+# the render starts; building it in parallel fails the run in the first minute.
 mkdir -p assets/audio
-if [ ! -s assets/audio/master.wav ]; then
-  ( cd audio && python3 mkaudio.py ) || exit 12
-  python3 - <<'PYX'
-import subprocess
-def dur(p):
-    return float(subprocess.run(['ffprobe','-v','error','-show_entries','format=duration',
-                                 '-of','csv=p=0',p], capture_output=True, text=True).stdout.strip())
-# Rebuilding the narration lands ~1s off the length the subtitle timings were cut
-# against, which drifts the captions by the end. A ~0.2% tempo nudge is inaudible
-# and locks them back together.
-src, want = 'audio/out/master.wav', float(__import__('os').environ.get('TARGET_SECONDS', '0')) or dur('audio/out/master.wav')
-have = dur(src)
-subprocess.run(f'ffmpeg -hide_banner -loglevel error -i {src} -af "atempo={have/want:.6f}" '
-               f'-ar 48000 -ac 2 assets/audio/master.wav -y', shell=True, check=True)
-print(f'[audio] {have:.3f} -> {dur("assets/audio/master.wav"):.3f}', flush=True)
-PYX
-fi
+( cd "examples/$P" && python3 mkaudio.py && cp out/master.mp3 ../../assets/audio/master.mp3 ) || exit 12
+[ -s assets/audio/master.mp3 ] || exit 12
+bash build.sh "$P" --audio assets/audio/master.mp3 || exit 13
 
 echo "=== RENDER START $(date -u +%T) ==="
 export HF_SEGMENTED_CAPTURE=true
-npx hyperframes render . -o /home/user/final.mp4 \
-  -q delivery -f 30 -w 8 --resolution 1080p --no-browser-gpu --best-effort \
-  --browser-timeout 180 --protocol-timeout 900000 --player-ready-timeout 180000 \
-  --resume --quiet
+npx hyperframes render . -o /home/user/master.mp4 \
+  -q delivery -f 30 -w 6 --resolution 1080p --no-browser-gpu --best-effort \
+  --browser-timeout 300 --protocol-timeout 1800000 \
+  --player-ready-timeout 300000 --resume --quiet
 RC=$?; echo "=== RENDER END rc=$RC $(date -u +%T) ==="
 [ $RC -ne 0 ] && exit 16
 
-ffprobe -v error -show_entries stream=codec_type,codec_name -of csv=p=0 /home/user/final.mp4
-ffmpeg -hide_banner -nostats -i /home/user/final.mp4 -af volumedetect -f null - 2>&1 \
-  | grep -E 'mean_volume|max_volume'
+ffprobe -v error -show_entries stream=codec_type,codec_name,width,height \
+  -of csv=p=0 /home/user/master.mp4
+ffprobe -v error -show_entries format=duration,size -of csv=p=0 /home/user/master.mp4
 
-# a lighter copy that opens straight from a link
-ffmpeg -hide_banner -loglevel error -i /home/user/final.mp4 \
-  -c:v libx264 -preset veryfast -crf 21 -pix_fmt yuv420p -c:a aac -b:a 160k \
-  -movflags +faststart /home/user/share.mp4 -y || exit 19
+# A copy that opens straight from a link. The target is about 100MB over
+# fourteen minutes, so the bitrate is computed from the real duration rather
+# than guessed, and two passes spend it where the picture needs it.
+D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 /home/user/master.mp4)
+VB=$(python3 -c "print(int((100*8*1000*1000/$D) - 128))")
+echo "=== LIGHT target ${VB}k video + 128k audio ==="
+ffmpeg -hide_banner -loglevel error -y -i /home/user/master.mp4 \
+  -c:v libx264 -preset slow -b:v ${VB}k -pass 1 -an -f mp4 /dev/null &&
+ffmpeg -hide_banner -loglevel error -y -i /home/user/master.mp4 \
+  -c:v libx264 -preset slow -b:v ${VB}k -pass 2 \
+  -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart \
+  /home/user/light.mp4 || exit 19
+ls -la /home/user/master.mp4 /home/user/light.mp4
 
-curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/final.mp4 "$PUT_URL" \
-  -o /dev/null -w 'UPLOAD HTTP %{http_code}\n' || exit 20
+curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/master.mp4 \
+  "$(cat /home/user/up/master.url)" -o /dev/null -w 'MASTER UPLOAD %{http_code}\n' || exit 20
+curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/light.mp4 \
+  "$(cat /home/user/up/light.url)" -o /dev/null -w 'LIGHT UPLOAD %{http_code}\n' || exit 21
 echo "=== ALL DONE $(date -u +%T) ==="
