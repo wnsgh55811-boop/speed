@@ -26,7 +26,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 OUT = os.path.join(ROOT, "assets", "img")
 CACHE = os.path.join(ROOT, "assets", ".cache")
-IDX = os.path.join(ROOT, "index.html")
+import glob
+IDX = sorted(glob.glob(os.path.join(ROOT, "*.html")))
 
 # A full-bleed plate is drawn at 1920x1080. An icon is drawn at 560px wide and
 # a cutout at 820px tall, so 1280 leaves better than 1.5x for both.
@@ -34,12 +35,14 @@ PLATE, INLINE = 1920, 1280
 
 os.makedirs(OUT, exist_ok=True)
 os.makedirs(CACHE, exist_ok=True)
-html = _io.open(IDX, encoding="utf-8").read()
-urls = sorted(set(re.findall(r'src="(https://[^"]+)"', html)))
-print(f"[localize] {len(urls)} remote assets referenced")
+pages = {f: _io.open(f, encoding="utf-8").read() for f in IDX}
+urls = sorted({u for h in pages.values()
+               for u in re.findall(r'src="(https://[^"]+)"', h)})
+print(f"[localize] {len(IDX)} composition(s), {len(urls)} remote assets")
 
 # which ones are background plates rather than inline elements
-plates = set(re.findall(r'<img id="ph\d+" src="(https://[^"]+)"', html))
+plates = {u for h in pages.values()
+          for u in re.findall(r'<img id="ph\d+" src="(https://[^"]+)"', h)}
 mapping, saved_before, saved_after = {}, 0, 0
 
 for u in urls:
@@ -70,10 +73,11 @@ for u in urls:
     print(f"  {'plate' if u in plates else 'inline'} "
           f"{'alpha' if alpha else 'opaque':6s} {im.size} -> {name}")
 
-for u, local in mapping.items():
-    html = html.replace(f'src="{u}"', f'src="{local}"')
-if re.search(r'src="https://', html):
-    sys.exit("some remote assets were left unmapped")
-_io.open(IDX, "w", encoding="utf-8").write(html)
+for f, html in pages.items():
+    for u, local in mapping.items():
+        html = html.replace(f'src="{u}"', f'src="{local}"')
+    if re.search(r'src="https://', html):
+        sys.exit(f"{os.path.basename(f)}: remote assets left unmapped")
+    _io.open(f, "w", encoding="utf-8").write(html)
 print(f"[localize] {saved_before/1e6:.1f}MB remote -> {saved_after/1e6:.1f}MB local "
       f"({saved_after/saved_before*100:.0f}%)")

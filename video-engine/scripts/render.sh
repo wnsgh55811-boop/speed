@@ -57,7 +57,11 @@ for k in $(seq 1 "$N"); do
   [ -s "/home/user/part$KK.mp4" ] && { echo "part $KK already rendered"; continue; }
   echo "=== PART $KK START $(date -u +%T) ==="
   export HF_SEGMENTED_CAPTURE=true
-  npx hyperframes render "part$KK.html" -o "/home/user/part$KK.mp4" \
+  # The renderer discovers the project's composition rather than taking a
+  # file, and every part carries the same composition id, so the part being
+  # rendered becomes index.html for the duration.
+  cp "part$KK.html" index.html
+  npx hyperframes render . -o "/home/user/part$KK.mp4" \
     -q delivery -f 30 -w 6 --resolution 1080p --no-browser-gpu --best-effort \
     --browser-timeout 300 --protocol-timeout 1800000 \
     --player-ready-timeout 300000 --resume --quiet
