@@ -9,7 +9,7 @@ Chain: per-block silence trim -> concat with the block's own gap -> loudnorm
 -> 1.2x. The speed-up happens here and only here; the blocks are generated at
 the voice's natural rate.
 """
-import json, os, subprocess, sys
+import json, os, re, subprocess, sys
 
 SPEED = 1.2
 VO, OUT = "vo", "out"
@@ -54,7 +54,27 @@ sh(f'ffmpeg -hide_banner -loglevel error -f concat -safe 0 -i "{VO}/list.txt" '
    f'-c copy "{VO}/joined.wav" -y')
 sh(f'ffmpeg -hide_banner -loglevel error -i "{VO}/joined.wav" '
    f'-af "loudnorm=I=-14.5:TP=-1.5:LRA=11,atempo={SPEED}" '
-   f'-ar 48000 -ac 2 "{OUT}/master.wav" -y')
+   f'-ar 48000 -ac 2 "{VO}/normed.wav" -y')
+
+
+def integrated(path):
+    out = subprocess.run(
+        f'ffmpeg -hide_banner -nostats -i "{path}" -af ebur128=peak=true '
+        f'-f null -', shell=True, text=True, capture_output=True).stderr
+    tail = out[out.rfind("Integrated loudness"):]
+    return float(re.search(r"I:\s+(-?[\d.]+) LUFS", tail).group(1))
+
+
+# loudnorm in one pass is a streaming estimate and lands about a decibel shy of
+# its target. Measure what actually came out and close the gap with a flat
+# gain: there is 4.6dB of peak headroom, so nothing has to be compressed to
+# get there.
+TARGET = -14.7
+have = integrated(f"{VO}/normed.wav")
+gain = TARGET - have
+sh(f'ffmpeg -hide_banner -loglevel error -i "{VO}/normed.wav" '
+   f'-af "volume={gain:.2f}dB" -ar 48000 -ac 2 "{OUT}/master.wav" -y')
+print(f"[audio] loudnorm gave {have:.1f} LUFS, {gain:+.2f}dB -> target {TARGET}")
 
 # The composition loads this in every render worker, and a 14-minute 48k
 # stereo wav is 160MB — enough to time out page load eight times over. A
