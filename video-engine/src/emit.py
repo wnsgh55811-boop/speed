@@ -788,7 +788,7 @@ def content(i, kind, arg, line, span_lines=()):
         # belongs to. Lines that only carry "라고 합니다" extend the scene
         # without adding a bubble.
         who = [w for w in arg.split("|") if w]
-        h, k = ['<div class="bub-stack">'], 0
+        h, k, prev = ['<div class="bub-stack">'], 0, None
         for j, ln in enumerate(span_lines):
             if not ln.startswith('"'):
                 continue
@@ -796,9 +796,13 @@ def content(i, kind, arg, line, span_lines=()):
             k += 1
             tag = "남자" if w == "m" else ("여자" if w == "w" else "내담자")
             side = "right" if w == "m" else "left"
+            # the name belongs on the first bubble of a run, not on every one
+            label = ("" if w == prev else
+                     f'<span class="who" data-layout-allow-overflow>'
+                     f'{esc(tag)}</span>')
+            prev = w
             h.append(f'<div class="bub-row {side} q" data-line="{j}">'
-                     f'<div class="bub {w}"><span class="who" '
-                     f'data-layout-allow-overflow>{esc(tag)}</span>'
+                     f'<div class="bub {w}">{label}'
                      f'{esc(ln.strip(chr(34)))}</div></div>')
         h.append("</div>")
         return "".join(h) if k else ""
@@ -858,10 +862,12 @@ def content(i, kind, arg, line, span_lines=()):
                 f'<span class="who" data-layout-allow-overflow>{esc(tag)}</span>{esc(line)}{strike}</div></div>')
     if kind == "H":
         num, _, word = arg.partition("|")
-        label = num[1:] if num.startswith("n") else (num.lstrip("0") or num)
+        label = num[1:] if num.startswith("n") else num
+        # The reference film sets a large ghosted numeral behind the keyword
+        # rather than a bead above it; this matches that.
         return (f'<div class="stage"><div class="scrim"></div>'
-                f'<div class="pearl">{esc(label)}</div>'
-                f'<div class="chap-word">{esc(word)}</div></div>')
+                f'<div class="chap"><span class="chap-num">{esc(label)}</span>'
+                f'<span class="chap-word">{esc(word)}</span></div></div>')
     if kind == "G":
         fn = GRAPHICS.get(arg)
         body = fn() if fn else ""
@@ -942,6 +948,11 @@ def main():
         cards, spans = [], []
         for k in range(span):
             ln = lines[li + k]
+            # A quote already set inside a bubble must not be repeated along
+            # the bottom; the lines around it that carry the narration still
+            # get their captions.
+            if kind == "Q" and ln.startswith('"'):
+                continue
             if shown is not None and ln.strip() == shown.strip():
                 continue
             lt0, lt1 = times[li + k]
@@ -983,6 +994,9 @@ def main():
   </div>{audio_tag}
 </div>
 <script>
+// The player supplies this registry; guarding it lets the same file be opened
+// on its own for frame checks instead of only inside the renderer.
+window.__timelines = window.__timelines || {{}};
 var tl = gsap.timeline({{ paused: true }});
 
 // Tween only what exists — recipes are shared across scene kinds, and GSAP
@@ -993,6 +1007,28 @@ function T(sel, from, to, at) {{
 }}
 var SC = {json.dumps(anim, separators=(",", ":"))};
 var CAPT = {json.dumps(cap_t, separators=(",", ":"))};
+
+// Diagrams draw themselves rather than fading in: a line that appears whole
+// says nothing, a line that travels says "this connects to that". Path lengths
+// come from the DOM so every figure works without hand-measuring it.
+function draw(sel, at, dur) {{
+  var ps = document.querySelectorAll(sel + " path");
+  for (var i = 0; i < ps.length; i++) {{
+    var el = ps[i], L;
+    try {{ L = el.getTotalLength(); }} catch (e) {{ continue; }}
+    if (!L || L < 8) continue;
+    el.style.strokeDasharray = L;
+    tl.fromTo(el, {{ strokeDashoffset: L }},
+              {{ strokeDashoffset: 0, duration: dur, ease: "power1.inOut" }},
+              at + Math.min(0.5, i * 0.07));
+  }}
+  var cs = document.querySelectorAll(sel + " circle, " + sel + " text, "
+                                     + sel + " rect");
+  if (cs.length)
+    tl.fromTo(cs, {{ opacity: 0 }},
+              {{ opacity: 1, duration: 0.34, ease: "power1.out",
+                 stagger: 0.06 }}, at + dur * 0.55);
+}}
 
 // plates drift so no frame is ever dead still
 SC.forEach(function (s) {{
@@ -1021,8 +1057,8 @@ SC.forEach(function (s) {{
     T(f + " .who", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3,
               ease: "power1.out" }}, t + 0.14);
   }} else if (s.k === "H") {{
-    T(f + " .pearl", {{ scale: 0.3, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t);
+    T(f + " .chap-num", {{ scale: 1.22, opacity: 0 }},
+              {{ scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" }}, t);
     T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }}, t + 0.18);
   }} else if (s.k === "Q") {{
@@ -1041,6 +1077,20 @@ SC.forEach(function (s) {{
                               ease: "sine.inOut" }}, nxt);
       }}
     }}
+  }} else if (s.k === "P") {{
+    // The mark draws itself in and the words rise under it, then the mark
+    // keeps breathing — 44 scenes carry this card, and a still one reads as a
+    // dropped frame.
+    T(f + " .pmark", {{ scale: 0.84, opacity: 0, rotate: -7 }},
+              {{ scale: 1, opacity: 1, rotate: 0, duration: 0.62,
+                 ease: "back.out(1.4)" }}, t);
+    T(f + " .hl", {{ yPercent: 34, opacity: 0 }},
+              {{ yPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out" }},
+              t + 0.16);
+    var pb = Math.max(0, Math.floor((s.d - 1.0) / 1.9) - 1);
+    if (pb > 0 && document.querySelector(f + " .picto"))
+      tl.to(f + " .picto", {{ scale: 1.045, duration: 0.95, ease: "sine.inOut",
+                              yoyo: true, repeat: pb }}, t + 0.8);
   }} else if (s.k === "Y") {{
     T(f + " .hl", {{ yPercent: 36, opacity: 0, scale: 1.04 }},
               {{ yPercent: 0, opacity: 1, scale: 1, duration: 0.6,
@@ -1058,8 +1108,13 @@ SC.forEach(function (s) {{
     if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.2, duration: 0.8,
                 ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
   }} else if (s.k === "N") {{
-    T(f + " svg", {{ scale: 0.94, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: dur, ease: "power2.out" }}, t);
+    T(f + " svg", {{ scale: 0.965, opacity: 0 }},
+              {{ scale: 1, opacity: 1, duration: 0.26, ease: "power2.out" }}, t);
+    draw(f, t + 0.04, Math.min(1.2, Math.max(0.5, s.d * 0.5)));
+    if (s.d > 2.2)
+      tl.fromTo(f + " svg", {{ y: 0 }},
+                {{ y: -9, duration: Math.min(s.d - 0.8, 6),
+                   ease: "sine.inOut" }}, t + 0.7);
   }} else if (s.k === "G") {{
     T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
@@ -1088,8 +1143,10 @@ SC.forEach(function (s) {{
     T(f + " .wavedot", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3 }}, t + 0.2);
     T(f + " .bar-fill", {{ scaleX: 0 }},
               {{ scaleX: 1, duration: 0.7, ease: "expo.out", stagger: 0.1 }}, t + 0.26);
-    T(f + " svg", {{ opacity: 0, scale: 0.95 }},
-              {{ opacity: 1, scale: 1, duration: dur, ease: "power2.out" }}, t);
+    T(f + " svg", {{ opacity: 0, scale: 0.96 }},
+              {{ opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }}, t);
+    if (!document.querySelector(f + " .wavepath"))
+      draw(f, t + 0.12, Math.min(1.4, Math.max(0.6, s.d * 0.5)));
     T(f + " .pmark", {{ opacity: 0, scale: 0.84 }},
               {{ opacity: 1, scale: 1, duration: 0.52, ease: "back.out(1.6)" }}, t + 0.06);
     T(f + " .hl, " + f + " .sub, " + f + " .gapline",
@@ -1097,6 +1154,18 @@ SC.forEach(function (s) {{
               {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out",
                  stagger: 0.08 }}, t + 0.1);
   }}
+}});
+
+// After the entrance, a wording card creeps almost imperceptibly instead of
+// freezing for the rest of its slot.
+SC.forEach(function (s) {{
+  if (!s.has || (s.k !== "T" && s.k !== "P" && s.k !== "H")) return;
+  if (s.d < 1.6) return;
+  var sel = "#fg" + String(s.i).padStart(3, "0") + " .stage";
+  if (!document.querySelector(sel)) return;
+  tl.fromTo(sel, {{ scale: 1 }},
+            {{ scale: 1.017, duration: Math.min(s.d - 0.6, 7),
+               ease: "sine.inOut" }}, s.t + 0.6);
 }});
 
 // captions: one line, fading up at each card's own start
