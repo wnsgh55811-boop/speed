@@ -53,7 +53,7 @@ with open(f"{VO}/list.txt", "w") as f:
 sh(f'ffmpeg -hide_banner -loglevel error -f concat -safe 0 -i "{VO}/list.txt" '
    f'-c copy "{VO}/joined.wav" -y')
 sh(f'ffmpeg -hide_banner -loglevel error -i "{VO}/joined.wav" '
-   f'-af "loudnorm=I=-15:TP=-1.5:LRA=11,atempo={SPEED}" '
+   f'-af "loudnorm=I=-14.5:TP=-1.5:LRA=11,atempo={SPEED}" '
    f'-ar 48000 -ac 2 "{OUT}/master.wav" -y')
 
 # The composition loads this in every render worker, and a 14-minute 48k
