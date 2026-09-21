@@ -265,5 +265,60 @@
   "kind": "portrait",
   "cut_job": "a2cebd05-3f44-4162-8fca-a76d1abee3a0"
  },
- "_note": "url = final asset (cut-outs point at the background-removed render). kind: photo | portrait | icon3d"
+ "_note": "url = final asset (cut-outs point at the background-removed render). kind: photo | portrait | icon3d",
+ "p_man_away": {
+  "raw_job": "0f3f8e72-2313-4761-86ea-c9529d4109db",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045746_26d607c8-5aa6-492d-b58e-faee692d5144.png",
+  "kind": "portrait"
+ },
+ "p_woman_thought": {
+  "raw_job": "529aef6f-6d1c-4532-8f30-b84efc37eceb",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045751_5de6f34d-0b46-4651-8ac8-9e633ddb82bf.png",
+  "kind": "portrait"
+ },
+ "p_man_laugh": {
+  "raw_job": "e49435f2-b974-40b5-92ad-a49e5ce68464",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045756_ee33509e-bd16-4b1b-91a2-79973213e6f5.png",
+  "kind": "portrait"
+ },
+ "p_woman_flat": {
+  "raw_job": "016969e7-e893-466c-8e6b-43fe8bc13ea2",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045802_aa8f1464-c54b-49b4-af0e-0e4e74e3e2f4.png",
+  "kind": "portrait"
+ },
+ "p_man_pockets": {
+  "raw_job": "ff8b783b-462a-4b63-804e-4b3552653a1f",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045807_577187c0-b118-4157-a545-4a2e8dedb7e0.png",
+  "kind": "portrait"
+ },
+ "p_man_settled": {
+  "raw_job": "cb6e565a-263f-47ac-87b4-480e19b0474f",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045812_07270563-817b-4188-8864-f535a72bc4e7.png",
+  "kind": "portrait"
+ },
+ "p_man_lean": {
+  "raw_job": "50f931ed-c7ef-4f9d-a76f-2d246a30764e",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045818_1644eecf-e38b-4679-a3be-26d61d0bc558.png",
+  "kind": "portrait"
+ },
+ "ph_alone_phone": {
+  "raw_job": "e3ebf7f3-88c5-405b-b1e6-bd9e8f96b366",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045613_e3ebf7f3-88c5-405b-b1e6-bd9e8f96b366.png",
+  "kind": "photo"
+ },
+ "ph_woman_laugh": {
+  "raw_job": "daddebfd-28fb-46e6-95df-7c4491222d2c",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045613_daddebfd-28fb-46e6-95df-7c4491222d2c.png",
+  "kind": "photo"
+ },
+ "ph_over_shoulder": {
+  "raw_job": "74eb298d-f62e-406c-821e-5487d5f9aef3",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_045613_74eb298d-f62e-406c-821e-5487d5f9aef3.png",
+  "kind": "photo"
+ },
+ "p_woman_eval": {
+  "raw_job": "437debfa-78a6-4899-80cc-bdbef23450c7",
+  "kind": "portrait",
+  "url": "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/hf_20260921_073606_06930f59-1482-42b3-889b-2eb588ac17eb.png"
+ }
 }

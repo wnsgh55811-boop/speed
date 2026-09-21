@@ -12,12 +12,12 @@ sc(4,4,"photo",   dict(kind="photo", img="ph_cafe_window", center="소개팅 장
 sc(5,5,"photo",   dict(kind="photo", img="ph_door_open", center="상대가 들어온다"))
 sc(6,6,"ember",   dict(kind="portrait", img="p_woman_enter", label="사진보다 훨씬"))
 sc(7,7,"violet",  dict(kind="hero3d", img="i3_brain", big="머리가 바빠진다"))
-sc(8,8,"violet",  dict(kind="bubbles", tone="thought", title="머릿속",
+sc(8,8,"violet",  dict(kind="bubbles", tone="thought", title="머릿속", portrait="p_man_away",
                        items=["잘 보여야 되는데","재밌게 해야 되는데","첫인상 망치면 안 되는데"]))
 sc(9,9,"teal",    dict(kind="hero3d", img="i3_bubble", big="인사", small=True))
 sc(10,10,"teal",  dict(kind="bubbles", tone="say", ok=True, title="첫마디", items=["안녕하세요."]))
 sc(11,11,"charcoal",dict(kind="hero3d", img="i3_door", big="여기서부터", sub2="조금씩 달라진다"))
-sc(12,14,"slate", dict(kind="bubbles", tone="say", title="첫 5분 동안 한 말",
+sc(12,14,"slate", dict(kind="bubbles", tone="say", title="첫 5분 동안 한 말", portrait="p_man_talk",
                        items=["오는 길 괜찮으셨어요?","여기 찾기 어렵진 않으셨어요?","뭐 드실래요?"]))
 sc(15,17,"slate", dict(kind="bubbles", tone="say", title="첫 5분 동안 한 말",
                        items=["저는 아무거나 괜찮아요.","편하신 걸로 드세요.","사진보다 훨씬 예쁘시네요."]))
@@ -27,7 +27,7 @@ sc(20,20,"ember", dict(kind="compare", title="무엇이 전달되는가",
                        left=("무슨 말을 했느냐","말의 내용",34),
                        right=("그 말을 하는 사람의 상태","태도와 상태",94)))
 sc(21,21,"blue",  dict(kind="hero3d", img="i3_eye", big="계속 반응을 확인한다", small=True))
-sc(22,24,"blue",  dict(kind="list", title="머릿속 체크리스트", mark="q",
+sc(22,24,"blue",  dict(kind="list", title="머릿속 체크리스트", mark="q", bgphoto="ph_alone_phone",
                        items=["내가 웃기면 웃는지","표정이 굳지는 않았는지","내가 마음에 드는 것 같은지"]))
 sc(25,25,"photo", dict(kind="photo", img="ph_mirror", center="상대가 좋아할 답을 먼저 찾는다"))
 sc(26,26,"slate", dict(kind="hero3d", img="i3_mirror", big="첫인상", sub2="보통은 외모부터 떠올린다"))
@@ -39,14 +39,14 @@ sc(33,37,"teal",  dict(kind="list", title="같이 읽히는 것들", mark="dot",
                               "어색할 때 어떻게 반응하는지","실수했을 때 얼마나 흔들리는지"]))
 sc(38,38,"teal",  dict(kind="hero3d", img="i3_magnifier", big="이런 것도 같이 인식된다", small=True))
 sc(39,39,"ember", dict(kind="strike", target="첫인상 = 외모", note="저는 그렇게 보지 않습니다"))
-sc(40,41,"ember", dict(kind="quote", big="마음에 드는 사람을 만났을 때\n나는 어떤 사람이 되는가"))
+sc(40,41,"ember", dict(kind="quote", big="나는 어떤 사람이 되는가"))
 sc(42,42,"charcoal",dict(kind="hero3d", img="i3_question", big="한번 생각해보세요", small=True))
 sc(43,43,"photo", dict(kind="photo", img="ph_cafe", center="마음에 안 들면 오히려 편하다"))
 sc(44,44,"photo", dict(kind="photo", img="ph_menu", center="메뉴를 본다"))
-sc(45,45,"slate", dict(kind="bubbles", tone="say", ok=True, title="나",
+sc(45,45,"slate", dict(kind="bubbles", tone="say", ok=True, title="나", portrait="p_man_lean",
                        items=["저는 아메리카노 마실게요.","뭐 드실래요?"]))
 sc(46,47,"slate", dict(kind="hero3d", img="i3_glass", big="그냥 자연스럽습니다", small=True))
-sc(48,48,"teal",  dict(kind="bubbles", tone="her", title="상대",
+sc(48,48,"teal",  dict(kind="bubbles", tone="her", title="상대", portrait="p_woman_thought",
                        items=["저는 여행할 때 계획 안 짜는 게 좋아요."]))
 sc(49,51,"teal",  dict(kind="bubbles", tone="say", ok=True, title="나",
                        items=["진짜요? 저는 계획 엄청 짜는데","완전 반대네요."]))
@@ -57,13 +57,13 @@ sc(53,54,"ember", dict(kind="bubbles", tone="her", title="상대", portrait="p_w
 sc(55,55,"violet",dict(kind="compare", title="실제 취향", neutral=True,
                        left=("즉흥 여행","남자의 진짜 취향",90),
                        right=("계획 여행","상대가 말한 취향",22)))
-sc(56,57,"violet",dict(kind="bubbles", tone="thought", title="머릿속",
+sc(56,57,"violet",dict(kind="bubbles", tone="thought", title="머릿속", portrait="p_man_pockets",
                        items=["나는 계획 잘 안 짜는데","안 맞는 사람처럼 보이려나?"]))
 sc(58,60,"violet",dict(kind="bubbles", tone="say", warp=True, title="입 밖으로 나온 말",
                        items=["저도 계획 짜는 편이에요."]))
 sc(61,61,"charcoal",dict(kind="hero", big="한 번이면 괜찮습니다", small=True))
 sc(62,62,"blue",  dict(kind="portrait", img="p_man_tense", label="사람이 흐릿해진다", fade=True))
-sc(63,66,"blue",  dict(kind="list", title="반복되는 대답", mark="loop",
+sc(63,66,"blue",  dict(kind="list", title="반복되는 대답", mark="loop", bgphoto="ph_over_shoulder",
                        items=["좋아한다고 하면 나도 좋아한다고 하고","싫어한다고 하면 나도 별로라고 하고",
                               "장소는 아무 데나 괜찮다고 하고","메뉴도 아무거나 괜찮다고 합니다"]))
 sc(67,68,"photo", dict(kind="photo", img="ph_table", center="어떤 사람인지 알기 어려워진다"))

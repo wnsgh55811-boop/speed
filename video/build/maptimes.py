@@ -12,7 +12,7 @@ blocks = json.load(open('blocks2.json'))
 GAP, LEAD = 0.26, 0.10
 strip = lambda s: re.sub(r'[^0-9가-힣]', '', s)
 
-cues, t = [], 0.0
+cues, words_abs, t = [], [], 0.0
 for bi, blk in enumerate(blocks):
     words = json.load(open(f'words/b{bi:02d}.json'))
     dur = float(subprocess.run(['ffprobe','-v','error','-show_entries','format=duration',
@@ -28,6 +28,9 @@ for bi, blk in enumerate(blocks):
     for w in words:
         for ch in strip(w['w']):
             heard_chars.append(ch); heard_t.append((w['s'], w['e']))
+
+    for w in words:
+        words_abs.append({'w': w['w'], 's': round(t + w['s'], 3), 'e': round(t + w['e'], 3)})
 
     sm = difflib.SequenceMatcher(None, script_chars, heard_chars, autojunk=False)
     span = {}
@@ -50,5 +53,6 @@ for bi, blk in enumerate(blocks):
 total = round(t - GAP + 0.6, 3)
 json.dump({'cues': cues, 'total': total, 'gap': GAP, 'lead': LEAD},
           open('cues.json','w'), ensure_ascii=False)
-print(f'lines {len(cues)}  video {total:.1f}s ({total/60:.2f} min)  '
+json.dump(words_abs, open('words_abs.json','w'), ensure_ascii=False)
+print(f'words {len(words_abs)}  lines {len(cues)}  video {total:.1f}s ({total/60:.2f} min)  '
       f'unmatched {sum(1 for c in cues if c["e"]-c["t"] <= 0.36)}')

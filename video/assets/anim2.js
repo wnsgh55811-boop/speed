@@ -40,12 +40,18 @@
     const photo = sc.querySelector('.photo');
     if (photo) TL.fromTo(photo, { scale: 1.04 }, { scale: 1.11, duration: m.dur, ease: 'none' }, st);
 
+    /* an element with data-at arrives on the word that says it */
+    const when = (el, fallback) => {
+      const v = el.dataset.at;
+      return v === undefined ? fallback : Math.max(st, Number(v));
+    };
     q('.rows .row', sc).forEach((r, k) => TL.fromTo(r, { opacity: 0, x: -18 },
-      { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, at + 0.2 + k * 0.26));
+      { opacity: 1, x: 0, duration: 0.3, ease: 'power2.out' }, when(r, at + 0.2 + k * 0.26)));
     q('.bub', sc).forEach((b, k) => TL.fromTo(b, { opacity: 0, y: 14, scale: .97 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'back.out(1.5)' }, at + 0.18 + k * 0.34));
+      { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'back.out(1.5)' },
+      when(b, at + 0.18 + k * 0.34)));
     q('.chip', sc).forEach((c, k) => TL.fromTo(c, { opacity: 0, y: 14 },
-      { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, at + 0.2 + k * 0.18));
+      { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }, when(c, at + 0.2 + k * 0.18)));
 
     /* bars, meters and gauges: width driven from data-w, block-level and sized */
     q('.fill,.meterf,.gfill', sc).forEach((f, k) => TL.fromTo(f, { width: '0%' },
@@ -82,6 +88,7 @@
       { opacity: 1, scale: 1, duration: 0.42, ease: 'power2.out' }, at + 0.2 + k * 0.16));
   });
 
+  window.__timelines = window.__timelines || {};
   window.__timelines['main'] = TL;
   TL.seek(0);
 })();

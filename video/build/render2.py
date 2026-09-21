@@ -1,3 +1,4 @@
+import re
 # -*- coding: utf-8 -*-
 import html as H
 from css2 import CY, AM, PK, GR
@@ -20,17 +21,32 @@ def _dots(val, color):
             "".join(f'<i class="dot{" on" if i<on else ""}"></i>' for i in range(5)) + '</div>')
 _ticks = lambda n=10: '<div class="ticks">' + '<i class="tick"></i>'*n + '</div>'
 
+def _adv(t, px):
+    """approx Pretendard ExtraBold advance, letter-spacing -.03em"""
+    u = sum(0.95 if ord(c) > 0x1100 else (0.28 if c == ' ' else 0.52) for c in t)
+    return u * px * 0.97
+
+def one(t, px, box=1480):
+    """centre hero copy is always a single line: never wraps, never breaks"""
+    t = str(t).replace("\n", " ").strip()
+    t = re.sub(r"\s+", " ", t)
+    while _adv(t, px) > box and px > 46:
+        px -= 2
+    return e(t), px
+
 def r_hero(v):
     sup = f'<div class="kicker">{e(v["sup"])}</div>' if v.get("sup") else ""
     sub2 = f'<div class="h-sm muted">{e(v["sub2"])}</div>' if v.get("sub2") else ""
     cls = "h-lg" if v.get("small") else "h-xl"
-    return f'{sup}<div class="{cls}">{nl(v["big"])}</div>{sub2}'
+    txt, px = one(v["big"], 92 if v.get("small") else 126, 1560)
+    return f'{sup}<div class="{cls}" style="font-size:{px}px">{txt}</div>{sub2}'
 
 def r_hero3d(v):
     return art(v, 240 if v.get("small") else 290) + r_hero(v)
 
 def r_quote(v):
-    return f'<div class="qmark">&ldquo;</div><div class="h-lg" style="max-width:1400px">{nl(v["big"])}</div>'
+    txt, px = one(v["big"], 92, 1400)
+    return f'<div class="qmark">&ldquo;</div><div class="h-lg" style="font-size:{px}px">{txt}</div>'
 
 def r_chapter(v):
     return f'<div class="chapnum">{e(v["num"])}</div><div class="h-lg">{e(v["big"])}</div>'
@@ -48,7 +64,10 @@ def r_strike(v):
             f'<div class="h-sm muted">{e(v["note"])}</div>')
 
 def r_photo(v):
-    return f'<div class="h-lg">{nl(v["center"])}</div>' if v.get("center") else ""
+    if not v.get("center"):
+        return ""
+    txt, px = one(v["center"], 92, 1500)
+    return f'<div class="h-lg" style="font-size:{px}px">{txt}</div>'
 
 def r_portrait(v):
     return (f'<div class="pcard"><img class="paper" src="assets/img/{v["img"]}.png" '
@@ -56,9 +75,13 @@ def r_portrait(v):
             f'<div class="h-sm">{e(v["label"])}</div>')
 
 def r_chips(v):
-    cells = "".join(f'<div class="chip{" on" if v.get("on") and t in v["on"] else ""}">{e(t)}</div>'
-                    for t in v["items"])
+    cells = "".join(f'<div class="chip{" on" if v.get("on") and t in v["on"] else ""}"{_at(v,i)}>{e(t)}</div>'
+                    for i, t in enumerate(v["items"]))
     return f'<div class="h-md">{e(v["title"])}</div><div class="chips">{cells}</div>'
+
+def _at(v, i):
+    ts = v.get('_at') or []
+    return f' data-at="{ts[i]}"' if i < len(ts) else ''
 
 def r_list(v):
     marks = {"dot":'<span class="mkdot"></span>', "q":'<span class="mkq">?</span>',
@@ -66,12 +89,12 @@ def r_list(v):
              "check":'<span class="mkc"></span>', "loop":'<span class="mkm"></span>',
              "pause":'<span class="mkm"></span>'}
     mk = marks.get(v.get("mark","dot"), marks["dot"])
-    rows = "".join(f'<div class="row"><span class="mk">{mk}</span><span>{e(t)}</span></div>'
-                   for t in v["items"])
+    rows = "".join(f'<div class="row"{_at(v,i)}><span class="mk">{mk}</span><span>{e(t)}</span></div>'
+                   for i, t in enumerate(v["items"]))
     return f'<div class="h-md">{e(v["title"])}</div><div class="rows">{rows}</div>'
 
 def r_steps(v):
-    rows = "".join(f'<div class="row"><span class="stepn">{i+1}</span><span>{e(t)}</span></div>'
+    rows = "".join(f'<div class="row"{_at(v,i)}><span class="stepn">{i+1}</span><span>{e(t)}</span></div>'
                    for i, t in enumerate(v["items"]))
     return f'<div class="h-md">{e(v["title"])}</div><div class="rows">{rows}</div>'
 
@@ -82,7 +105,7 @@ def r_bubbles(v):
         if tone == "mix": c = "say" if i % 2 == 0 else "her"
         d = " dense" if v.get("dense") else ""
         x = f'<div class="bubx">{xmark(50)}</div>' if v.get("crossed") else ""
-        out.append(f'<div class="bub {c}{d}">{e(t)}{x}</div>')
+        out.append(f'<div class="bub {c}{d}"{_at(v,i)}>{e(t)}{x}</div>')
     body = (f'<div class="kicker">{e(v["title"])}</div><div class="bubs">{"".join(out)}</div>'
             + ('<div class="okdot"></div>' if v.get("ok") else ''))
     if v.get("portrait"):
@@ -154,9 +177,9 @@ def r_mutual(v):
 
 def r_beforeafter(v):
     return (f'<div class="h-md">{e(v["title"])}</div><div class="bubs">'
-            f'<div class="bub say dense before">{e(v["before"])}'
+            f'<div class="bub say dense before"{_at(v,0)}>{e(v["before"])}'
             f'<div class="bubx">{xmark(50)}</div></div>'
-            f'<div class="bub say dense after">{e(v["after"])}</div></div>')
+            f'<div class="bub say dense after"{_at(v,1)}>{e(v["after"])}</div></div>')
 
 def r_growdot(v):
     return (f'<div class="h-md">{e(v["title"])}</div><div class="grow">'

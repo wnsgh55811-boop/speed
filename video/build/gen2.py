@@ -4,13 +4,60 @@
 Subtitle windows come straight from the words the narration actually says, so
 nothing here guesses at sync. Scene windows are derived from the cues they own.
 """
-import json, os, sys, html as H
+import json, os, sys, re, difflib, html as H
 from css2 import CSS, BG
 import render2
 
 FPS, W, Hh = 30, 1920, 1080
 SUB_MAX_W = 1560
 LEAD, TAIL = 0.12, 0.10        # visual lead-in / hold; deliberately small
+
+_bare = lambda s: re.sub(r'[^0-9\uac00-\ud7a3]', '', str(s))
+
+def pin_items(items, words, t0, t1, lead=0.04):
+    """When does each item actually get said?
+
+    Slides the item's bare characters against the words spoken inside this
+    scene's window and returns the start of its first matching word. Items the
+    narration never says (design labels, axis captions) fall back to an even
+    spread so they still arrive one at a time rather than all at once.
+    """
+    win = [w for w in words if w['e'] > t0 - 0.35 and w['s'] < t1 + 0.35]
+    if not win or not items:
+        n = max(1, len(items))
+        return [round(t0 + (t1 - t0) * i / (n + 1), 3) for i in range(len(items))]
+    chars, tmap = [], []
+    for w in win:
+        for ch in _bare(w['w']):
+            chars.append(ch); tmap.append(w['s'])
+    out, cursor = [], 0
+    for it in items:
+        target = _bare(it)
+        best_t, best_n, best_end = None, 0, cursor
+        if target and chars:
+            sm = difflib.SequenceMatcher(None, target, chars[cursor:], autojunk=False)
+            blocks = [b for b in sm.get_matching_blocks() if b.size > 0]
+            if blocks:
+                n = sum(b.size for b in blocks)
+                if n >= max(2, len(target) * 0.45):
+                    best_t = tmap[cursor + blocks[0].b]
+                    best_n = n
+                    best_end = cursor + blocks[-1].b + blocks[-1].size
+        if best_t is None:
+            out.append(None)
+        else:
+            out.append(round(max(t0, best_t - lead), 3)); cursor = min(best_end, len(chars))
+    # fill unmatched slots between their matched neighbours
+    for i, v in enumerate(out):
+        if v is not None: continue
+        prev = next((out[j] for j in range(i-1, -1, -1) if out[j] is not None), t0)
+        nxt  = next((out[j] for j in range(i+1, len(out)) if out[j] is not None), t1)
+        out[i] = round(prev + (nxt - prev) * 0.5, 3)
+    # keep them strictly in order and inside the scene
+    last = t0
+    for i in range(len(out)):
+        out[i] = round(min(max(out[i], last), max(t0, t1 - 0.12)), 3); last = out[i]
+    return out
 
 def main():
     cues   = json.load(open('cues.json'))
@@ -33,11 +80,15 @@ def main():
     scenes[-1]['_dur'] = round(total - scenes[-1]['_start'], 3)
 
     # ---- subtitles: drop a line the centre type already says ----
+    words = json.load(open('words_abs.json')) if os.path.exists('words_abs.json') else []
     widths = json.load(open('sub_widths2.json')) if os.path.exists('sub_widths2.json') else {}
     subs = []
     for s in scenes:
         v = s['vis']
         centre = {str(v.get(k,'')).replace('\n',' ').strip() for k in ('big','center','target')}
+        # a quote bubble carries the spoken words verbatim; the subtitle would just double it
+        if v['kind'] == 'bubbles':
+            centre |= {str(t).strip() for t in v.get('items', [])}
         for c in s['_cues']:
             if c['text'].strip() in centre:
                 continue
@@ -45,6 +96,15 @@ def main():
     over = [x for x in subs if widths.get(x['text'], 0) > SUB_MAX_W]
 
     # ---- markup ----
+    ITEMKEYS = {'bubbles':'items','list':'items','steps':'items','chips':'items'}
+    for s in scenes:
+        v = s['vis']; key = ITEMKEYS.get(v['kind'])
+        if key and v.get(key):
+            v['_at'] = pin_items(v[key], words, s['_start'], s['_start'] + s['_dur'])
+        elif v['kind'] == 'beforeafter':
+            v['_at'] = pin_items([v['before'], v['after']], words,
+                                 s['_start'], s['_start'] + s['_dur'])
+
     scene_html = []
     for i, s in enumerate(scenes):
         base, bloom = BG[s['bg']]
@@ -53,6 +113,10 @@ def main():
         if v['kind'] == 'photo':
             photo = (f'<div class="photo" style="background-image:url(assets/img/{v["img"]}.jpg)"></div>'
                      f'<div class="scrim"></div>')
+        elif v.get('bgphoto'):
+            # a person photo behind ordinary type; heavier scrim so the copy still clears AA
+            photo = (f'<div class="photo dim" style="background-image:url(assets/img/{v["bgphoto"]}.jpg)">'
+                     f'</div><div class="scrim heavy"></div>')
         scene_html.append(
             f'<div class="scene clip" id="sc{i}" data-start="{s["_start"]}" '
             f'data-duration="{s["_dur"]}" data-track-index="1">'
