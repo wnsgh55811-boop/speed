@@ -2,4 +2,3 @@ node_modules/
 snapshots/
 out/
 assets/audio/*.mp3
-assets/fonts/*.otf
