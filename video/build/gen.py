@@ -135,15 +135,24 @@ def main():
         f'<div class="sub clip" data-start="{s["t"]}" data-duration="{s["d"]}" '
         f'data-track-index="2">{H.escape(s["text"])}</div>' for s in subs)
 
-    audio_html = "".join(
-        f'<audio id="vo{i}" src="assets/audio/s{i:03d}.mp3" data-start="{sc["_start"]+LEAD}" '
-        f'data-track-index="3"></audio>' for i, sc in enumerate(S)
-        if os.path.exists(f'../assets/audio/s{i:03d}.mp3'))
+    # One pre-mixed master track: narration placed at its exact cue time with the
+    # effect cues summed in. Renders far leaner than 114 separate elements and
+    # makes the soundtrack verifiable as a standalone file.
+    if os.path.exists('../assets/audio/master.mp3'):
+        audio_html = ('<audio id="vo" src="assets/audio/master.mp3" '
+                      'data-start="0" data-track-index="3"></audio>')
+    else:
+        audio_html = "".join(
+            f'<audio id="vo{i}" src="assets/audio/s{i:03d}.mp3" data-start="{sc["_start"]+LEAD}" '
+            f'data-track-index="3"></audio>' for i, sc in enumerate(S)
+            if os.path.exists(f'../assets/audio/s{i:03d}.mp3'))
 
     idx = {s['key']: s for s in S}
     sfx_html = ""
     for n, (name, key, off) in enumerate(SFX):
         sc = idx.get(key)
+        if os.path.exists('../assets/audio/master.mp3'):
+            continue
         if not sc or not os.path.exists(f'../assets/audio/sfx_{name}.mp3'):
             continue
         sfx_html += (f'<audio id="sfx{n}" src="assets/audio/sfx_{name}.mp3" '
