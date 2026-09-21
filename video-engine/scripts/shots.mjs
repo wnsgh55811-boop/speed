@@ -11,7 +11,7 @@ const [out, ...ts] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: process.env.PW_CHROME || undefined,
   args: ['--force-color-profile=srgb', '--font-render-hinting=none'],
 });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });

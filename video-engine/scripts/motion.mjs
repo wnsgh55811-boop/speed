@@ -13,7 +13,7 @@ const clips = [...html.matchAll(/id="fg(\d{3})" data-start="([\d.]+)" data-durat
   .map(m => ({ i: +m[1], s: +m[2], d: +m[3] }));
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: process.env.PW_CHROME || undefined,
 });
 const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
 await page.goto('file://' + resolve('index.html'), { waitUntil: 'load' });
