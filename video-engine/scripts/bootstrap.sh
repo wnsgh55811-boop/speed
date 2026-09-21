@@ -45,9 +45,15 @@ if [ -s /home/user/up/get.txt ]; then
   while read -r k url; do
     [ -z "$k" ] && continue
     [ -s "/home/user/part$k.mp4" ] && continue
-    curl -fsSL -o "/home/user/part$k.mp4" "$url" \
-      && ffprobe -v error -show_entries format=duration -of csv=p=0 "/home/user/part$k.mp4" \
-      || rm -f "/home/user/part$k.mp4"
+    # A part is only worth keeping if it decodes and runs the length a part
+    # runs; a truncated or 404 body must not stand in for a rendered piece.
+    if curl -fsSL -o "/home/user/part$k.mp4" "$url"; then
+      D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "/home/user/part$k.mp4" 2>/dev/null)
+      case $D in ''|0*|1[0-2]*) echo "part$k recovered body unusable (${D:-no duration})"
+        rm -f "/home/user/part$k.mp4";; *) echo "part$k recovered ${D}s";; esac
+    else
+      rm -f "/home/user/part$k.mp4"
+    fi
   done < /home/user/up/get.txt
 fi
 ls -la /home/user/part*.mp4 2>/dev/null
