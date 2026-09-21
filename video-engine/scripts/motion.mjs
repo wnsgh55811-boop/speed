@@ -16,7 +16,12 @@ const browser = await chromium.launch({
   executablePath: process.env.PW_CHROME || undefined,
 });
 const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
-await page.goto('file://' + resolve('index.html'), { waitUntil: 'load' });
+// 'load' would wait on the narration wav too, which is 160MB; the stills
+// only need the images decoded.
+await page.goto('file://' + resolve('index.html'), { waitUntil: 'domcontentloaded' });
+await page.waitForFunction(
+  () => [...document.images].every(i => i.complete),
+  null, { timeout: 180000 });
 await page.evaluate(() => {
   const root = document.getElementById('root');
   window.__clips = [...root.querySelectorAll('.clip')].map(el => {
