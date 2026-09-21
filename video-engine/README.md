@@ -22,30 +22,49 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
 | 경로 | 내용 |
 |---|---|
 | `PROMPT.md` | 붙여넣기용 제작 프롬프트. 스타일·절대 규칙·전달 방식 |
-| `src/emit.py` | 씬 빌더. 도식 40여 종, 픽토그램 24종, GSAP 모션 |
+| `QA.md` | 렌더 후 실제 프레임 점검 항목 |
+| `STYLE_GUIDE.md` | 디자인 토큰·모션 문법 |
+| `src/emit.py` | 씬 빌더. 도식 40여 종, 픽토그램 24종, GSAP 모션, `--part K/N` |
 | `src/style.css` | 디자인 시스템. 배경 8종, 자막, 말풍선, 그래프, 누끼 |
 | `src/build.py` | 자막 실측 분할, 에셋 라운드로빈 |
 | `src/mkpreview.py` | 컴포지션 → 브라우저 프리뷰 빌더 |
+| `build.sh` | 프로젝트의 `plan.py`·`chunks.json`·`timings.txt` 를 `src/` 로 스테이징 |
+| `scripts/bootstrap.sh` | **빈 샌드박스 → 결과물.** 재실행 가능 (업로드된 파트는 회수) |
+| `scripts/render.sh` | 오디오 → 파트 emit → 로컬라이즈 → 파트별 렌더·업로드 |
+| `scripts/finish.sh` | 파트 합치기 → MASTER → LIGHT. master 있으면 LIGHT 부터 |
+| `scripts/localize.py` | 원격 에셋을 로컬로 내려 모든 `*.html` 을 고쳐씀 |
 | `scripts/paper.py` | 누끼 + 손으로 찢은 종이 테두리 처리 |
-| `scripts/mkaudio.py` | 나레이션 조각 이어붙이기 → master.wav |
-| `scripts/render.sh` | 샌드박스 1회성 렌더 (오디오 → 렌더 → 업로드) |
-| `examples/idasa/` | "공백의 태도" 씬 플랜·대본·타이밍 (참고용) |
+| `scripts/{shots,motion,check}.mjs` | 프레임 캡처 · 씬별 모션 델타 · 레이아웃 검사 |
+| `examples/talk/mkchunks.py` | 대본 → TTS 블록 (짧게 쪼개면 음색이 튄다) |
+| `examples/talk/mkaudio.py` | TTS 블록 → master.mp3 (+ 라우드니스 정규화) |
+| `examples/talk/align.py` | faster-whisper 강제정렬 → 줄별 `timings.txt` |
+| `examples/talk/` | "질문이 끝나면 대화도 끝납니다" 플랜·대본·타이밍 |
+| `examples/idasa/` | "공백의 태도" (참고용) |
 
-`src/` 는 프로젝트 무관하게 재사용, `examples/` 는 이번 영상 전용이다.
+`src/` 는 프로젝트 무관하게 재사용, `examples/` 는 영상 전용이다.
 새 영상은 `examples/` 를 복사해서 `plan.py` 와 `chunks.json` 만 새로 쓴다.
 
 ## 파이프라인
 
 ```
-대본 → 문장 분할 (chunks.json)
-     → 힉스필드 TTS → 조각 오디오 → mkaudio.py → master.wav
-     → 문장별 타이밍 (timings.txt)
+대본 → mkchunks.py → 3분짜리 TTS 블록 6개 (chunks.json)
+     → 힉스필드 TTS(일레븐랩스, 1.2배속) → mkaudio.py → master.mp3
+     → align.py (강제정렬) → 줄별 timings.txt
      → 씬 플랜 (plan.py: 씬 종류 + 에셋)
-     → emit.py → index.html (HyperFrames 컴포지션)
-     → hyperframes check (린트 · 레이아웃 · 모션 · 대비)
-     → hyperframes snapshot (프레임 눈으로 확인)
-     → render.sh → MP4
+     → emit.py --part K/N → part01..06.html (씬 경계에 맞춰 분할)
+     → localize.py (에셋 로컬화: 워커 기동 68초 → 14초)
+     → render.sh → 파트별 MP4, 끝나는 즉시 업로드
+     → finish.sh → MASTER(영상 copy + 나레이션 1본) → LIGHT(2패스 ~100MB)
 ```
+
+한 번에 다 돌리려면 샌드박스에서:
+
+```
+setsid nohup bash scripts/bootstrap.sh </dev/null > /home/user/b.log 2>&1 &
+```
+
+`sandbox_exec` 는 60초에 끊기고 샌드박스는 예고 없이 회수되므로,
+렌더는 반드시 `setsid` 로 떼어 놓고 로그만 폴링한다.
 
 ## 씬 종류 (`plan.py`)
 
@@ -60,8 +79,12 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
 | `K` | 인용 말풍선 | `m` 남자 / `w` 여자 / `n` 내담자, 끝에 `x` = 취소선 |
 | `H` | 챕터 헤더 | `"번호\|키워드"` |
 | `G` | 인포그래픽 | 그래픽 id |
+| `Q` | 말풍선 대화 묶음 | `m`/`w`/`n` 을 `|` 로 이어붙임. 줄별로 차례로 등장 |
+| `Y` | 사진 플레이트 + 헤드라인 | `"에셋키|문구"` |
 
 `T`·`H`·`P` 는 문장이 화면 중앙에 크게 뜨므로 하단 자막을 내보내지 않는다.
+`Q` 도 말풍선 안에 들어간 인용 줄은 자막으로 겹쳐 내보내지 않는다.
+`T` 는 arg 가 비면 대본 줄을 그대로 헤드라인으로 쓴다 (버그 아님).
 
 ## 이번에 잡은 버그 (다시 밟지 말 것)
 
@@ -81,8 +104,41 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
   렌더 도중 자리를 비우지 말 것.
 - **오디오 누락으로 렌더 즉시 실패** — 컴포지션이 참조하는 오디오 파일은
   렌더 시작 전에 존재해야 한다. 병렬로 만들면 늦는다.
+- **렌더가 60초마다 `render_cancelled_parent_exited` 로 죽음** — 렌더러는 시작할 때
+  자기 PPID 사슬을 스냅샷해 두고 조상이 사라지면 잡을 취소한다. 샌드박스는 호출
+  셸을 60초에 정리하므로 `setsid` 로도 안 된다. `HYPERFRAMES_RENDER_DETACHED=1` 이
+  스냅샷 자체를 건너뛴다.
+- **`npm i` 가 렌더러를 안 깔았는데 성공처럼 보임** — `package.json` 이 playwright
+  만 의존성으로 두고 렌더러는 npm script 안에서 `npx --yes hyperframes@...` 로
+  불렀다. 렌더러를 진짜 dependency 로 박아야 설치가 실패하면 실패한다.
+- **파트 렌더가 매번 전체 영상을 렌더** — 렌더러는 파일을 받지 않고 프로젝트의
+  컴포지션을 찾아간다. 파트를 `index.html` 로 복사해 놓고 렌더할 것.
+- **`localize.py` 가 `index.html` 만 고쳐써서 파트는 CDN 을 계속 봄** — 프로젝트
+  루트의 모든 `*.html` 을 고쳐쓰고, 남은 원격 참조가 있으면 파일명을 대고 죽을 것.
+- **LIGHT 목표 비트레이트가 1000배** — bit/s 로 계산한 값을 ffmpeg 에 `${VB}k` 로
+  넘겼다. 100MB = 800000 kbit 이므로 ffmpeg 에 주는 숫자는 kbit/s 여야 한다.
+- **파트를 stream copy 로 이으면 나레이션에 이음매가 생김** — 파트마다 자기
+  AAC 조각을 들고 있고 AAC 인코더 딜레이 때문에 경계마다 클릭이 남는다. 긴 블록으로
+  녹음한 이유가 사라진다. 영상만 copy 로 잇고 소리는 `master.mp3` 를 한 본으로 먹인다.
+- **ffprobe 의 `frame_tags=` 는 요청한 순서로 안 찍힘** — signalstats 저장 순서
+  (`YMIN,YLOW,YAVG,YHIGH,YMAX,YDIF`) 로 나온다. `{YMAX,YAVG,YDIF}` 를 요청하면
+  `YAVG,YMAX,YDIF` 순서다. 한 프레임 찍어서 이름째로 확인하고 쓸 것.
+- **`movie=` 소스의 `seek_point` 이 안 먹음** — 구간 측정은 전체 패스를 돌린 뒤
+  프레임 인덱스로 자르는 게 확실하다.
+- **선화·픽토그램 씬을 p90 으로 재면 다 "어둡다"고 나옴** — 획이 얇아서 90분위가
+  배경값이다. 도식은 임계값 위 픽셀 **비율**(잉크량)로, 그 변화량으로 애니메이션
+  유무를 본다. 사진은 p90·YMAX 로 본다.
 
 ## 결과물 전달
 
 Claude 아티팩트 페이지는 네트워크 정책상 이미지 CDN을 못 불러오는 환경이라
 사진도 소리도 나오지 않는다. 완성본은 **MP4 링크**로 전달한다 (로그인 불필요).
+
+렌더 QA 는 프레임을 눈으로 보는 게 원칙이지만, 이 환경은 이미지 CDN 이 막혀
+개발 컨테이너에서 실제 프레임을 열 수 없다. 그래서 두 축으로 본다.
+
+1. **수치** — 렌더된 MP4 에 `signalstats` 를 걸어 전 프레임을 재고 씬별로 자른다.
+   씬 최대휘도(검게 죽었는지), `YDIF==0` 프레임(정지했는지), 임계값 위 픽셀
+   비율의 증가량(도식이 그려지는지).
+2. **눈** — 업로드한 MP4 를 `video_analysis_create` 에 걸면 씬별로 무엇이
+   보이는지 서술해 준다. 인물의 옷·표정까지 적어 오면 사람이 안 죽은 것이다.
