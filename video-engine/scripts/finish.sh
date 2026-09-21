@@ -18,6 +18,16 @@ P=${PROJECT:-talk}
 ROOT=/home/user/proj/video-engine
 AUD=$ROOT/assets/audio/master.mp3
 cd /home/user
+# The light copy is a second, long encode, and it is what a lost sandbox
+# usually interrupts. A master already in hand is taken as done rather than
+# rebuilt from parts and uploaded a second time.
+HAVE=$(ffprobe -v error -show_entries format=duration -of csv=p=0 master.mp4 2>/dev/null)
+case ${HAVE%%.*} in
+  8[0-9][0-9]) echo "master.mp4 already present (${HAVE}s) - going straight to the light copy"
+               SKIP_MASTER=1;;
+esac
+
+if [ -z "$SKIP_MASTER" ]; then
 [ -s "$AUD" ] || { echo "missing $AUD"; exit 9; }
 : > parts.txt
 for k in $(seq 1 "$N"); do
@@ -46,9 +56,12 @@ python3 -c "import sys; v=float('${LU:--99}'); sys.exit(0 if -24 < v < -6 else 1
 # the sandbox mid-encode costs the convenience copy and not the film.
 curl -f -X PUT -H "Content-Type: video/mp4" --upload-file master.mp4 \
   "$(cat /home/user/up/master.url)" -o /dev/null -w 'MASTER UPLOAD %{http_code}\n' || exit 20
+fi
 
 D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 master.mp4)
-VB=$(python3 -c "print(int((100*8*1000*1000/$D) - 128))")
+# 100MB = 800000 kbit. ffmpeg is given ${VB}k, so VB has to be kbit/s:
+# computing bit/s here and then appending k asked for 942 Mbps.
+VB=$(python3 -c "print(int(100*8*1000/$D) - 128)")
 echo "=== LIGHT target ${VB}k video + 128k audio ==="
 ffmpeg -hide_banner -loglevel error -y -i master.mp4 -c:v libx264 -preset medium \
   -b:v ${VB}k -pass 1 -an -f mp4 /dev/null &&
