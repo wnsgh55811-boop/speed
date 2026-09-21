@@ -13,6 +13,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from build import (W, H, CDN, IMG, ALIAS, NEON_FIG, FAMILIES,   # noqa: E402
                    esc, caption_cards, motes)
+try:
+    from plan import EXPOSURE                              # noqa: E402
+except ImportError:
+    EXPOSURE = {}
 from plan import PLAN                                            # noqa: E402
 
 OUT = os.path.join(HERE, "..", "index.html")
@@ -749,8 +753,15 @@ def pick(alias, i):
 def background(i, kind, arg, section):
     """Return (css_class, inner_html). Photos own their own plate."""
     if kind in ("B", "Y"):
-        key = pick(arg.partition("|")[0], i)
-        return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt="">'
+        alias = arg.partition("|")[0]
+        key = pick(alias, i)
+        # A still that was generated dark needs lifting before the plate's own
+        # 0.86 and the tint go on top of it, or the face goes to black.
+        g = EXPOSURE.get(alias, 1.0)
+        ex = ("" if g == 1.0 else
+              f' style="filter:grayscale(.22) brightness({0.86 * g:.2f}) '
+              f'contrast({1.04 + 0.06 * (g - 1):.2f}) saturate(.92) blur(.6px)"')
+        return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt=""{ex}>'
                             f'<div class="tint"></div>')
     fam = FAMILIES[(section * 3 + i // 2) % len(FAMILIES)]
     # never three alike in a row

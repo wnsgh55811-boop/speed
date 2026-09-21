@@ -24,36 +24,36 @@ kind codes
 # ── assets generated for this film, alongside the shared library ────────────
 _C = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/"
 IMG_EXTRA = {
-    "br_search_list_1":  _C + "hf_20260921_152739_f27417d4-0e68-48e1-b927-a027b4fabf5a.png",
-    "br_pilates_1":      _C + "hf_20260921_152741_bac1b6e3-6933-4898-bcc0-51e3b11347c1.png",
-    "br_japan_walk_1":   _C + "hf_20260921_152740_9d3557ef-1355-4dbe-a0cf-8e7f4affbab8.png",
-    "br_seongsu_1":      _C + "hf_20260921_152740_9563a813-edc7-4502-8d0c-13792e808cbd.png",
-    "br_home_netflix_1": _C + "hf_20260921_152803_8d9b29b4-6ade-49fe-8ac9-7bb9590789b4.png",
-    "br_office_late_1":  _C + "hf_20260921_152803_8be4f6c6-8ea1-49b4-9664-2439ec02294f.png",
-    "br_interrogate_1":  _C + "hf_20260921_152802_66bbb24a-fbee-4e8a-ba66-df1f9d939834.png",
-    "br_two_laugh_1":    _C + "hf_20260921_152803_4127e3c7-3e9e-4b88-8ddd-0a2abe4ec609.png",
-    "br_solo_train_1":   _C + "hf_20260921_152823_a06889c1-d022-4cb3-bf36-d6a07d50263b.png",
-    "br_americano_1":    _C + "hf_20260921_152823_ffd18975-ba29-40e2-a23c-d71d9c75cda5.png",
-    "br_lean_listen_1":  _C + "hf_20260921_152823_b102960b-1b73-4829-8d7d-15bd13e5f577.png",
-    "br_review_note_1":  _C + "hf_20260921_152823_eb991e49-ef5c-48a1-ac16-f299ec69db4e.png",
-    "il_multitask_1":    _C + "hf_20260921_152924_6e1c95bd-508c-4ae0-ba98-0986e3d58f3e.png",
-    "il_dig_layers_1":   _C + "hf_20260921_152924_85071190-44c7-4476-8932-a8c95da3bf71.png",
-    "il_topic_map_1":    _C + "hf_20260921_152923_cbff1730-e8d7-4574-9ed9-e5c6bb28fc40.png",
-    # 3d icons — keyed copies are filled in by keyed.py once the cutouts land
-    "ico_cards_1":       _C + "hf_20260921_152846_3df05b89-645e-4a8b-af33-b63a18cfe62b.png",
-    "ico_engine_1":      _C + "hf_20260921_152846_0cbf9c5c-4cfb-49b9-98c9-83c0694ddcd6.png",
-    "ico_layers4_1":     _C + "hf_20260921_152846_4187e9a4-f411-482d-a400-fa302457d876.png",
-    "ico_magnifier_1":   _C + "hf_20260921_152846_95e6d160-bc1e-426e-a101-24518b1e61d4.png",
-    "ico_notebook_1":    _C + "hf_20260921_152903_cddc157c-065e-4287-83eb-2d8d99dd815c.png",
-    "ico_links_1":       _C + "hf_20260921_152903_98d7929d-47aa-49f4-a868-04243c1c2975.png",
-    "ico_key_1":         _C + "hf_20260921_152903_e4262c5e-b060-4164-8b10-9f8655d90c01.png",
-    "ico_trash_1":       _C + "hf_20260921_152903_c224b867-a0f7-41f1-b259-6188cfb17ead.png",
-    "ico_stopwatch_1":   _C + "hf_20260921_152926_9b0ceaa4-116d-441b-b841-5a4e6fe497ce.png",
+    "br_search_list_1":  _C + "hf_20260921_155855_2e8be452-43cc-4087-b821-4437ea514a53.png",
+    "br_pilates_1":      _C + "hf_20260921_155855_2657d16d-903d-4a99-bd90-dc32ac6f7809.png",
+    "br_japan_walk_1":   _C + "hf_20260921_155855_fbb29828-7deb-4ff9-ac4b-1c268ca5a6a5.png",
+    "br_seongsu_1":      _C + "hf_20260921_155856_b597ace5-5c6e-4ad3-bba1-a70997ff6038.png",
+    "br_home_netflix_1": _C + "hf_20260921_155915_ad0cb3df-bba6-4b4e-bb65-4bcd52dd60ca.png",
+    "br_office_late_1":  _C + "hf_20260921_155915_eac5e02e-c796-4e6d-a1dd-2aae09797ad8.png",
+    "br_interrogate_1":  _C + "hf_20260921_155915_603740e3-35c1-4f14-87fc-6d10a7f1bb3e.png",
+    "br_two_laugh_1":    _C + "hf_20260921_155915_18bdde7e-bdfa-4828-92d9-b88b0001a2ff.png",
+    "br_solo_train_1":   _C + "hf_20260921_155932_89a2e7cd-9744-433d-bbba-9a7cb1c9a671.png",
+    "br_americano_1":    _C + "hf_20260921_155932_467d0a52-91c2-4674-9688-8a96fea1093d.png",
+    "br_lean_listen_1":  _C + "hf_20260921_155932_8ed28837-7fac-486f-9ac4-bdec468e53b6.png",
+    "br_review_note_1":  _C + "hf_20260921_155933_91c66c08-ee70-4bd3-90aa-34756b846f42.png",
+    "il_multitask_1":    _C + "hf_20260921_155952_9c3a3e47-d933-420a-8fd7-7e8507f1eaae.png",
+    "il_dig_layers_1":   _C + "hf_20260921_155952_02b85dc4-cf3b-4573-b362-4e92c321523c.png",
+    "il_topic_map_1":    _C + "hf_20260921_155952_6be15c94-0b8b-4af3-b381-9c0aea95a3c3.png",
+    # 3d icons — generated with background:transparent, so real alpha already
+    "ico_cards_1":       _C + "hf_20260921_155952_da57a65a-53ce-4e2b-8f94-ddb673a8a0d6.png",
+    "ico_engine_1":      _C + "hf_20260921_160017_569c197a-a044-41b7-9bee-c44337fa93da.png",
+    "ico_layers4_1":     _C + "hf_20260921_160017_0c1ec026-c5f2-4f44-94e3-fa7c40167243.png",
+    "ico_magnifier_1":   _C + "hf_20260921_160016_74ce87d0-21fe-40c9-88f2-ef62bfb2e38f.png",
+    "ico_notebook_1":    _C + "hf_20260921_160017_31b90774-421d-4934-93e1-3d9d8c5f7f81.png",
+    "ico_links_1":       _C + "hf_20260921_160035_9ac28a40-981e-4619-b1a8-f81c7215f38d.png",
+    "ico_key_1":         _C + "hf_20260921_160035_6d97b53d-172e-468d-be4f-1fd5563edb0d.png",
+    "ico_trash_1":       _C + "hf_20260921_160035_11b8d64f-0d58-492a-b66a-1f9c944cb351.png",
+    "ico_stopwatch_1":   _C + "hf_20260921_160035_ffee77f9-987d-4e99-975d-2eaa07935416.png",
 }
 ALIAS_EXTRA = {k[:-2]: [k] for k in IMG_EXTRA}
 
-# keyed.py rewrites this file's IMG_EXTRA in place once the icons come back
-# from background removal; nothing else needs to change.
+# All of the above are quality:high / resolution:2k. The first pass ran at the
+# model's defaults (low, 1k) and was too soft to carry a 1080p frame.
 
 
 # ── graphics for this film ──────────────────────────────────────────────────
@@ -481,3 +481,23 @@ PLAN = [
     ("T", "질문이 부족한 게 아닙니다", 2),                  # 664-665
     ("T", "대화의 구조를 아직 모르는 겁니다", 2),            # 666-667
 ]
+
+
+# ── exposure ────────────────────────────────────────────────────────────────
+# Measured on the generated stills: the 90th-percentile luminance of each one.
+# Several came back with a p90 in the 70s, and the plate already multiplies by
+# 0.86 and lays a tint over it, so a face in those would have sunk to black —
+# the one thing the brief is most explicit about. The gain here brings each
+# still up to a p90 of about 145 before the plate touches it; the stills that
+# already sit there are left alone.
+EXPOSURE = {
+    "br_search_list": 1.95,
+    "br_japan_walk":  1.80,
+    "br_home_netflix": 1.70,
+    "br_office_late": 2.05,
+    "br_interrogate": 1.34,
+    "br_review_note": 1.60,
+    "il_multitask":   1.30,
+    "il_dig_layers":  1.30,
+    "il_topic_map":   1.75,
+}
