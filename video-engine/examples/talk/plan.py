@@ -73,7 +73,7 @@ IMG_EXTRA = {
     "pg_attention_1": _C + "hf_20260924_083633_36eea2b7-8fc2-4371-a947-e4f11dd861a2.png",
     "pg_iceberg_1": _C + "hf_20260924_083633_fb65890c-44ac-4809-ac0a-45947ce84f22.png",
     "pg_smoothpath_1": _C + "hf_20260924_083633_3892f453-148d-4ce8-9dbd-ed81b24b12d9.png",
-    "pg_linkpoint_1": _C + "hf_20260924_083652_c75ce6f5-8859-413d-bbba-cbbdd8530448.png",
+    "pg_linkpoint_1": _C + "hf_20260924_084242_4de5f02f-3815-4844-985e-cd42069e282a.png",
     "pg_pause_1": _C + "hf_20260924_083651_709ed9b7-1848-47c4-bcd9-963451dad0f0.png",
     "pg_target_1": _C + "hf_20260924_083651_5ef7a5e0-15cf-49af-9d7d-289a56fed85e.png",
     "pg_fading_1": _C + "hf_20260924_083650_984869a5-f704-4cce-bdc8-071aa2c4e923.png",
