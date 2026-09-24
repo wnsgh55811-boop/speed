@@ -60,17 +60,25 @@ ls -la /home/user/part*.mp4 2>/dev/null
 
 # Building the narration and fetching 80-odd images costs about seven of a
 # lease's fifteen minutes. The first lease does it once and publishes the
-# result (prep.url); every later lease restores it (prep.get) in seconds.
+# result along with the upload targets (prep.url); every later lease is
+# launched with only the archive's address (prep.get) and restores all of it.
 if [ -s /home/user/up/prep.get ] && [ ! -s assets/audio/master.mp3 ]; then
-  curl -fsSL "$(cat /home/user/up/prep.get)" | tar -xz -C "$ROOT" || exit 7
+  rm -rf /home/user/prep && mkdir -p /home/user/prep
+  curl -fsSL "$(cat /home/user/up/prep.get)" | tar -xz -C /home/user/prep || exit 7
+  mkdir -p assets/audio assets/.cache
+  cp /home/user/prep/master.mp3 assets/audio/master.mp3
+  cp -rn /home/user/prep/cache/. assets/.cache/
+  cp -n /home/user/prep/up/* /home/user/up/ 2>/dev/null
   echo "=== PREP RESTORED $(date -u +%T) ==="
 fi
 if [ -s /home/user/up/prep.url ] && [ ! -s /home/user/up/prep.get ]; then
   PREP_ONLY=1 PROJECT=$P PARTS=$N bash scripts/render.sh || exit 5
-  tar -czf /home/user/prep.tgz -C "$ROOT" assets/audio/master.mp3 assets/.cache || exit 8
-  curl -f -X PUT -H "Content-Type: application/gzip" --upload-file /home/user/prep.tgz \
+  rm -rf /home/user/prep && mkdir -p /home/user/prep/up
+  cp assets/audio/master.mp3 /home/user/prep/ && cp -r assets/.cache /home/user/prep/cache
+  cp /home/user/up/* /home/user/prep/up/
+  tar -czf /home/user/prep.tgz -C /home/user/prep . || exit 8
+  curl -f -X PUT -H "Content-Type: application/octet-stream" --upload-file /home/user/prep.tgz \
     "$(cat /home/user/up/prep.url)" -o /dev/null -w 'PREP UPLOAD %{http_code}\n' || exit 8
-  [ -n "$PREP_EXIT" ] && exit 0
 fi
 PROJECT=$P PARTS=$N bash scripts/render.sh || exit 5
 [ -n "$NO_FINISH" ] && exit 0
