@@ -82,6 +82,43 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
 - **오디오 누락으로 렌더 즉시 실패** — 컴포지션이 참조하는 오디오 파일은
   렌더 시작 전에 존재해야 한다. 병렬로 만들면 늦는다.
 
+
+## 2세대: span 컴포저 (`src/compose.py`) — "하이에나와 사자"
+
+짧은 호흡의 대본(492줄)은 한 줄 = 한 씬이면 너무 잘게 끊긴다. 그래서 씬 하나가
+여러 줄에 걸치고, 씬 **안의 요소가 각자 자기 대사 줄에 맞춰** 등장한다
+(말풍선은 그 말을 할 때, 막대는 그 단어가 나올 때, 토큰은 "넘겨준다"는 순간 이동).
+
+```
+대본(script.txt) → chunks.json (≈1,600자 × 5, 문장 끝에서 자름)
+  → Higgsfield TTS (ElevenLabs, 내-목소리-v4) — 이미 빠른 템포라 1.2× 후처리 없음
+  → scripts/align.py (샌드박스): 이어붙이기 · -14 LUFS · faster-whisper 줄 타이밍
+  → timings.txt
+  → plan.py (씬 = (시작 줄, 종류, 인자))  →  src/compose.py  →  build/index.html
+  → scripts/snap.mjs 로 로컬 프레임 QA (CDN 이미지는 라벨 자리표시자로)
+  → compose.py --seg a b  로 구간 분할 → scripts/render_seg.sh (샌드박스 렌더)
+  → scripts/assemble.py : 구간 연결 + 나레이션 + 효과음 + 마스터링 + MASTER/LIGHT
+```
+
+씬 종류: `hook photo video typo chat quotes rows icon chapter cmp graph_reverse
+graph_effort scale tokens iceberg timer share invest steps center eq cycle roots
+flip check cta` — 모든 씬에 `nocap=[줄]`(중앙 타이포와 같은 말이면 자막 제거),
+`head=(줄, 문구)`(도식이 시작되기 전 빈 화면을 막는 상단 제목)을 줄 수 있다.
+
+### 이번에 잡은 버그 (다시 밟지 말 것)
+
+- **사진·영상이 통째로 안 보임** — Ken Burns 래퍼 `.kb` 에 크기가 없었다. GSAP 가
+  transform 을 거는 순간 높이 0 박스가 absolute 이미지의 기준이 된다.
+  `.kb{position:absolute;inset:0}` 필수.
+- **샌드박스 백그라운드 렌더가 5초 만에 취소** — `render_cancelled_parent_exited`.
+  부모 프로세스 감시 때문. `HYPERFRAMES_RENDER_DETACHED=1` 로 실행.
+- **영상 클립 프레임 멈춤 경고** — concat `-c copy` 로 만든 부메랑은 키프레임이 6.8초
+  간격. `-g 30` 으로 재인코딩.
+- **샌드박스 → 로컬로 파일을 못 가져옴** — 이 컨테이너는 Higgsfield CDN 이 막혀 있다.
+  로컬 QA 는 자리표시자로, 이미지 밝기 QA 는 샌드박스에서 프레임 통계로 한다.
+- **Whisper 타임스탬프가 균일 간격으로 무너지는 구간** — 청크 경계 무음으로 앵커를 잡고,
+  같은 길이가 3줄 이상 반복되면 글자 수 비례 재배분 후 무음에 스냅(align 보정).
+
 ## 결과물 전달
 
 Claude 아티팩트 페이지는 네트워크 정책상 이미지 CDN을 못 불러오는 환경이라

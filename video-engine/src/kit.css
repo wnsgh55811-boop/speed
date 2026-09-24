@@ -1,0 +1,168 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   kit.css — span-scene components layered on top of style.css.
+
+   Built for the second film ("하이에나와 사자"). Everything here is sized for
+   a phone held at arm's length: no label under 40px, captions 50px, and all
+   content kept above the caption band (y < 860) so the two never collide.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* captions: one line, raised into the mobile safe zone (≥120px from bottom) */
+.cap-wrap{bottom:122px}
+.cap{font-size:50px;font-weight:700;-webkit-text-stroke:3px rgba(0,0,0,.78)}
+.cap-scrim{bottom:-122px;height:300px;
+  background:linear-gradient(180deg, transparent 0%, rgba(0,0,0,.34) 45%, rgba(0,0,0,.55) 100%)}
+
+/* content lives in a 1920x860 box above the caption band */
+.zone{position:absolute;left:0;right:0;top:0;height:880px;display:flex;
+  align-items:center;justify-content:center}
+.fgm{position:absolute;inset:0}
+.col{display:flex;flex-direction:column;align-items:center}
+.row2{display:flex;align-items:center;justify-content:center}
+
+/* ── photo / video plates ───────────────────────────────────────────── */
+.plate{position:absolute;inset:0;overflow:hidden;background:#101114}
+.plate img,.plate video{position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;
+  filter:brightness(1.02) contrast(1.04) saturate(.95)}
+.plate .shade{position:absolute;inset:0;background:
+  linear-gradient(180deg, rgba(6,7,10,.10) 0%, rgba(6,7,10,.08) 45%, rgba(6,7,10,.50) 100%)}
+.plate .side{position:absolute;inset:0;background:
+  linear-gradient(90deg, rgba(6,7,10,.0) 0%, rgba(6,7,10,.0) 38%, rgba(6,7,10,.72) 100%)}
+.plate .sideL{position:absolute;inset:0;background:
+  linear-gradient(270deg, rgba(6,7,10,.0) 0%, rgba(6,7,10,.0) 38%, rgba(6,7,10,.72) 100%)}
+.ph-missing{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#5b6470,#8c8472);color:#fff;font-size:44px;font-weight:700}
+
+/* framed media card (photo or video inside a panel) */
+.card{position:relative;border-radius:28px;overflow:hidden;
+  box-shadow:0 30px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08)}
+.card img,.card video{display:block;width:100%;height:100%;object-fit:cover;
+  filter:brightness(1.04) contrast(1.03)}
+
+/* ── headline type ──────────────────────────────────────────────────── */
+.kick{font-weight:700;font-size:40px;letter-spacing:.14em;color:var(--amber);
+  text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.big{font-weight:800;font-size:112px;line-height:1.16;letter-spacing:-.03em;color:#fff;
+  text-align:center;word-break:keep-all;text-shadow:0 6px 34px rgba(0,0,0,.75)}
+.big.m{font-size:92px}.big.s{font-size:76px}.big.xs{font-size:64px}
+.c-cy{color:var(--cyan)}.c-am{color:var(--amber)}.c-dim{color:#8f8d88}.c-red{color:#F0707A}
+.mark{position:relative;display:inline-block;padding:0 .12em}
+.mark .hl-bg{position:absolute;left:0;right:0;bottom:.06em;height:.36em;border-radius:6px;
+  background:rgba(216,179,104,.38);transform-origin:left center;z-index:-1}
+.strk{position:absolute;left:-2%;right:-2%;top:52%;height:8px;border-radius:4px;
+  background:#F0707A;transform-origin:left center;box-shadow:0 0 12px rgba(240,112,122,.6)}
+.sub2{font-weight:600;font-size:48px;color:#d9d6cf;text-align:center;
+  text-shadow:0 3px 16px rgba(0,0,0,.7)}
+
+/* ── chat UI (stylised, not a KakaoTalk clone) ─────────────────────── */
+.phone{position:relative;width:900px;border-radius:44px;padding:40px 36px 46px;
+  background:linear-gradient(180deg,#1b1f27,#12151b);
+  box-shadow:0 40px 90px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.07)}
+.phone .ph-top{display:flex;align-items:center;gap:18px;margin-bottom:26px;
+  font-size:34px;font-weight:700;color:#e8e6e0}
+.phone .ph-top i{width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#d8b368,#8a6a33)}
+.msg{display:flex;margin:16px 0}
+.msg.me{justify-content:flex-end}
+.msg .b{max-width:700px;padding:22px 32px;border-radius:30px;font-size:48px;font-weight:600;
+  line-height:1.3;word-break:keep-all}
+.msg.me .b{background:#F6DF5A;color:#1e1c16;border-bottom-right-radius:8px}
+.msg.you .b{background:#F4F3EF;color:#1e1c16;border-bottom-left-radius:8px}
+.msg .rd{align-self:flex-end;font-size:28px;font-weight:700;color:#F6DF5A;margin:0 10px 6px}
+.typing{display:flex;gap:10px;padding:22px 28px;background:#2a2f39;border-radius:30px;width:max-content}
+.typing i{width:14px;height:14px;border-radius:50%;background:#9aa3b2}
+
+/* floating quote / thought cards */
+.qcard{position:relative;padding:28px 42px;border-radius:26px;font-weight:700;font-size:52px;
+  line-height:1.3;color:#1f1d19;background:#F4F1E8;word-break:keep-all;text-align:center;
+  box-shadow:0 22px 50px rgba(0,0,0,.5)}
+.qcard.y{background:#F6DF5A}
+.qcard.dk{background:rgba(20,22,28,.86);color:#fff;border:2px solid rgba(255,255,255,.16)}
+.qcard.am{background:rgba(216,179,104,.16);color:#fff;border:2px solid rgba(216,179,104,.7)}
+.qcard.cy{background:rgba(90,216,247,.12);color:#fff;border:2px solid rgba(90,216,247,.7)}
+.qcard .who2{position:absolute;top:-46px;left:8px;font-size:32px;font-weight:600;
+  color:rgba(240,238,232,.8)}
+.thought{position:relative;padding:24px 36px;border-radius:40px;font-weight:700;font-size:46px;
+  color:#fff;background:rgba(18,20,26,.82);border:2px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 44px rgba(0,0,0,.5);white-space:nowrap}
+.thought:after{content:"";position:absolute;left:52px;bottom:-26px;width:22px;height:22px;
+  border-radius:50%;background:rgba(18,20,26,.82);border:2px solid rgba(255,255,255,.18)}
+
+/* list rows with state marks */
+.lst{display:flex;flex-direction:column;gap:30px}
+.li{position:relative;display:flex;align-items:center;gap:30px;font-size:56px;font-weight:700;
+  color:#f2f0ea;text-shadow:0 3px 14px rgba(0,0,0,.6);white-space:nowrap}
+.li .ic{flex:0 0 auto;width:66px;height:66px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:40px;font-weight:800}
+.ic.ok{background:var(--cyan);color:#0b0c0e}
+.ic.no{background:#F0707A;color:#1b0a0c}
+.ic.q{background:rgba(216,179,104,.95);color:#1b1408}
+.ic.n{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.3)}
+.li .t{position:relative}
+.li.dim{color:#9c9a94}
+
+/* pills / chips */
+.pill{display:inline-flex;align-items:center;gap:14px;padding:18px 34px;border-radius:999px;
+  font-size:46px;font-weight:700;color:#fff;background:rgba(255,255,255,.1);
+  border:2px solid rgba(255,255,255,.22);white-space:nowrap}
+.pill.am{background:rgba(216,179,104,.95);color:#1e1709;border-color:transparent}
+.pill.cy{background:rgba(90,216,247,.95);color:#07161b;border-color:transparent}
+
+/* two-column comparison */
+.cmp{display:flex;gap:70px;align-items:stretch}
+.cmp .pane{width:760px;padding:40px 46px;border-radius:32px;background:rgba(16,18,24,.78);
+  border:2px solid rgba(255,255,255,.12);box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.cmp .pane.am{border-color:rgba(216,179,104,.6)}
+.cmp .pane.cy{border-color:rgba(90,216,247,.6)}
+.pane h3{font-size:60px;font-weight:800;margin-bottom:26px;display:flex;align-items:center;gap:22px}
+.pane h3 img{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid currentColor}
+.pane .pl{font-size:46px;font-weight:600;color:#ecebe6;margin:18px 0;display:flex;gap:18px;
+  align-items:center;white-space:nowrap}
+.pane .pl b{color:var(--cyan)}
+
+/* icon tile (3D renders shipped on a pale studio sweep — framed as a tile) */
+.tile{position:relative;width:520px;height:520px;border-radius:64px;overflow:hidden;
+  box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.12),
+             0 0 80px rgba(90,216,247,.12)}
+.tile img{width:100%;height:100%;object-fit:cover;filter:brightness(.98) contrast(1.05)}
+.tile:after{content:"";position:absolute;inset:0;border-radius:64px;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.18)}
+
+/* chapter */
+.chap-num{font-weight:800;font-size:44px;letter-spacing:.3em;color:var(--amber)}
+.chap-t{font-weight:800;font-size:124px;color:#fff;letter-spacing:-.03em;
+  text-shadow:0 8px 40px rgba(0,0,0,.8)}
+.chap-rule{width:540px;height:4px;border-radius:2px;margin:30px 0;
+  background:linear-gradient(90deg,transparent,var(--amber),transparent);transform-origin:center}
+
+/* svg diagram typography */
+.dg text{font-family:var(--font)}
+.dt{font-weight:700;font-size:48px;fill:#f4f3ef}
+.dt-s{font-weight:600;font-size:40px;fill:#bdbab3}
+.dt-am{font-weight:800;font-size:50px;fill:var(--amber)}
+.dt-cy{font-weight:800;font-size:50px;fill:var(--cyan)}
+.ln{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ax{stroke:rgba(255,255,255,.4);stroke-width:3}
+.gr{stroke:rgba(255,255,255,.09);stroke-width:2}
+.st-cy{stroke:var(--cyan);stroke-width:8;filter:drop-shadow(0 0 12px rgba(90,216,247,.6))}
+.st-am{stroke:var(--amber);stroke-width:8;filter:drop-shadow(0 0 12px rgba(216,179,104,.55))}
+.fl-cy{fill:var(--cyan)}.fl-am{fill:var(--amber)}.fl-w{fill:#f4f3ef}.fl-dim{fill:rgba(255,255,255,.14)}
+
+/* token chips that travel between sides */
+.tok{position:absolute;padding:16px 30px;border-radius:999px;font-size:42px;font-weight:700;
+  background:#F4F1E8;color:#1b1a16;white-space:nowrap;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+
+/* cta */
+.cta-card{display:flex;flex-direction:column;align-items:center;gap:26px;padding:60px 90px;
+  border-radius:40px;background:rgba(14,15,19,.82);border:2px solid rgba(216,179,104,.55);
+  box-shadow:0 40px 100px rgba(0,0,0,.6)}
+.cta-btn{display:flex;align-items:center;gap:20px;padding:24px 52px;border-radius:999px;
+  background:var(--amber);color:#1b1408;font-weight:800;font-size:52px}
+.arrow-dn{font-size:64px;color:var(--amber);font-weight:800}
+.qcard,.thought{white-space:pre-line}
+.thought{white-space:nowrap}
+.pill.xl{font-size:76px;padding:24px 64px;font-weight:800}
+.ph-missing.face{position:relative;display:inline-flex;width:92px;height:92px;border-radius:50%;font-size:0}
+/* Ken Burns layer must own the full frame: GSAP puts a transform on it, which
+   makes it the containing block for the absolutely-placed photo — as a 0-height
+   static div that collapsed every plate to nothing. */
+.kb{position:absolute;inset:0}

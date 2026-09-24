@@ -20,11 +20,10 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from plan import PLAN                                    # noqa: E402
 from PIL import ImageFont, ImageDraw, Image              # noqa: E402
 
 W, H, FPS = 1920, 1080, 30
-CAP_PX, CAP_MAX = 44, 1720
+CAP_PX, CAP_MAX, CAP_W = 44, 1720, "SemiBold"
 CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/"
 
 # ── assets still sourced from the existing library (photos, cutouts, icons) ──
@@ -173,7 +172,7 @@ def text_w(t, f):
 
 def caption_cards(line):
     """Break one narration line into cards that each fit on a single line."""
-    f = font(CAP_PX)
+    f = font(CAP_PX, CAP_W)
     if text_w(line, f) <= CAP_MAX:
         return [line]
     # prefer clause boundaries, then plain spaces
