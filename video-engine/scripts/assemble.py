@@ -34,54 +34,48 @@ adur = float(sh("ffprobe -v error -show_entries format=duration -of csv=p=0 vo.w
 print(f"video {vdur:.3f}s  voice {adur:.3f}s")
 
 # ── SFX bed ────────────────────────────────────────────────────────────────
+import numpy as np
 SR = 48000
 N = int((vdur + 1) * SR)
-bed = [0.0] * N
-rnd = random.Random(7)
+bed = np.zeros(N, dtype=np.float32)
+rng = np.random.default_rng(7)
+def lowpass(x, k):
+    y = np.empty_like(x); acc = 0.0
+    for i in range(len(x)):
+        acc += k * (x[i] - acc); y[i] = acc
+    return y
 def tone(kind):
-    out = []
     if kind == "click":
-        n = int(.03 * SR); lp = 0
-        for i in range(n):
-            x = rnd.uniform(-1, 1); lp = lp * .55 + x * .45
-            out.append((x - lp) * math.exp(-i / (.006 * SR)) * .5)
-    elif kind in ("whoosh", "whoosh_s"):
-        L = .55 if kind == "whoosh" else .32; n = int(L * SR); lp = 0
-        for i in range(n):
-            p = i / n; a = math.sin(math.pi * p) ** 2
-            k = .04 + .25 * p
-            lp = lp + k * (rnd.uniform(-1, 1) - lp)
-            out.append(lp * a * 1.6)
-    elif kind == "tick":
-        n = int(.06 * SR)
-        for i in range(n):
-            out.append(math.sin(2 * math.pi * 1650 * i / SR) * math.exp(-i / (.012 * SR)) * .35)
-    elif kind == "draw":
-        n = int(.7 * SR); lp = 0
-        for i in range(n):
-            p = i / n; lp = lp + .08 * (rnd.uniform(-1, 1) - lp)
-            out.append(lp * math.sin(math.pi * p) * .9)
-    elif kind == "impact":
-        n = int(.45 * SR)
-        for i in range(n):
-            f = 62 + 40 * math.exp(-i / (.05 * SR))
-            out.append(math.sin(2 * math.pi * f * i / SR) * math.exp(-i / (.14 * SR)) * .9)
-    return out
+        n = int(.03 * SR); x = rng.uniform(-1, 1, n)
+        return (x - lowpass(x, .45)) * np.exp(-np.arange(n) / (.006 * SR)) * .5
+    if kind in ("whoosh", "whoosh_s"):
+        n = int((.55 if kind == "whoosh" else .32) * SR); p = np.arange(n) / n
+        return lowpass(rng.uniform(-1, 1, n), .12) * np.sin(np.pi * p) ** 2 * 1.6
+    if kind == "tick":
+        n = int(.06 * SR); t = np.arange(n)
+        return np.sin(2 * np.pi * 1650 * t / SR) * np.exp(-t / (.012 * SR)) * .35
+    if kind == "draw":
+        n = int(.7 * SR); p = np.arange(n) / n
+        return lowpass(rng.uniform(-1, 1, n), .08) * np.sin(np.pi * p) * .9
+    if kind == "impact":
+        n = int(.45 * SR); t = np.arange(n)
+        f = 62 + 40 * np.exp(-t / (.05 * SR))
+        return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / (.14 * SR)) * .9
+    return np.zeros(1)
 GAIN = {"click": .16, "whoosh": .14, "whoosh_s": .10, "tick": .10, "draw": .08, "impact": .30}
 cache = {}
 for t, kind in json.load(open("../sfx.json")):
-    if kind not in cache: cache[kind] = tone(kind)
-    s0 = int(t * SR); g = GAIN.get(kind, .1)
-    for i, v in enumerate(cache[kind]):
-        j = s0 + i
-        if 0 <= j < N: bed[j] += v * g
+    if kind not in cache: cache[kind] = tone(kind).astype(np.float32)
+    s0 = int(t * SR); v = cache[kind] * GAIN.get(kind, .1)
+    e = min(N, s0 + len(v))
+    if s0 < N: bed[s0:e] += v[:e - s0]
 with wave.open("sfx.wav", "w") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
-    w.writeframes(b"".join(struct.pack("<h", int(max(-1, min(1, v)) * 32767)) for v in bed))
+    w.writeframes((np.clip(bed, -1, 1) * 32767).astype("<i2").tobytes())
 
 # ── mix + loudness ─────────────────────────────────────────────────────────
 sh('ffmpeg -v error -i vo.wav -i sfx.wav -filter_complex "[1:a]aformat=channel_layouts=stereo,'
-   'volume=0.9[s];[0:a][s]amix=inputs=2:duration=first:normalize=0[m]" -map "[m]" -ar 48000 mix.wav -y')
+   'volume=0.9[s];[0:a][s]amix=inputs=2:duration=first,volume=2[m]" -map "[m]" -ar 48000 mix.wav -y')
 m = json.loads(re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", sh(
     "ffmpeg -hide_banner -i mix.wav -af loudnorm=I=-14:TP=-1.3:LRA=11:print_format=json -f null -"), re.S).group(0))
 sh(f'ffmpeg -v error -i mix.wav -af "loudnorm=I=-14:TP=-1.3:LRA=11:measured_I={m["input_i"]}:'
@@ -97,13 +91,15 @@ sh("ffmpeg -v error -i video.mp4 -i final.wav -map 0:v -map 1:a -c:v copy -c:a a
 target_mb = 98
 abr = 128
 vbr = int(target_mb * 8 * 1024 / vdur - abr)
-sh(f"ffmpeg -v error -i video.mp4 -c:v libx264 -preset slow -b:v {vbr}k -pass 1 -an -f mp4 /dev/null -y")
-sh(f"ffmpeg -v error -i video.mp4 -i final.wav -map 0:v -map 1:a -c:v libx264 -preset slow -b:v {vbr}k "
-   f"-maxrate {int(vbr*1.8)}k -bufsize {vbr*3}k -pass 2 -pix_fmt yuv420p -profile:v high -c:a aac -b:a {abr}k "
+# single pass, capped: motion graphics sit far under the cap, so quality holds
+sh(f"ffmpeg -v error -i video.mp4 -i final.wav -map 0:v -map 1:a -c:v libx264 -preset faster -crf 21 "
+   f"-maxrate {vbr}k -bufsize {vbr*2}k -pix_fmt yuv420p -profile:v high -c:a aac -b:a {abr}k "
    f"-shortest -movflags +faststart LIGHT.mp4 -y")
 for f in ("MASTER.mp4", "LIGHT.mp4"):
     print(f, os.path.getsize(f) / 1e6, "MB", sh(f"ffprobe -v error -show_entries stream=codec_name,width,height "
           f"-show_entries format=duration -of compact=p=0 {f}").replace("\n", " | "))
-print(sh(f'curl -f -X PUT -H "Content-Type: video/mp4" --upload-file MASTER.mp4 "{mp}" -o /dev/null -w "UP MASTER %{{http_code}}"'))
-print(sh(f'curl -f -X PUT -H "Content-Type: video/mp4" --upload-file LIGHT.mp4 "{lp}" -o /dev/null -w "UP LIGHT %{{http_code}}"'))
+for f, u in (("MASTER.mp4", mp), ("LIGHT.mp4", lp)):   # an upload miss must not kill the other
+    r = subprocess.run(f'curl -s -X PUT -H "Content-Type: video/mp4" --upload-file {f} "{u}" -o /dev/null '
+                       f'-w "%{{http_code}}"', shell=True, text=True, capture_output=True)
+    print("UP", f, r.stdout, flush=True)
 print("ASSEMBLE DONE")

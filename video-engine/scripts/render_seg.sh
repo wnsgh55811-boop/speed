@@ -24,20 +24,25 @@ export PATH=$W/n22/bin:$PATH
 [ -d node_modules/hyperframes ] || npm i --no-audit --no-fund --silent hyperframes@0.8.52 || exit 15
 
 # generated 5s clips → slow boomerangs (~40s) so no scene ever runs out of footage
-python3 - <<'PY' || exit 16
-import json, os, subprocess
+SEGS=""; i=1; for a in "$@"; do [ $((i % 2)) -eq 1 ] && SEGS="$SEGS $a"; i=$((i+1)); done
+python3 - $SEGS <<'PY' || exit 16
+import json, os, re, subprocess
 CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/"
+import sys
+need = set()
+for k in sys.argv[1:]:                        # only the clips these segments use
+    need |= set(re.findall(r'assets/(v_\w+)\.mp4', open(f"seg_{k}.html").read()))
 for k, f in json.load(open("clips.json")).items():
     out = f"assets/{k}.mp4"
-    if os.path.exists(out): continue
+    if k not in need or os.path.exists(out): continue
     subprocess.run(f'curl -fsSL --retry 5 -o raw_{k}.mp4 "{CDN}{f}"', shell=True, check=True)
     gam = {"v_phone": 1.5, "v_hyena": 1.25, "v_date": 1.25}.get(k, 1.0)   # lift dark clips, never crush
     vf = f"setpts=1.35*PTS,scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,fps=30,eq=gamma={gam}:saturation=1.03"
-    subprocess.run(f'ffmpeg -v error -i raw_{k}.mp4 -an -vf "{vf}" -c:v libx264 -crf 15 -pix_fmt yuv420p f_{k}.mp4 -y', shell=True, check=True)
-    subprocess.run(f'ffmpeg -v error -i f_{k}.mp4 -vf reverse -c:v libx264 -crf 15 -pix_fmt yuv420p r_{k}.mp4 -y', shell=True, check=True)
+    subprocess.run(f'ffmpeg -v error -i raw_{k}.mp4 -an -vf "{vf}" -c:v libx264 -preset veryfast -crf 16 -pix_fmt yuv420p f_{k}.mp4 -y', shell=True, check=True)
+    subprocess.run(f'ffmpeg -v error -i f_{k}.mp4 -vf reverse -c:v libx264 -preset veryfast -crf 16 -pix_fmt yuv420p r_{k}.mp4 -y', shell=True, check=True)
     open(f"l_{k}.txt", "w").write("".join(f"file '{x}_{k}.mp4'\n" for x in "frfrfr"))
     # dense keyframes: the renderer seeks every frame, sparse GOPs freeze
-    subprocess.run(f'ffmpeg -v error -f concat -safe 0 -i l_{k}.txt -c:v libx264 -crf 16 -g 30 -keyint_min 30 '
+    subprocess.run(f'ffmpeg -v error -f concat -safe 0 -i l_{k}.txt -c:v libx264 -preset veryfast -crf 16 -g 30 -keyint_min 30 '
                    f'-pix_fmt yuv420p -movflags +faststart {out} -y', shell=True, check=True)
     print("clip", k, flush=True)
 PY
