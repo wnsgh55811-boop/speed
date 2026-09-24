@@ -30,10 +30,12 @@ esac
 if [ -z "$SKIP_MASTER" ]; then
 [ -s "$AUD" ] || { echo "missing $AUD"; exit 9; }
 : > parts.txt
-for k in $(seq 1 "$N"); do
-  KK=$(printf %02d "$k")
-  [ -s "part$KK.mp4" ] || { echo "missing part$KK.mp4"; exit 10; }
-  echo "file '/home/user/part$KK.mp4'" >> parts.txt
+# PARTS_LIST names the pieces in order when they come from more than one
+# split of the film (e.g. one 6-way piece standing in for two 12-way ones).
+LIST=${PARTS_LIST:-$(for k in $(seq 1 "$N"); do printf 'part%02d.mp4 ' "$k"; done)}
+for f in $LIST; do
+  [ -s "$f" ] || { echo "missing $f"; exit 10; }
+  echo "file '/home/user/$f'" >> parts.txt
 done
 ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i parts.txt -c:v copy -an mute.mp4 || exit 11
 ffmpeg -hide_banner -loglevel error -y -i mute.mp4 -i "$AUD" \

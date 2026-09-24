@@ -50,10 +50,13 @@ PYX
 # and decoding 2688x1520 plates over the network cost about ninety seconds
 # apiece before the first frame.
 python3 scripts/localize.py || exit 14
+[ -n "$PREP_ONLY" ] && { echo "=== PREP DONE $(date -u +%T) ==="; exit 0; }
 
 for k in $(seq 1 "$N"); do
   KK=$(printf %02d "$k")
   [ -n "$ONLY" ] && [ "$ONLY" != "$k" ] && continue
+  # parts already covered by a file from an earlier split of the same film
+  case " $SKIP " in *" $k "*) echo "part $KK skipped (covered)"; continue;; esac
   [ -s "/home/user/part$KK.mp4" ] && { echo "part $KK already rendered"; continue; }
   echo "=== PART $KK START $(date -u +%T) ==="
   export HF_SEGMENTED_CAPTURE=true

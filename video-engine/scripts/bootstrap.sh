@@ -58,6 +58,21 @@ if [ -s /home/user/up/get.txt ]; then
 fi
 ls -la /home/user/part*.mp4 2>/dev/null
 
+# Building the narration and fetching 80-odd images costs about seven of a
+# lease's fifteen minutes. The first lease does it once and publishes the
+# result (prep.url); every later lease restores it (prep.get) in seconds.
+if [ -s /home/user/up/prep.get ] && [ ! -s assets/audio/master.mp3 ]; then
+  curl -fsSL "$(cat /home/user/up/prep.get)" | tar -xz -C "$ROOT" || exit 7
+  echo "=== PREP RESTORED $(date -u +%T) ==="
+fi
+if [ -s /home/user/up/prep.url ] && [ ! -s /home/user/up/prep.get ]; then
+  PREP_ONLY=1 PROJECT=$P PARTS=$N bash scripts/render.sh || exit 5
+  tar -czf /home/user/prep.tgz -C "$ROOT" assets/audio/master.mp3 assets/.cache || exit 8
+  curl -f -X PUT -H "Content-Type: application/gzip" --upload-file /home/user/prep.tgz \
+    "$(cat /home/user/up/prep.url)" -o /dev/null -w 'PREP UPLOAD %{http_code}\n' || exit 8
+  [ -n "$PREP_EXIT" ] && exit 0
+fi
 PROJECT=$P PARTS=$N bash scripts/render.sh || exit 5
+[ -n "$NO_FINISH" ] && exit 0
 PROJECT=$P bash scripts/finish.sh "$N" || exit 6
 echo "=== BOOTSTRAP DONE $(date -u +%T) ==="
