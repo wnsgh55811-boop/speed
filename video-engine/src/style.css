@@ -194,10 +194,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 
 /* chips / tag rows */
 .chips{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;max-width:1560px}
-.chip{border-radius:999px;padding:20px 42px;font-weight:600;font-size:50px;
+.chip,.jchip{border-radius:999px;padding:20px 42px;font-weight:600;font-size:50px;
   color:var(--ink);background:rgba(255,255,255,.10);
   border:2px solid rgba(255,255,255,.20);text-shadow:0 2px 10px rgba(0,0,0,.6)}
-.chip.hot{background:var(--amber);border-color:transparent;color:#1E1A12;text-shadow:none}
+.chip.hot,.jchip.hot{background:var(--amber);border-color:transparent;color:#1E1A12;text-shadow:none}
 
 /* list rows */
 .rows{display:flex;flex-direction:column;gap:26px;align-items:flex-start}
@@ -285,3 +285,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .vflow-arm{display:block;width:4px;height:38px;border-radius:2px;
   background:linear-gradient(180deg,var(--cyan-deep),var(--cyan));
   transform-origin:top center;box-shadow:0 0 12px rgba(90,216,247,.5)}
+
+/* generated pictograms on P cards */
+.pgimg{width:330px;height:330px;object-fit:contain;display:block;
+  filter:drop-shadow(0 20px 38px rgba(0,0,0,.55))}
+.jchip{display:inline-block}

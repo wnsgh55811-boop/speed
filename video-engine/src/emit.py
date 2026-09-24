@@ -487,6 +487,18 @@ _PICTO = {
 }
 
 
+def flags(txt):
+    """Leading option characters on a T/Y wording.
+
+    `~` — the words are on screen, so no caption repeats them underneath.
+    `>` — one part per spoken line, each revealed when its line is spoken.
+    """
+    f = ""
+    while txt[:1] in ("~", ">"):
+        f, txt = f + txt[0], txt[1:]
+    return f, txt
+
+
 def picto(name, size=200):
     """One line-drawn mark in the shared stroke language."""
     return (f'<svg class="picto glow" width="{size}" height="{size}" viewBox="0 0 192 192" '
@@ -510,8 +522,9 @@ def g_rows(title, items, muted=(), mark=None):
     return "".join(h)
 
 
-def g_chips(title, items, hot=()):
-    h = ['<div class="stage"><div class="scrim wide"></div>']
+def g_chips(title, items, hot=(), steps=None):
+    ds = f' data-steps="{",".join(map(str, steps))}"' if steps else ""
+    h = [f'<div class="stage"{ds}><div class="scrim wide"></div>']
     if title:
         h.append(f'<div class="hl md gtitle">{esc(title)}</div>')
     h.append('<div class="chips" style="margin-top:50px">')
@@ -521,14 +534,16 @@ def g_chips(title, items, hot=()):
     return "".join(h)
 
 
-def g_bars(title, data, axis=("얕음", "깊음")):
+def g_bars(title, data, axis=("얕음", "깊음"), steps=None, focus=None):
     """A bar plus the degree it stands for.
 
     Review note: "그냥 바만 있어" — length alone read as decoration. Each row now
     carries a five-step rating and the block carries an axis, so the bar says how
     much, not just that there is some.
     """
-    h = ['<div class="stage"><div class="scrim wide"></div>',
+    ds = f' data-steps="{",".join(map(str, steps))}"' if steps else ""
+    fo = f' data-focus="{focus[0]}@{focus[1]}"' if focus else ""
+    h = [f'<div class="stage"{ds}{fo}><div class="scrim wide"></div>',
          f'<div class="hl md gtitle">{esc(title)}</div>' if title else '',
          '<div class="bars" style="margin-top:50px">']
     for lab, frac, tone in data:
@@ -561,16 +576,103 @@ def g_chain(items):
 
 
 def g_twobranch(title, left, right):
+    # Each label is centred on the end of its own branch. The two were set in a
+    # flex row with a fixed gap, which put them wherever their word lengths
+    # happened to land rather than under the lines that point at them.
     return ("".join([
         '<div class="stage"><div class="scrim wide"></div>',
         f'<div class="hl md gtitle">{esc(title)}</div>',
-        '<svg width="1300" height="300" viewBox="0 0 1300 300" style="margin-top:26px">',
+        '<div style="position:relative;width:1300px;height:300px;margin-top:26px">',
+        '<svg width="1300" height="190" viewBox="0 0 1300 190" style="position:absolute;left:0;top:0">',
         '<path class="edge glow" d="M650 10 L650 90 M650 90 L250 90 L250 170 M650 90 L1050 90 L1050 170"/>',
         '</svg>',
-        '<div style="display:flex;gap:210px;margin-top:-56px">',
-        f'<div class="hl md" style="font-size:54px;color:#918F8A">{esc(left)}</div>',
-        f'<div class="hl md" style="font-size:54px">{esc(right)}</div>',
+        '<div class="hl md tb-lab" style="position:absolute;top:196px;left:-100px;width:700px;'
+        f'font-size:54px;color:#918F8A;text-align:center">{esc(left)}</div>',
+        '<div class="hl md tb-lab" style="position:absolute;top:196px;left:700px;width:700px;'
+        f'font-size:54px;text-align:center">{esc(right)}</div>',
         '</div></div>']))
+
+
+def g_jump(a, b):
+    """A topic that leaps rather than follows: the arc skips the ground between."""
+    return ("".join([
+        '<div class="stage" data-late="0.5" data-stagger="0.1"><div class="scrim wide"></div>',
+        '<div style="display:flex;align-items:flex-end;gap:0">',
+        f'<span class="chip" style="margin-bottom:6px">{esc(a)}</span>',
+        '<svg width="620" height="260" viewBox="0 0 620 260" style="margin:0 -10px">',
+        '<path d="M30 250 L590 250" stroke="rgba(255,255,255,.18)" stroke-width="3" '
+        'stroke-dasharray="10 14" fill="none"/>',
+        '<path class="edge-hot glow" d="M40 230 C 160 -40, 460 -40, 580 230"/>',
+        '<path class="edge-hot" d="M548 206 L582 236 L592 192"/>',
+        '</svg>',
+        f'<span class="jchip hot" style="margin-bottom:6px">{esc(b)}</span>',
+        '</div></div>']))
+
+
+def g_ladder(levels, frm, to, title=""):
+    """Depth as steps down: a marker leaves one level and settles on the next."""
+    n = len(levels)
+    sx, sy, x0, y0 = 360, 120, 150, 70
+    d = f"M{x0 - 110} {y0}"
+    for k in range(n):
+        x, y = x0 + k * sx, y0 + k * sy
+        d += f" L{x + 150} {y}"
+        if k < n - 1:
+            d += f" L{x + 150} {y + sy}"
+    W_, H_ = x0 + (n - 1) * sx + 330, y0 + (n - 1) * sy + 140
+    h = ['<div class="stage"><div class="scrim wide"></div>']
+    if title:
+        h.append(f'<div class="hl md gtitle">{esc(title)}</div>')
+    h.append(f'<svg width="{W_}" height="{H_}" viewBox="0 0 {W_} {H_}" style="margin-top:34px">')
+    h.append(f'<path class="edge glow" d="{d}"/>')
+    for k, lab in enumerate(levels):
+        x, y = x0 + k * sx, y0 + k * sy
+        cls = "dlabel" if k == to else "dlabel-dim"
+        hot = " style='fill:#E7B865'" if k == to else ""
+        h.append(f'<text class="{cls}" x="{x + 20}" y="{y + 68}" text-anchor="middle"{hot}>'
+                 f'{esc(lab)}</text>')
+    fx, fy = x0 + frm * sx + 20, y0 + frm * sy - 26
+    tx, ty = x0 + to * sx + 20, y0 + to * sy - 26
+    h.append(f'<circle class="lmark" cx="{fx}" cy="{fy}" r="22" fill="#E7B865" '
+             f'data-dx="{tx - fx}" data-dy="{ty - fy}"/>')
+    h.append("</svg></div>")
+    return "".join(h)
+
+
+def g_branches(title, center, items):
+    """One topic opening out in several directions at once."""
+    pos = [(250, 90), (1150, 90), (250, 470), (1150, 470)]
+    cx, cy = 700, 280
+    h = ['<div class="stage" data-late="0.9" data-stagger="0.16"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle">{esc(title)}</div>',
+         '<div style="position:relative;width:1400px;height:560px;margin-top:30px">',
+         '<svg width="1400" height="560" viewBox="0 0 1400 560" style="position:absolute;left:0;top:0">']
+    for (x, y) in pos[:len(items)]:
+        h.append(f'<path class="edge glow" d="M{cx} {cy} L{x} {y}"/>')
+    h.append('</svg>')
+    h.append(f'<span class="chip hot" style="position:absolute;left:{cx}px;top:{cy}px;'
+             f'transform:translate(-50%,-50%)">{esc(center)}</span>')
+    for (x, y), it in zip(pos, items):
+        h.append(f'<span style="position:absolute;left:{x}px;top:{y}px;transform:translate(-50%,-50%)">'
+                 f'<span class="jchip" style="display:inline-block;white-space:nowrap">{esc(it)}</span></span>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def g_facts(title, turns):
+    """Facts handed back and forth — each one lands, none of them opens anything."""
+    h = [f'<div class="stage" data-late="0.35" data-stagger="0.42"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle">{esc(title)}</div>',
+         '<div style="display:flex;flex-direction:column;gap:20px;width:1100px;margin-top:40px">']
+    for k, t in enumerate(turns):
+        side = "flex-start" if k % 2 == 0 else "flex-end"
+        last = k == len(turns) - 1
+        style = ("color:#6F6D69;background:transparent;border-style:dashed" if last else
+                 "color:#B9B7B2")
+        h.append(f'<div style="display:flex;justify-content:{side}">'
+                 f'<span class="jchip" style="{style}">{esc(t)}</span></div>')
+    h.append('</div></div>')
+    return "".join(h)
 
 
 def g_gap(mode):
@@ -592,7 +694,7 @@ def g_gap(mode):
 def g_lanes():
     lanes = ["상대 말을 듣기", "나를 평가하기", "다음 멘트 준비하기"]
     h = ['<div class="stage"><div class="scrim wide"></div>',
-         '<div class="hl md gtitle">동시에 켜져 있는 것들</div>',
+         '<div class="hl md gtitle">동시에 하고 있는 일</div>',
          '<div class="rows" style="margin-top:46px;gap:22px">']
     for lab in lanes:
         h.append('<div class="row" style="background:rgba(255,255,255,.07);'
@@ -709,6 +811,7 @@ GRAPHICS = {
 
 
 _PRIM = {"rows": g_rows, "chips": g_chips, "bars": g_bars, "chain": g_chain,
+         "jump": g_jump, "ladder": g_ladder, "branches": g_branches, "facts": g_facts,
          "twobranch": g_twobranch, "gap": g_gap, "lanes": g_lanes,
          "stack": g_stack, "pingpong": g_pingpong, "vflow": g_vflow,
          "wave": g_wave}
@@ -780,9 +883,14 @@ def content(i, kind, arg, line, span_lines=()):
         return ""
     if kind == "Y":
         _, _, head = arg.partition("|")
-        size = "xl" if len(head) <= 12 else ("lg" if len(head) <= 22 else "md")
-        return (f'<div class="stage"><div class="scrim"></div>'
-                f'<div class="hl {size}">{esc(head)}</div></div>')
+        fl, head = flags(head)
+        parts = [q for q in head.split("|") if q.strip()]
+        longest = max((len(q) for q in parts), default=0)
+        size = "xl" if longest <= 12 else ("lg" if longest <= 22 else "md")
+        step = ' data-stepped="1"' if ">" in fl else ""
+        return (f'<div class="stage"{step}><div class="scrim"></div>'
+                + "".join(f'<div class="hl {size}">{esc(q)}</div>' for q in parts)
+                + '</div>')
     if kind == "Q":
         # One bubble per quoted line in the span, revealed on the line it
         # belongs to. Lines that only carry "라고 합니다" extend the scene
@@ -838,14 +946,21 @@ def content(i, kind, arg, line, span_lines=()):
         mark, _, txt = arg.partition("|")
         words = txt or line
         size = "xl" if len(words) <= 14 else ("lg" if len(words) <= 26 else "md")
+        # Marks are generated pictograms now. The hand-drawn neon line set read
+        # as a free icon pack and was reused across unrelated sentences; each
+        # card gets its own image drawn for what that sentence says.
+        mk = (f'<img id="{sid}-pg" class="picto pgimg" src="{src(pick(mark, i))}" alt="">'
+              if mark in ALIAS else picto(mark, 252))
         return (f'<div class="stage"><div class="scrim wide"></div>'
-                f'<div class="pmark">{picto(mark, 252)}</div>'
+                f'<div class="pmark">{mk}</div>'
                 f'<div class="hl {size}" style="margin-top:34px">{esc(words)}</div></div>')
     if kind == "T":
-        txt = arg if arg else line
+        fl, txt = flags(arg)
+        txt = txt or line
         parts = [p for p in txt.split("|") if p.strip()]
         size = "xl" if (len(parts) == 1 and len(parts[0]) <= 14) else "lg"
-        h = ['<div class="stage"><div class="scrim wide"></div>']
+        step = ' data-stepped="1"' if ">" in fl else ""
+        h = [f'<div class="stage"{step}><div class="scrim wide"></div>']
         for p in parts:
             h.append(f'<div class="hl {size}">{esc(p)}</div>')
         h.append("</div>")
@@ -933,7 +1048,12 @@ def main():
     bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
     cap_n = 0
     for i, (kind, arg, li, span) in enumerate(scenes):
-        t0, t1 = times[li][0], times[li + span - 1][1]
+        # A scene holds the screen until the next one takes it. Ending it on
+        # its own last word left every pause between sentences with no clip on
+        # any track — 57 black flashes, 16s in all, between scenes that should
+        # simply cut from one to the next.
+        t0 = times[li][0]
+        t1 = times[scenes[i + 1][2]][0] if i + 1 < len(scenes) else total
         line = lines[li]
         d = max(0.4, t1 - t0)
         fam, inner = background(i, kind, arg, chunk_of[li])
@@ -966,9 +1086,11 @@ def main():
         # dropped.
         if kind == "H":
             continue
+        if kind in ("T", "Y") and "~" in flags(arg if kind == "T" else arg.partition("|")[2])[0]:
+            continue
         shown = None
         if kind == "T":
-            shown = arg or line
+            shown = flags(arg)[1] or line
         elif kind == "P":
             shown = arg.partition("|")[2] or line
 
@@ -1074,10 +1196,18 @@ SC.forEach(function (s) {{
 // content entrances, one recipe per scene kind
 SC.forEach(function (s) {{
   if (!s.has) return;
-  var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
+  var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t;
   var f0 = f;
   var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
-  if (s.k === "T") {{
+  var stepped = document.querySelector(f + " [data-stepped]");
+  var hls = document.querySelectorAll(f + " .hl");
+  if ((s.k === "T" || s.k === "Y") && stepped && hls.length > 1) {{
+    // one part per spoken line, each landing on its own words
+    for (var hi = 0; hi < hls.length; hi++)
+      tl.fromTo(hls[hi], {{ yPercent: 40, opacity: 0 }},
+                {{ yPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out" }},
+                (s.s[hi] !== undefined ? s.s[hi] : t + hi * 0.4) + (hi ? 0.04 : 0));
+  }} else if (s.k === "T") {{
     T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out",
                  stagger: 0.09 }}, t);
@@ -1122,7 +1252,7 @@ SC.forEach(function (s) {{
     if (pb > 0 && document.querySelector(f + " .picto"))
       tl.to(f + " .picto", {{ scale: 1.045, duration: 0.95, ease: "sine.inOut",
                               yoyo: true, repeat: pb }}, t + 0.8);
-  }} else if (s.k === "Y") {{
+  }} else if (s.k === "Y" && !stepped) {{
     T(f + " .hl", {{ yPercent: 36, opacity: 0, scale: 1.04 }},
               {{ yPercent: 0, opacity: 1, scale: 1, duration: 0.6,
                  ease: "power3.out" }}, t);
@@ -1151,7 +1281,17 @@ SC.forEach(function (s) {{
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
     var items = document.querySelectorAll(f + " .row, " + f + " .chip, "
                 + f + " .bars > div, " + f + " .stk, " + f + " .vflow-node");
-    if (items.length && items.length === s.s.length && s.s.length > 1) {{
+    var dsEl = document.querySelector(f + " [data-steps]");
+    if (items.length && dsEl) {{
+      // the plan says which spoken line each item belongs to
+      var map = dsEl.getAttribute("data-steps").split(",");
+      for (var gj = 0; gj < items.length; gj++) {{
+        var at = s.s[parseInt(map[gj] || map[map.length - 1], 10)];
+        tl.fromTo(items[gj], {{ yPercent: 34, opacity: 0 }},
+                  {{ yPercent: 0, opacity: 1, duration: 0.44,
+                     ease: "power3.out" }}, (at !== undefined ? at : t) + 0.05);
+      }}
+    }} else if (items.length && items.length === s.s.length && s.s.length > 1) {{
       // one item per spoken line — reveal each on its own line
       for (var gi = 0; gi < items.length; gi++) {{
         tl.fromTo(items[gi], {{ yPercent: 34, opacity: 0 }},
@@ -1165,6 +1305,30 @@ SC.forEach(function (s) {{
                 {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
                    stagger: 0.08 }}, t + 0.14);
     }}
+    var fo = document.querySelector(f + " [data-focus]");
+    if (fo) {{
+      // later in the scene the narration narrows to one row; the rest step back
+      var fv = fo.getAttribute("data-focus").split("@");
+      var rowsF = document.querySelectorAll(f + " .bars > div");
+      var fat = s.s[parseInt(fv[1], 10)];
+      for (var fr = 0; fr < rowsF.length; fr++)
+        if (fr !== parseInt(fv[0], 10) && fat !== undefined)
+          tl.to(rowsF[fr], {{ opacity: 0.24, duration: 0.45, ease: "sine.inOut" }}, fat);
+    }}
+    var lateEl = document.querySelector(f + " [data-late]");
+    if (lateEl) {{
+      tl.fromTo(f + " .jchip", {{ opacity: 0, scale: 0.86, yPercent: 16 }},
+                {{ opacity: 1, scale: 1, yPercent: 0, duration: 0.42, ease: "back.out(1.5)",
+                   stagger: parseFloat(lateEl.getAttribute("data-stagger") || "0.12") }},
+                t + parseFloat(lateEl.getAttribute("data-late")));
+    }}
+    var lm = document.querySelector(f + " .lmark");
+    if (lm)
+      tl.fromTo(lm, {{ x: 0, y: 0 }},
+                {{ x: parseFloat(lm.getAttribute("data-dx")),
+                   y: parseFloat(lm.getAttribute("data-dy")),
+                   duration: Math.min(0.8, Math.max(0.45, s.d * 0.4)),
+                   ease: "power2.inOut" }}, t + Math.min(1.0, s.d * 0.3));
     T(f + " .vflow-arm", {{ scaleY: 0 }},
               {{ scaleY: 1, duration: 0.34, ease: "power2.out", stagger: 0.1 }},
               t + 0.3);
