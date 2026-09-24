@@ -7,8 +7,8 @@
 by flood-filling the background from the border, which keeps their edges
 crisp. Photos of people and animals go through rembg (isnet-general-use).
 Every result is trimmed to its alpha bounding box plus a small margin, so
-the layout can size the figure itself. Writes <out_dir>/cut_<key>.png and a
-checkerboard contact sheet sheet.jpg for a quick look.
+the layout can size the figure itself, and dark subjects get a shadow lift.
+Writes <out_dir>/cut_<key>.png and a checkerboard contact sheet sheet.jpg.
 """
 import io
 import os
@@ -68,6 +68,20 @@ def key_rembg(im):
     return remove(im, session=_session)
 
 
+def lift(im, target=85):
+    """Keyed figures sit on dark plates: a subject shot in low light (mean luma
+    40-60) turns into a silhouette there. Lift shadows with a gamma toward
+    `target` mean luma (never below 0.62, which starts to look washed out)."""
+    import math
+    a = np.asarray(im).astype(float)
+    m = a[..., 3] > 200
+    L = (0.299 * a[..., 0] + 0.587 * a[..., 1] + 0.114 * a[..., 2])[m].mean()
+    g = min(1.0, max(0.62, math.log(target / 255) / math.log(max(L, 1) / 255)))
+    if g < 0.999:
+        a[..., :3] = 255 * np.power(a[..., :3] / 255, g)
+    return Image.fromarray(a.clip(0, 255).astype("uint8"), "RGBA")
+
+
 def trim(im, pad=0.04):
     bb = im.getchannel("A").point(lambda v: 255 if v > 24 else 0).getbbox()
     if not bb:
@@ -102,7 +116,7 @@ def main():
         im = fetch(url)
         im.thumbnail((1400, 1400))
         cut = key_flat(im) if k.startswith("i_") else key_rembg(im)
-        cut = trim(cut)
+        cut = lift(trim(cut))
         cut.save(os.path.join(out, f"cut_{k}.png"), optimize=True)
         done.append(cut)
         print("cut", k, cut.size, flush=True)
