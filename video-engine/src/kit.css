@@ -166,3 +166,34 @@
    makes it the containing block for the absolutely-placed photo — as a 0-height
    static div that collapsed every plate to nothing. */
 .kb{position:absolute;inset:0}
+
+/* ── v2: one-line key typography, stable, high contrast ──────────────── */
+.tstep{display:flex;align-items:center;justify-content:center;pointer-events:none}
+.tstep .wrap{display:flex;align-items:center;justify-content:center}
+.kt{font-weight:800;color:#fff;white-space:nowrap;line-height:1.22;letter-spacing:-.03em;
+  text-align:center;position:relative;
+  text-shadow:0 4px 0 rgba(0,0,0,.35), 0 8px 40px rgba(0,0,0,.85)}
+.kt .mark{z-index:0}
+.keyzone{background:radial-gradient(ellipse 60% 45% at 50% 50%, rgba(0,0,0,.45), transparent 70%)}
+.dimmer{position:absolute;inset:0}
+/* spoken lines, centred: me = yellow / other = white; always opaque */
+.bubble{padding:30px 50px;border-radius:40px;font-weight:700;font-size:58px;line-height:1.3;
+  white-space:nowrap;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.bubble.me{background:#F6DF5A;color:#1e1c16;border-bottom-right-radius:10px}
+.bubble.you{background:#F4F3EF;color:#1e1c16;border-bottom-left-radius:10px}
+.cutfig{position:absolute;top:0;height:880px;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 30px 50px rgba(0,0,0,.6))}
+.icon3d{position:relative;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 34px 44px rgba(0,0,0,.55)) drop-shadow(0 0 60px rgba(90,216,247,.18))}
+.icon3d .ph-missing{border-radius:50%}
+/* white text never sits on a see-through box */
+.pill{background:rgba(12,13,17,.9);border-color:rgba(255,255,255,.28)}
+.qcard.dk{background:#15171d}
+.qcard.am{background:#2a2217}
+.qcard.cy{background:#0f2730}
+.thought,.thought:after{background:#15171d}
+.cmp .pane{background:#14161c}
+.cmp .pane.am .pl b{color:var(--amber)}
+.tok{font-size:40px}
+.kt.c-am{color:var(--amber)}.kt.c-cy{color:var(--cyan)}.kt.c-dim{color:#a9a7a1}.kt.c-red{color:#F0707A}
+.kt.c-am .hl-bg{background:rgba(216,179,104,.24)}

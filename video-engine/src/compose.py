@@ -36,7 +36,9 @@ LOCAL = "--local" in sys.argv
 
 
 def esc(s):
-    return html.escape(str(s), quote=True)
+    # line breaks become <br>: a raw newline inside a clip splits it across two
+    # lines of index.html, and the segment cutter then orphans the second half
+    return html.escape(str(s), quote=True).replace("\n", "<br>")
 
 
 # ── time / asset context ────────────────────────────────────────────────────
@@ -89,6 +91,8 @@ def A(t, fx, d=None, **kw):
 def img(key, cls="", style=""):
     if LOCAL:
         return (f'<div class="ph-missing {cls}" style="{style}">{esc(key)}</div>')
+    if key.startswith("cut_"):          # keyed in the render sandbox (scripts/cutout.py)
+        return f'<img class="{cls}" src="assets/{key}.png" alt="" style="{style}">'
     return f'<img class="{cls}" src="{C.src(key)}" alt="" style="{style}">'
 
 
@@ -104,17 +108,22 @@ def vid(key, t0, dur, cls="", style=""):
 # ── scene library ───────────────────────────────────────────────────────────
 # Each returns dict(html=..., nocap=set(lines), bg=family|None, plate=bool)
 
-def s_photo(sc, key, kb="in", tags=(), side=None, tint=True):
-    """Full-bleed photograph with Ken Burns, optional timed tag pills."""
+def s_photo(sc, key, kb="in", tags=(), side=None, tint=True, dim=0.0, steps=None):
+    """Full-bleed photograph with Ken Burns. `dim` lays an even black veil for
+    any text on top; `steps` puts one-line key typography over it."""
     shade = '<div class="shade"></div>' if tint else ""
     if side == "R":
         shade += '<div class="side"></div>'
     elif side == "L":
         shade += '<div class="sideL"></div>'
+    if dim:
+        shade += f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"></div>'
     h = [f'<div class="plate"><div class="kb" data-kb="{kb}">{img(key)}</div>{shade}</div>']
     for (ln, txt, pos, cls) in tags:
         h.append(f'<div style="position:absolute;{pos}"><span class="pill {cls}"'
                  f'{A(C.T(ln, .1), "pop")}>{esc(txt)}</span></div>')
+    if steps:
+        h.append('<div class="zone">' + steps_html(sc, steps) + '</div>')
     return dict(html="".join(h), plate=True)
 
 
@@ -131,7 +140,7 @@ def s_video(sc, key, side=None, title=None, rows=(), quotes=()):
     h = [f'<div class="plate"><div class="kb" data-kb="in">{vid(key, t0, t1 - t0)}</div>{shade}</div>']
     if title or rows or quotes:
         pos = "right:110px" if side != "L" else "left:110px"
-        h.append(f'<div style="position:absolute;{pos};top:0;height:880px;width:820px;display:flex;'
+        h.append(f'<div style="position:absolute;{pos};top:0;height:880px;width:900px;display:flex;'
                  f'flex-direction:column;justify-content:center;gap:34px">')
         if title:
             ln, txt, cls = title
@@ -147,39 +156,22 @@ def s_video(sc, key, side=None, title=None, rows=(), quotes=()):
         for q in quotes:
             ln, txt, st = q[0], q[1], q[2]
             who = f'<span class="who2">{esc(q[3])}</span>' if len(q) > 3 else ""
-            al = "flex-end" if (len(q) > 3 and q[3] == "나") else "flex-start"
+            al = "flex-start" if (len(q) > 3 and q[3] == "나") else "flex-end"
             h.append(f'<div class="qcard {st}" style="align-self:{al};margin-top:40px"{A(C.T(ln, .05), "pop")}>{who}{esc(txt)}</div>')
             C.sfx.append([C.T(ln, .05), "click"])
         h.append('</div>')
     return dict(html="".join(h), plate=True)
 
 
-def s_typo(sc, parts, kick=None, align="center", y=0):
-    """parts: [(line, text, cls)] — each line of type lands on its sentence.
-    cls tokens: m s xs (size), cy am dim (colour), x (struck on the *next*
-    line's time), hl (amber marker sweep)."""
-    h = [f'<div class="zone"><div class="col" style="gap:26px;transform:translateY({y}px)">']
+def s_typo(sc, parts, kick=None):
+    h = ['<div class="zone keyzone">']
     if kick:
         ln, txt = kick
-        h.append(f'<div class="kick"{A(C.T(ln), "fade")}>{esc(txt)}</div>')
-    for k, p in enumerate(parts):
-        ln, txt, cls = p[0], p[1], p[2] if len(p) > 2 else ""
-        size = " ".join(c for c in cls.split() if c in ("m", "s", "xs"))
-        col = {"cy": "c-cy", "am": "c-am", "dim": "c-dim", "red": "c-red"}
-        colc = " ".join(col[c] for c in cls.split() if c in col)
-        inner = esc(txt)
-        extra = ""
-        if "hl" in cls.split():
-            inner = (f'<span class="mark"><span class="hl-bg"{A(C.T(ln, .35), "growx", .6)}>'
-                     f'</span>{inner}</span>')
-        if "x" in cls.split():
-            xt = p[3] if len(p) > 3 and p[3] is not None else (
-                C.T(parts[k + 1][0], .05) if k + 1 < len(parts) and parts[k + 1][0] > ln else C.T(ln, 1.0))
-            extra = f'<i class="strk"{A(xt, "growx", .35)}></i>'
-        h.append(f'<div class="big {size} {colc}" style="position:relative"'
-                 f'{A(C.T(ln, .05), "up")}>{inner}{extra}</div>')
-    h.append('</div></div>')
-    return dict(html="".join(h))
+        h.append(f'<div class="kick" style="position:absolute;left:0;right:0;top:300px;text-align:center"'
+                 f'{A(C.T(ln), "fade")}>{esc(txt)}</div>')
+    h.append(steps_html(sc, parts))
+    h.append('</div>')
+    return dict(html="".join(h), bg="bg-spot")
 
 
 def s_chat(sc, msgs, title="", read_at=None, typing_at=None, side="c", bgkey=None):
@@ -205,28 +197,33 @@ def s_chat(sc, msgs, title="", read_at=None, typing_at=None, side="c", bgkey=Non
     return dict(html="".join(h), plate=bool(bgkey))
 
 
-def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None):
+def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None, title=None, dim=0.0):
     """Quote / thought cards over a photo or a cut-out figure.
     quotes: [(line, text, style)] style ∈ y (spoken), dk (thought), am, cy."""
     h = []
     if bgkey:
         sd = {"R": "side", "L": "sideL"}.get(side, "")
         h.append(f'<div class="plate"><div class="kb" data-kb="in">{img(bgkey)}</div>'
-                 f'<div class="shade"></div>{f"<div class={chr(34)}{sd}{chr(34)}></div>" if sd else ""}</div>')
+                 f'<div class="shade"></div>{f"<div class={chr(34)}{sd}{chr(34)}></div>" if sd else ""}'
+                 + (f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"></div>' if dim else "") + '</div>')
     if cut:
-        h.append(f'<div style="position:absolute;left:{160 if side!="L" else 1160}px;bottom:230px;'
-                 f'height:640px;width:600px;display:flex;align-items:flex-end;justify-content:center"'
-                 f'{A(sc["t0"], "up")}>{img(cut, "cutimg", "height:640px;width:auto;max-width:600px;object-fit:contain")}</div>')
+        # keyed figures stand on the bottom edge: a portrait cropped at the waist
+        # must meet the frame, never float above the captions
+        h.append(f'<div class="cutfig" style="left:{120 if side!="L" else 1120}px;top:auto;bottom:0;'
+                 f'height:900px;width:680px;align-items:flex-end"'
+                 f'{A(sc["t0"], "up")}>{img(cut, "cutimg", "max-height:900px;width:auto;max-width:680px;object-fit:contain;object-position:bottom")}</div>')
     x0 = 330 if (cut or bgkey) and side != "L" else 0
     if side == "L":
         x0 = -330
     h.append(f'<div class="zone"><div class="col" style="gap:{"60px" if len(quotes) < 3 else "44px"};'
              f'transform:translateX({x0}px)">')
+    if title:                          # in the column, so it can never overlap a card
+        h.append(f'<div class="big xs c-am" style="margin-bottom:10px"{A(C.T(title[0], .05), "up")}>{esc(title[1])}</div>')
     for i, q in enumerate(quotes):
         ln, txt, st = q[0], q[1], q[2]
-        cls = "thought" if st == "th" else f"qcard {st}"
+        cls = "thought" if st == "th" else f"qcard {st}"  # no float: text never drifts
         off = (i % 2) * 70 - 35 if layout == "zig" else 0
-        h.append(f'<div class="{cls} flt" style="transform:translateX({off}px)"'
+        h.append(f'<div class="{cls}" style="transform:translateX({off}px)"'
                  f'{A(C.T(ln, .05), "pop")}>{esc(txt)}</div>')
         C.sfx.append([C.T(ln, .05), "click"])
     h.append('</div></div>')
@@ -252,11 +249,18 @@ def s_rows(sc, items, title=None, width=None, y=0):
     return dict(html="".join(h))
 
 
+def icon(key, size=520, at=None):
+    """3D icon: keyed PNG floating free (cut_*) or, failing that, the tile."""
+    a = A(at, "pop") if at is not None else ""
+    if key.startswith("cut_"):
+        return (f'<div class="icon3d flt" style="width:{size}px;height:{size}px"{a}>'
+                f'{img(key, "", "width:100%;height:100%;object-fit:contain")}</div>')
+    return f'<div class="tile flt" style="width:{size}px;height:{size}px"{a}>{img(key)}</div>'
+
+
 def s_icon(sc, key, badge=None, sub=None, side="c", badge_at=None, sub_at=None):
-    x = {"c": 0, "l": -420, "r": 420}[side]
-    h = [f'<div class="zone"><div class="{"col" if side=="c" else "row2"}" style="gap:60px;'
-         f'transform:translateX({0 if side=="c" else 0}px)">']
-    tile = (f'<div class="tile flt"{A(sc["t0"], "pop")}>{img(key)}</div>')
+    h = [f'<div class="zone"><div class="{"col" if side=="c" else "row2"}" style="gap:60px">']
+    tile = icon(key, 520 if side != "c" else 440, sc["t0"])
     txt = ""
     if badge:
         txt += f'<div class="big s"{A(C.T(badge_at, .1) if badge_at is not None else sc["t0"] + .3, "up")}>{esc(badge)}</div>'
@@ -345,18 +349,16 @@ def s_graph_effort(sc, draw_at, peak_at, xl=("강함", "약함"), ylab="내 노�
     return dict(html=h)
 
 
-def s_scale(sc, steps, left="나", right="상대", drops=(), title=None):
-    """A balance beam that tips a little further each time something is
-    handed across. steps: [(line, deg)]; drops: [(line, label)] land on the
-    right pan."""
-    pivot_x, pivot_y = 960, 250
+def s_scale(sc, steps, left="상대", right="나", drops=(), title=None):
+    """A balance beam. The LEFT pan is the heavy side (갑 / whoever holds the
+    initiative) and sinks a little further with every step; steps carry
+    negative degrees. drops: [(line, label)] land on the left pan."""
     h = ['<div class="zone"><div style="position:relative;width:1500px;height:760px">']
     if title:
-        h.append(f'<div class="big xs c-am" style="position:absolute;top:-10px;left:0;right:0"'
+        h.append(f'<div class="big xs c-am" style="position:absolute;top:-40px;left:0;right:0"'
                  f'{A(sc["t0"], "up")}>{esc(title)}</div>')
     stp = ";".join(f"{C.T(l, .1):.3f}:{d}" for l, d in steps)
-    # beam group rotates about the pivot; pans hang and counter-rotate
-    h.append(f'<svg class="dg" width="1500" height="760" viewBox="0 0 1500 760" style="position:absolute;inset:0">'
+    h.append(f'<svg class="dg" width="1500" height="760" viewBox="0 0 1500 760" style="position:absolute;inset:0;overflow:visible">'
              f'<path class="ln ax" d="M750 250 L750 650" style="stroke-width:10;stroke:#8d8a83"/>'
              f'<path d="M620 690 L880 690 L820 650 L680 650 Z" fill="#8d8a83"/>'
              f'<g class="beam" data-steps="{stp}" style="transform-origin:750px 250px">'
@@ -364,39 +366,41 @@ def s_scale(sc, steps, left="나", right="상대", drops=(), title=None):
              f'<circle cx="750" cy="250" r="22" fill="#d8b368"/>'
              f'<g class="pan" data-counter="1" style="transform-origin:190px 250px">'
              f'<path class="ln" d="M190 250 L110 430 M190 250 L270 430" style="stroke:#bdbab3;stroke-width:4"/>'
-             f'<path d="M80 430 L300 430 Q190 500 80 430 Z" class="fl-cy"/>'
-             f'<text class="dt-cy" x="190" y="560" text-anchor="middle">{esc(left)}</text></g>'
-             f'<g class="pan" data-counter="1" style="transform-origin:1310px 250px">'
-             f'<path class="ln" d="M1310 250 L1230 430 M1310 250 L1390 430" style="stroke:#bdbab3;stroke-width:4"/>'
-             f'<path d="M1200 430 L1420 430 Q1310 500 1200 430 Z" class="fl-am"/>'
-             f'<text class="dt-am" x="1310" y="560" text-anchor="middle">{esc(right)}</text>')
+             f'<path d="M80 430 L300 430 Q190 500 80 430 Z" class="fl-am"/>'
+             f'<text class="dt-am" x="190" y="570" text-anchor="middle" style="font-size:60px">{esc(left)}</text>')
     for k, (ln, lab) in enumerate(drops):
-        y = 400 - k * 64
-        h.append(f'<g{A(C.T(ln, .05), "drop")}><rect x="{1310-150}" y="{y-46}" width="300" height="56" rx="28" fill="#F4F1E8"/>'
-                 f'<text x="1310" y="{y-6}" text-anchor="middle" style="font-weight:700;font-size:34px;fill:#1b1a16">{esc(lab)}</text></g>')
+        y = 410 - k * 66
+        h.append(f'<g{A(C.T(ln, .05), "drop")}><rect x="40" y="{y-48}" width="300" height="58" rx="29" fill="#F4F1E8"/>'
+                 f'<text x="190" y="{y-8}" text-anchor="middle" style="font-weight:700;font-size:34px;fill:#1b1a16">{esc(lab)}</text></g>')
         C.sfx.append([C.T(ln, .05), "tick"])
-    h.append('</g></g></svg></div></div>')
+    h.append(f'</g><g class="pan" data-counter="1" style="transform-origin:1310px 250px">'
+             f'<path class="ln" d="M1310 250 L1230 430 M1310 250 L1390 430" style="stroke:#bdbab3;stroke-width:4"/>'
+             f'<path d="M1200 430 L1420 430 Q1310 500 1200 430 Z" class="fl-cy"/>'
+             f'<text class="dt-cy" x="1310" y="570" text-anchor="middle" style="font-size:60px">{esc(right)}</text></g>'
+             '</g></svg></div></div>')
     return dict(html="".join(h))
 
 
 def s_tokens(sc, items, left="나", right="상대", final=None):
-    """Choices start on my side and are handed over one at a time."""
-    h = ['<div class="zone"><div style="position:relative;width:1700px;height:760px">']
-    h.append(f'<div style="position:absolute;left:0;top:40px;width:640px;height:620px;border-radius:40px;'
-             f'border:3px dashed rgba(90,216,247,.55);background:rgba(90,216,247,.05)"{A(sc["t0"], "fade")}></div>'
-             f'<div style="position:absolute;right:0;top:40px;width:640px;height:620px;border-radius:40px;'
-             f'border:3px dashed rgba(216,179,104,.6);background:rgba(216,179,104,.05)"{A(sc["t0"], "fade")}></div>'
-             f'<div class="big xs c-cy" style="position:absolute;left:0;width:640px;top:62px">{esc(left)}</div>'
-             f'<div class="big xs c-am" style="position:absolute;right:0;width:640px;top:62px">{esc(right)}</div>'
-             f'<div style="position:absolute;left:760px;top:330px;width:180px;text-align:center;font-size:90px;'
+    """Choices start on my side and are handed over one at a time. Tokens are
+    one fixed width, centred in their box with even margins all round."""
+    n = len(items)
+    top, pitch, th = 150, 104, 78
+    bh = max(640, top + (n - 1) * pitch + th + 70)          # 70px clear under the last token
+    y0 = (760 - bh) // 2
+    h = [f'<div class="zone"><div style="position:relative;width:1700px;height:760px">']
+    for side, col in (("left:0", "90,216,247"), ("right:0", "216,179,104")):
+        h.append(f'<div style="position:absolute;{side};top:{y0}px;width:640px;height:{bh}px;border-radius:40px;'
+                 f'border:3px dashed rgba({col},.6);background:rgba({col},.06)"{A(sc["t0"], "fade")}></div>')
+    h.append(f'<div class="big xs c-cy" style="position:absolute;left:0;width:640px;top:{y0 + 26}px">{esc(left)}</div>'
+             f'<div class="big xs c-am" style="position:absolute;right:0;width:640px;top:{y0 + 26}px">{esc(right)}</div>'
+             f'<div style="position:absolute;left:760px;top:{y0 + bh // 2 - 60}px;width:180px;text-align:center;font-size:90px;'
              f'color:rgba(255,255,255,.5);font-weight:800">→</div>')
     for k, (ln, lab) in enumerate(items):
-        y = 190 + k * 96
-        h.append(f'<div class="tok" style="left:70px;top:{y}px"{A(C.T(ln, .05), "move", .9, x=1060)}>{esc(lab)}</div>')
+        y = y0 + top + k * pitch
+        h.append(f'<div class="tok" style="left:70px;top:{y}px;width:500px;height:{th}px;justify-content:center;display:flex;'
+                 f'align-items:center;padding:0"{A(C.T(ln, .05), "move", .9, x=1060)}>{esc(lab)}</div>')
         C.sfx.append([C.T(ln, .05), "whoosh_s"])
-    if final:
-        h.append(f'<div class="big xs" style="position:absolute;left:0;right:0;top:320px"'
-                 f'{A(C.T(final[0], .1), "up")}>{esc(final[1])}</div>')
     h.append('</div></div>')
     return dict(html="".join(h))
 
@@ -426,7 +430,7 @@ def s_timer(sc, label, at, dur, sub=None, sub_at=None, hours=False, key=None):
         f'{300 + (r+26)*__import__("math").sin(k*3.14159/6):.1f} L{300 + (r+42)*__import__("math").cos(k*3.14159/6):.1f} '
         f'{300 + (r+42)*__import__("math").sin(k*3.14159/6):.1f}" style="stroke:rgba(255,255,255,.35);stroke-width:4"/>'
         for k in range(12))
-    tile = (f'<div class="tile flt" style="width:360px;height:360px">{img(key)}</div>' if key else "")
+    tile = icon(key, 380) if key else ""
     h = (f'<div class="zone"><div class="row2" style="gap:90px">{tile}<div style="position:relative;width:600px;height:600px"'
          f'{A(sc["t0"], "pop")}>'
          f'<svg width="600" height="600" viewBox="0 0 600 600">{ticks}'
@@ -589,7 +593,7 @@ def s_flip(sc, rows, title=None):
 def s_check(sc, num, title, quotes=(), rows=(), card=None):
     body = ""
     if card:
-        body += f'<div class="card flt" style="width:640px;height:360px"{A(sc["t0"] + .3, "up")}>{img(card)}</div>'
+        body += f'<div class="card" style="width:640px;height:360px"{A(sc["t0"] + .3, "up")}>{img(card)}</div>'
     if rows:
         body += '<div class="lst">'
         for r in rows:
@@ -616,35 +620,181 @@ def s_check(sc, num, title, quotes=(), rows=(), card=None):
 
 def s_cta(sc, lines_at):
     h = (f'<div class="zone"><div class="cta-card"{A(sc["t0"], "pop")}>'
-         f'<div class="kick">PRIVATE LECTURE</div>'
          f'<div class="big s">비공개 특강</div>'
-         f'<div class="sub2"{A(C.T(lines_at[0], .1), "up")}>멘트보다 먼저, 태도가 바뀌는 순간을 다룹니다</div>'
-         f'<div class="sub2 c-am"{A(C.T(lines_at[2], .1), "up")}>스킬 공부만 해왔다면, 다른 관점에서</div>'
-         f'<div class="cta-btn"{A(C.T(lines_at[1], .1), "pop")}>설명란에서 확인하기</div>'
-         f'<div class="arrow-dn flt"{A(C.T(lines_at[1], .4), "fade")}>↓</div></div></div>')
+         f'<div class="sub2" style="color:#fff"{A(C.T(lines_at[0], .1), "up")}>태도를 바꾸면 연애가 쉬워집니다</div>'
+         f'<div class="cta-btn" style="margin-top:44px"{A(C.T(lines_at[1], .1), "pop")}>설명란에서 확인하기</div>'
+         f'</div></div>')
     C.sfx.append([C.T(lines_at[1], .1), "click"])
     return dict(html=h)
 
 
-def s_hook(sc, title_a, title_b, key):
-    """0–3s: the paradox on screen before the first sentence ends."""
+def s_hook(sc, key):
+    """Opening: the waiting-for-a-reply clip, nothing laid over it."""
     t0 = sc["t0"]
-    X0, Y0 = 1060, 700
-    h = (f'<div class="plate"><div class="kb" data-kb="in">{vid(key, t0, sc["t1"] - t0) if key.startswith("v_") else img(key)}</div>'
-         f'<div class="shade"></div><div class="side" style="background:linear-gradient(90deg,rgba(6,7,10,.05) 0%,rgba(6,7,10,.35) 45%,rgba(6,7,10,.86) 100%)"></div></div>'
-         f'<div style="position:absolute;right:120px;top:130px;width:760px" class="col">'
-         f'<div class="kick" style="align-self:flex-start"{A(t0 + .05, "fade")}>연애의 역설</div>'
-         f'<div class="big m" style="text-align:left;align-self:flex-start;margin-top:16px"{A(t0 + .1, "up")}>{esc(title_a)}</div>'
-         f'<div class="big m c-am" style="text-align:left;align-self:flex-start"{A(t0 + .45, "up")}>{esc(title_b)}</div>'
-         f'<svg class="dg" width="760" height="330" viewBox="0 0 760 330" style="margin-top:30px">'
-         f'<path class="ln ax" d="M20 20 L20 300 L740 300"/>'
-         f'<path class="ln st-am" d="M20 270 C 250 250, 450 120, 720 40"{A(t0 + .7, "draw", 1.6)}/>'
-         f'<path class="ln st-cy" d="M20 60 C 250 80, 450 200, 720 270"{A(t0 + .9, "draw", 1.6)}/>'
-         f'<text class="dt-am" x="720" y="30" text-anchor="end" style="font-size:40px"{A(t0 + 1.9, "fade")}>내 호감</text>'
-         f'<text class="dt-cy" x="720" y="225" text-anchor="end" style="font-size:40px"{A(t0 + 2.1, "fade")}>상대 반응</text>'
+    return dict(html=f'<div class="plate"><div class="kb" data-kb="in">{vid(key, t0, sc["t1"] - t0)}</div>'
+                     f'<div class="shade"></div></div>', plate=True)
+
+
+def fit_px(text, px=104, max_w=1640, weight="ExtraBold"):
+    """Largest size ≤ px at which `text` stays on ONE line inside max_w."""
+    f = build.font
+    while px > 56 and build.text_w(text, f(px, weight)) > max_w:
+        px -= 4
+    return px
+
+
+def steps_html(sc, parts, box_style="position:absolute;inset:0", base_px=104, max_w=1640):
+    """Key typography, one line on screen at a time.
+
+    parts: [(line, text, cls[, dt])]. Each part replaces the one before it —
+    it fades in on its own sentence and the previous part leaves as it lands.
+    A '|' in text makes a deliberate two-line step. cls tokens: am cy dim
+    (colour), s (smaller), hl (amber marker), x (struck through before it goes).
+    """
+    col = {"cy": "c-cy", "am": "c-am", "dim": "c-dim", "red": "c-red"}
+    ts = [C.T(p[0], p[3] if len(p) > 3 else .05) for p in parts]
+    h = []
+    for k, p in enumerate(parts):
+        ln, txt, cls = p[0], p[1], p[2] if len(p) > 2 else ""
+        toks = cls.split()
+        colc = " ".join(col[c] for c in toks if c in col)
+        rows = txt.split("|")
+        px = min(fit_px(r, base_px - (22 if "s" in toks else 0), max_w) for r in rows)
+        inner = "<br>".join(esc(r) for r in rows)
+        if "hl" in toks:
+            inner = (f'<span class="mark"><span class="hl-bg"{A(ts[k] + .3, "growx", .6)}></span>'
+                     f'{inner}</span>')
+        strike = ""
+        if "x" in toks:
+            xt = (ts[k + 1] - .85) if k + 1 < len(parts) else ts[k] + 1.0
+            strike = f'<i class="strk"{A(max(ts[k] + .5, xt), "growx", .35)}></i>'
+        # the old line is fully gone before the next one starts: never two at once
+        hide = A(max(ts[k] + .6, ts[k + 1] - .32), "hide", .22) if k + 1 < len(parts) else ""
+        h.append(f'<div class="tstep" style="{box_style}"><div class="wrap"{hide}>'
+                 f'<div class="kt {colc}" style="font-size:{px}px"{A(ts[k], "up", .5)}>{inner}{strike}</div>'
+                 f'</div></div>')
+    return "".join(h)
+
+
+def s_bubbles(sc, msgs, bgkey=None, dim=.6, title=None):
+    """Spoken lines as bubbles in the middle of the frame, one per sentence."""
+    h = []
+    if bgkey:
+        h.append(f'<div class="plate"><div class="kb" data-kb="in">{img(bgkey)}</div>'
+                 f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"></div></div>')
+    h.append('<div class="zone"><div class="col" style="gap:40px">')
+    if title:
+        h.append(f'<div class="big xs c-am" style="margin-bottom:10px"{A(C.T(title[0], .05), "up")}>{esc(title[1])}</div>')
+    for m in msgs:
+        ln, txt, who = m[0], m[1], (m[2] if len(m) > 2 else "me")
+        h.append(f'<div class="bubble {who}"{A(C.T(ln, .05), "pop")}>{esc(txt)}</div>')
+        C.sfx.append([C.T(ln, .05), "click"])
+    h.append('</div></div>')
+    return dict(html="".join(h), plate=bool(bgkey))
+
+
+def s_cut(sc, key, steps=None, side="L", tags=()):
+    """A keyed figure (person/animal) standing in a designed plate, with one
+    line of key type beside it."""
+    x = "left:120px" if side == "L" else "right:120px"
+    tx = "left:780px;right:80px" if side == "L" else "left:80px;right:780px"
+    h = [f'<div class="cutfig" style="{x}"{A(sc["t0"], "up", .7)}>{img(key, "", "height:700px;width:auto;max-width:700px;object-fit:contain")}</div>']
+    if steps:
+        h.append(steps_html(sc, steps, box_style=f"position:absolute;top:0;height:880px;{tx}", base_px=96, max_w=1020))
+    for (ln, txt, cls) in tags:
+        pass
+    return dict(html="".join(h), bg="bg-ink")
+
+
+def fig(color):
+    """A pictogram person: head + rounded body, one stroke language."""
+    return (f'<circle cx="0" cy="-150" r="46" fill="{color}"/>'
+            f'<path d="M-70 60 Q-70 -80 0 -80 Q70 -80 70 60 Z" fill="{color}"/>')
+
+
+def s_distance(sc, reach_at, back_at):
+    """I keep reaching; she drifts back and goes quiet."""
+    h = ('<div class="zone"><svg class="dg" width="1700" height="720" viewBox="0 0 1700 720">'
+         '<path class="ln" d="M120 560 L1580 560" style="stroke:rgba(255,255,255,.25);stroke-width:3"/>'
+         f'<g transform="translate(560 480)">{fig("#5AD8F7")}'
+         '<text class="dt-cy" x="0" y="150" text-anchor="middle">나</text></g>'
+         f'<g{A(C.T(back_at), "move", 1.6, x=220)}><g{A(C.T(back_at), "out", 1.6)}>'
+         f'<g transform="translate(1100 480)">{fig("#D8B368")}'
+         '<text class="dt-am" x="0" y="150" text-anchor="middle">상대</text></g></g></g>'
+         + "".join(f'<path class="ln st-cy" d="M{660 + k*110} {380 - k*6} q40 -40 80 0"{A(C.T(reach_at, k*.35), "draw", .6)}/>'
+                   for k in range(3))
+         + '</svg></div>')
+    return dict(html=h)
+
+
+def s_pull(sc, label_at, a_at, b_at):
+    """Being dragged, then dragging: the rope just changes direction."""
+    h = ('<div class="zone"><svg class="dg" width="1700" height="760" viewBox="0 0 1700 760">'
+         f'<text class="dt" x="850" y="110" text-anchor="middle" style="font-size:64px;font-weight:800"'
+         f'{A(C.T(label_at), "up")}>반대 방향의 같은 게임</text>'
+         f'<g{A(C.T(a_at), "move", .9, x=90)}><g transform="translate(480 520)">{fig("#5AD8F7")}'
+         '<text class="dt-cy" x="0" y="150" text-anchor="middle">나</text></g></g>'
+         f'<g transform="translate(1220 520)">{fig("#D8B368")}'
+         '<text class="dt-am" x="0" y="150" text-anchor="middle">상대</text></g>'
+         '<path class="ln" d="M560 470 L1140 470" style="stroke:#e9e5da;stroke-width:8"/>'
+         f'<g{A(C.T(a_at), "fade")}><g{A(C.T(b_at) - .1, "hide", .2)}>'
+         '<path class="ln st-am" d="M780 360 L940 360 M900 325 L945 360 L900 395"/>'
+         '<text class="dt" x="860" y="300" text-anchor="middle">끌려다니기</text></g></g>'
+         f'<g{A(C.T(b_at), "fade")}>'
+         '<path class="ln st-cy" d="M940 360 L780 360 M820 325 L775 360 L820 395"/>'
+         '<text class="dt" x="860" y="300" text-anchor="middle">끌고 다니기</text></g>'
          '</svg></div>')
-    C.sfx.append([t0 + .1, "impact"])
-    return dict(html=h, plate=True)
+    return dict(html=h)
+
+
+def s_core(sc, steps):
+    """A person with a steady light at the chest: the centre that stays put."""
+    h = ('<div class="zone"><svg class="dg" width="700" height="760" viewBox="-350 -420 700 760" '
+         'style="position:absolute;left:170px;top:60px">'
+         '<circle cx="0" cy="-230" r="80" fill="#2a2f3a"/>'
+         '<path d="M-150 300 Q-150 -120 0 -120 Q150 -120 150 300 Z" fill="#2a2f3a"/>'
+         f'<circle cx="0" cy="20" r="120" fill="rgba(90,216,247,.18)"{A(sc["t0"] + .4, "pulse")}/>'
+         f'<circle cx="0" cy="20" r="46" fill="#5AD8F7" style="filter:drop-shadow(0 0 30px rgba(90,216,247,.95))"'
+         f'{A(sc["t0"] + .2, "pop")}/></svg>'
+         + steps_html(sc, steps, box_style="position:absolute;top:0;height:880px;left:820px;right:60px",
+                      base_px=92, max_w=1000)
+         + '</div>')
+    return dict(html=h, bg="bg-ink")
+
+
+def s_morph(sc, a_at, b_at):
+    """친절 slides aside and dims; an arrow draws; 거래 turns over into place."""
+    card = ('position:absolute;left:50%;top:50%;width:620px;height:260px;margin:-130px 0 0 -310px;'
+            'border-radius:40px;display:flex;align-items:center;justify-content:center;'
+            'font-weight:800;font-size:116px')
+    h = ('<div class="zone keyzone" style="perspective:1400px">'
+         f'<div style="position:absolute;inset:0"{A(C.T(b_at), "move", .7, x=-420)}>'
+         f'<div style="position:absolute;inset:0"{A(C.T(b_at), "out", .7)}>'
+         f'<div style="{card};background:#12303a;border:4px solid #5AD8F7;color:#fff"{A(C.T(a_at), "up")}>친절</div></div></div>'
+         f'<svg class="dg" width="1920" height="880" viewBox="0 0 1920 880" style="position:absolute;inset:0">'
+         f'<path class="ln st-am" d="M890 440 L1030 440 M990 400 L1035 440 L990 480"{A(C.T(b_at, .4), "draw", .5)}/></svg>'
+         f'<div style="position:absolute;inset:0;transform:translateX(420px)">'
+         f'<div style="{card};background:#D8B368;color:#1b1408"{A(C.T(b_at, .6), "flipin", .55)}>거래</div></div>'
+         '</div>')
+    C.sfx.append([C.T(b_at, .6), "whoosh_s"])
+    return dict(html=h, bg="bg-spot")
+
+
+def s_reject(sc, link_at, cut_at):
+    """Good start, then it stops: the line between them snaps."""
+    h = ('<div class="zone"><svg class="dg" width="1700" height="720" viewBox="0 0 1700 720">'
+         f'<g transform="translate(480 470)">{fig("#5AD8F7")}</g>'
+         f'<g transform="translate(1220 470) scale(-1 1)">{fig("#D8B368")}</g>'
+         '<path d="M1290 330 l90 -60" class="ln" style="stroke:#D8B368;stroke-width:26"/>'
+         f'<g{A(C.T(link_at), "fade")}><g{A(C.T(cut_at), "hide", .3)}>'
+         '<path class="ln" d="M580 360 L1120 360" style="stroke:#e9e5da;stroke-width:6;stroke-dasharray:18 14"/>'
+         '<path d="M850 300 c-30-45-105-22-82 30 c15 30 82 68 82 68 s67-38 82-68 c23-52-52-75-82-30z" fill="#F0707A"/></g></g>'
+         f'<g{A(C.T(cut_at), "fade", .3)}>'
+         '<path class="ln" d="M580 360 L800 360" style="stroke:rgba(233,229,218,.45);stroke-width:6;stroke-dasharray:18 14"/>'
+         '<path class="ln" d="M900 360 L1120 360" style="stroke:rgba(233,229,218,.45);stroke-width:6;stroke-dasharray:18 14"/>'
+         '<path class="ln" d="M820 320 L880 400 M880 320 L820 400" style="stroke:#F0707A;stroke-width:10"/></g>'
+         '</svg></div>')
+    return dict(html=h)
 
 
 SCENES = {k[2:]: v for k, v in globals().items() if k.startswith("s_")}
@@ -670,6 +820,9 @@ var FX = {
            tl.fromTo(el,{strokeDashoffset:L},{strokeDashoffset:0,duration:d||2,ease:"none"},t); },
   move:  function(el,t,d){ tl.fromTo(el,{opacity:el.style.opacity||1},{x:num(el,'x',0),y:num(el,'y',0),duration:d||.9,ease:"power2.inOut"},t); },
   pulse: function(el,t,d){ tl.fromTo(el,{opacity:.25},{opacity:1,duration:.45,ease:"sine.inOut",yoyo:true,repeat:4},t); },
+  hide:  function(el,t,d){ tl.fromTo(el,{opacity:1},{opacity:0,duration:d||.25,ease:"power1.in",immediateRender:false},t); },
+  flipout: function(el,t,d){ tl.fromTo(el,{rotationX:0,opacity:1},{rotationX:90,opacity:0,duration:d||.45,ease:"power2.in",immediateRender:false},t); },
+  flipin:  function(el,t,d){ tl.fromTo(el,{rotationX:-90,opacity:0},{rotationX:0,opacity:1,duration:d||.5,ease:"power2.out"},t); },
   shake: function(el,t,d){ tl.fromTo(el,{x:-6},{x:6,duration:.08,ease:"sine.inOut",yoyo:true,repeat:5},t); }
 };
 document.querySelectorAll('[data-fx]').forEach(function(el){
@@ -685,10 +838,9 @@ document.querySelectorAll('.beam').forEach(function(g){
       tl.to(pn,{rotation:-r,svgOrigin:ox+" 250",duration:1.1,ease:"power2.inOut"},t); });
   });
 });
-// every scene breathes: slow push, never dead still
+// photos drift (Ken Burns) and icons float; type and panels stay put —
+// a slow push on text reads as stutter at 30 fps
 SC.forEach(function(s){
-  var f = document.getElementById('fgm' + s.i);
-  if (f) tl.fromTo(f,{scale:1,y:0},{scale:1.028,y:-8,duration:s.d,ease:"sine.inOut"},s.t);
   var kb = document.querySelectorAll('#fg' + s.i + ' .kb');
   kb.forEach(function(k){ var m = k.getAttribute('data-kb');
     var a = {in:[1.0,1.075,0,-18], out:[1.08,1.0,0,12]}[m] || [1.0,1.06,0,0];

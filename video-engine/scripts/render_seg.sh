@@ -3,13 +3,18 @@
 # sandbox (one background job per call; the lease is ~15 min, so a job should
 # carry ≤ ~3 minutes of film). Each finished segment is PUT to its presigned URL.
 #
-#   ZIP=<cdn url of pack.zip> bash render_seg.sh <k> <put_url> [<k> <put_url> ...]
+#   ZIP=<cdn url of pack.zip> bash render_seg.sh <k> [<k> ...]
 #
-# pack.zip: seg_<k>.html, vendor/gsap.min.js, clips.json
+# pack.zip: seg_<k>.html, put_seg_<k>.url (presigned PUT, so no long URL is
+# ever retyped into a command), vendor/gsap.min.js, clips.json, expo.py and
+# optionally cuts.url (CDN zip of keyed cut_*.png from cutout.py)
 set -x
-W=/home/user/R; mkdir -p $W && cd $W
+W=${W:-/home/user/R}; mkdir -p $W && cd $W
 [ -f pack.zip ] || curl -fsSL --retry 5 -o pack.zip "$ZIP" || exit 11
 unzip -oq pack.zip || exit 12
+if [ -f cuts.url ] && [ ! -f assets/.cuts ]; then
+  mkdir -p assets && curl -fsSL --retry 5 -o cuts.zip "$(cat cuts.url)" && unzip -oq cuts.zip -d assets && touch assets/.cuts || exit 19
+fi
 
 mkdir -p assets/fonts
 for w in Regular Medium SemiBold Bold ExtraBold; do
@@ -24,7 +29,7 @@ export PATH=$W/n22/bin:$PATH
 [ -d node_modules/hyperframes ] || npm i --no-audit --no-fund --silent hyperframes@0.8.52 || exit 15
 
 # generated 5s clips → slow boomerangs (~40s) so no scene ever runs out of footage
-SEGS=""; i=1; for a in "$@"; do [ $((i % 2)) -eq 1 ] && SEGS="$SEGS $a"; i=$((i+1)); done
+SEGS="$*"
 python3 - $SEGS <<'PY' || exit 16
 import json, os, re, subprocess
 CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/"
@@ -49,8 +54,8 @@ PY
 
 [ -f expo.json ] || python3 expo.py || exit 18
 
-while [ $# -ge 2 ]; do
-  K=$1; PUT=$2; shift 2
+for K in "$@"; do
+  PUT=$(tr -d '\n' < put_seg_$K.url)
   cp seg_$K.html index.html
   echo "=== SEG $K START $(date -u +%T) ==="
   HYPERFRAMES_RENDER_DETACHED=1 npx hyperframes render . -o $W/seg_$K.mp4 -f 30 -w 6 --no-low-memory-mode -q delivery \
