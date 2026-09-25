@@ -21,11 +21,15 @@ sandbox_job.sh voice <branch> lion "<mp3 url 3개, 콤마>"
 
 ## 3. 세그먼트 렌더 (샌드박스 작업 수명 ~15분)
 
-길이를 약 85초씩 나눠 `seg` 잡을 따로 돌린다. 경계는 정수 초로.
+실측: 샌드박스 4 workers 로 약 13 fps (40초 구간 = 셋업 포함 2분).
+약 150초씩 3개로 나눠 `seg` 잡을 따로 돌린다. 경계는 정수 초로.
 ```
-sandbox_job.sh seg <branch> lion 0 85 <PUT url>
-sandbox_job.sh seg <branch> lion 85 170 <PUT url>   ...
+sandbox_job.sh seg <branch> lion 0 150 <PUT url>
+sandbox_job.sh seg <branch> lion 150 300 <PUT url>
+sandbox_job.sh seg <branch> lion 300 <끝> <PUT url>
 ```
+`HYPERFRAMES_RENDER_DETACHED=1` 필수 (스크립트에 들어 있음) — 없으면 백그라운드
+런처가 먼저 끝나면서 `render_cancelled_parent_exited` 로 렌더가 취소된다.
 
 ## 4. 최종
 

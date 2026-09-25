@@ -10,6 +10,9 @@
 #   final <branch> <proj> "<mp3,...>" "<seg mp4 urls>" <PUT master> <PUT light>
 #                                                  audio + SFX mix, concat, master/light
 set -uo pipefail
+# the background launcher exits early; without this hyperframes sees a dead
+# ancestor and cancels the render ("render_cancelled_parent_exited")
+export HYPERFRAMES_RENDER_DETACHED=1
 MODE=$1; BR=$2; PRJ=$3
 cd /home/user
 exec > >(tee -a job.log) 2>&1
@@ -65,7 +68,7 @@ seg)
   node_setup; assets
   python3 src/emit_v2.py "$E" --range "$4" "$5" || exit 24
   echo "=== SEG START $4-$5 $(date -u +%T) ==="
-  npx hyperframes render . -o /home/user/seg.mp4 -q high -f 30 -w 7 --no-browser-gpu \
+  ./node_modules/.bin/hyperframes render . -o /home/user/seg.mp4 -q high -f 30 -w 4 --no-browser-gpu \
     --browser-timeout 180 --protocol-timeout 900000 --player-ready-timeout 180000 --quiet || exit 25
   echo "=== SEG END $(date -u +%T) ==="
   ffprobe -v error -show_entries format=duration -of csv=p=0 /home/user/seg.mp4
