@@ -799,6 +799,8 @@ def cut_range(doc, a, b):
     def shift(m):
         tag, st, du, rest = m.group(1), float(m.group(2)), float(m.group(3)), m.group(4)
         s0, s1 = max(st, a), min(st + du, b)
+        if s1 <= s0 and "<video" in tag:
+            return f'{tag} data-start="PARK"{rest}'     # removed below
         if s1 <= s0:
             # parked past the segment end: never shown, DOM left intact
             return f'{tag} data-start="{b - a + 5:.3f}" data-duration="0.001"{rest}'
@@ -811,6 +813,9 @@ def cut_range(doc, a, b):
         return f'{tag} data-start="{s0 - a:.3f}" data-duration="{s1 - s0:.3f}"{extra}{rest}'
 
     doc = re.sub(r'(<(?:div|video|audio)[^>]*?) data-start="([\d.]+)" data-duration="([\d.]+)"([^>]*>)', shift, doc)
+    # a parked <video> still gets its frames extracted (and fails the
+    # coverage gate), so media outside the window is dropped outright
+    doc = re.sub(r'<video[^>]*data-start="PARK"[^>]*></video>', "", doc)
     doc = doc.replace('window.__timelines["main"] = tl;',
                       f'var seg = gsap.timeline({{ paused: true }});\n'
                       f'seg.add(tl.tweenFromTo({a:.3f}, {b:.3f}, {{ ease: "none" }}), 0);\n'
