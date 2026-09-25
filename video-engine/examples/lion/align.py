@@ -16,6 +16,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 VO = os.path.join(HERE, "vo")
@@ -46,6 +47,9 @@ def transcribe(path):
 
 
 def main():
+    if "--splice-only" in sys.argv:          # re-run with spans cut earlier
+        splice(json.load(open(os.path.join(HERE, "spans.json"))))
+        return
     chars = transcribe(os.path.join(VO, "vo.wav"))
     heard = "".join(c for c, _ in chars)
     script, owner = "", []
@@ -86,6 +90,7 @@ def spans_from(at, owner):
 
 
 def splice(spans):
+    json.dump([[round(a, 3), round(b, 3)] for a, b in spans], open(os.path.join(HERE, "spans.json"), "w"))
     # splice pauses: cut at the midpoint of the silence before each chosen line
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                                 "-of", "csv=p=0", os.path.join(VO, "vo.wav")],

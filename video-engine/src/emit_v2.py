@@ -772,6 +772,9 @@ window.__timelines["main"] = tl;
 </body>
 </html>
 """
+    if "--range" in sys.argv:
+        k = sys.argv.index("--range")
+        doc = cut_range(doc, float(sys.argv[k + 1]), float(sys.argv[k + 2]))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(doc)
     json.dump(sorted(SFX, key=lambda s: s["t"]), open(os.path.join(PROJ, "sfx.json"), "w"), indent=0)
     print(f"wrote index.html  {TOTAL:.1f}s · {len(scenes)} scenes · {len(caps)} captions · {len(SFX)} sfx")
@@ -779,6 +782,40 @@ window.__timelines["main"] = tl;
 
 
 P_JS = []
+
+
+def cut_range(doc, a, b):
+    """Rewrite the composition to cover only [a, b) of the film.
+
+    The sandbox kills background work after ~15 min, so a long film renders
+    as segments that are concatenated afterwards. Every timed element is
+    shifted by -a (media that starts before a skips ahead with
+    data-media-start), elements outside the window are dropped, and the
+    registered timeline becomes a scrubber that plays the full timeline from
+    a to b — so every tween lands exactly where it would in the full render.
+    """
+    b = min(b, TOTAL)
+
+    def shift(m):
+        tag, st, du, rest = m.group(1), float(m.group(2)), float(m.group(3)), m.group(4)
+        s0, s1 = max(st, a), min(st + du, b)
+        if s1 <= s0:
+            # parked past the segment end: never shown, DOM left intact
+            return f'{tag} data-start="{b - a + 5:.3f}" data-duration="0.001"{rest}'
+        extra = ""
+        if st < a and "<video" in tag:
+            ms = re.search(r'data-media-start="([\d.]+)"', rest)
+            base = float(ms.group(1)) if ms else 0.0
+            rest = re.sub(r' data-media-start="[\d.]+"', "", rest)
+            extra = f' data-media-start="{base + a - st:.3f}"'
+        return f'{tag} data-start="{s0 - a:.3f}" data-duration="{s1 - s0:.3f}"{extra}{rest}'
+
+    doc = re.sub(r'(<(?:div|video|audio)[^>]*?) data-start="([\d.]+)" data-duration="([\d.]+)"([^>]*>)', shift, doc)
+    doc = doc.replace('window.__timelines["main"] = tl;',
+                      f'var seg = gsap.timeline({{ paused: true }});\n'
+                      f'seg.add(tl.tweenFromTo({a:.3f}, {b:.3f}, {{ ease: "none" }}), 0);\n'
+                      'window.__timelines["main"] = seg;')
+    return doc
 
 if __name__ == "__main__":
     main()
