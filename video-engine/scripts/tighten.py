@@ -7,6 +7,13 @@ of each listed gap so only `keep` seconds of it remain.
 
     python3 tighten.py audio <in.mp3> <out.mp3> s:e [s:e ...]   # sandbox, ffmpeg
     python3 tighten.py timings <project_dir> s:e [s:e ...]      # local: timings.txt
+    python3 tighten.py prepend-audio <take> <a> <b> <D> <in.mp3> <out.mp3>
+    python3 tighten.py prepend-timings <project_dir> <D>
+
+prepend: a line the TTS dropped (e.g. the very first sentence) is voiced on its
+own, take[a:b] is laid in front of the narration padded to D seconds (a whole
+number of frames, so already-rendered later segments stay usable) and every
+timing moves by D.
 
 Both passes take the same gap list, so audio and line timings shift together.
 KEEP must match between them.
@@ -68,8 +75,38 @@ def timings(project, cs):
     print(f"total {total:.3f} -> {shift(total, cs):.3f}")
 
 
+def prepend_audio(take, a, b, D, src, dst, gain=0.0):
+    lead = f"atrim={a}:{b},asetpts=PTS-STARTPTS,volume={gain}dB,afade=t=in:d=0.015,areverse,afade=t=in:d=0.03,areverse,apad=whole_dur={D}"
+    graph = (f"[0:a]aresample=48000,aformat=channel_layouts=stereo,{lead}[l];"
+             f"[1:a]aresample=48000,aformat=channel_layouts=stereo[m];[l][m]concat=n=2:v=0:a=1[o]")
+    subprocess.run(["ffmpeg", "-v", "error", "-i", take, "-i", src, "-filter_complex", graph, "-map", "[o]",
+                    "-c:a", "libmp3lame", "-b:a", "320k", dst, "-y"], check=True)
+
+
+def prepend_timings(project, D):
+    p = f"{project}/timings.txt"
+    raw = open(p, encoding="utf-8").read()
+    head, times = raw.split("TIMES ")
+    total = float(head.split("TOTAL ")[1].split()[0])
+    pairs = [(round(a + D, 3), round(b + D, 3)) for a, b in (tuple(float(x) for x in q.split(",")) for q in times.split())]
+    pairs[0] = (0.0, D)
+    head = head.replace(f"TOTAL {total:.3f}", f"TOTAL {total + D:.3f}")
+    open(p, "w", encoding="utf-8").write(head + "TIMES " + " ".join(f"{a:.2f},{b:.2f}" for a, b in pairs) + "\n")
+    c = f"{project}/cuts.txt"
+    vals = [float(x) for x in open(c).read().split()]
+    open(c, "w").write(" ".join(f"{(v + D) if i else 0:.2f}" for i, v in enumerate(vals)) + "\n")
+    print(f"total {total:.3f} -> {total + D:.3f}")
+
+
 if __name__ == "__main__":
     mode = sys.argv[1]
+    if mode == "prepend-audio":
+        t, a, b, D, src, dst = sys.argv[2:8]
+        prepend_audio(t, float(a), float(b), float(D), src, dst, float(sys.argv[8]) if len(sys.argv) > 8 else 0.0)
+        sys.exit()
+    if mode == "prepend-timings":
+        prepend_timings(sys.argv[2], float(sys.argv[3]))
+        sys.exit()
     if mode == "audio":
         cs = cuts(sys.argv[4:])
         audio(sys.argv[2], sys.argv[3], cs)
