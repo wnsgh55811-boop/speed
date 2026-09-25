@@ -4,3 +4,7 @@ renders/
 snapshots/
 assets/audio/
 index.html
+assets/fonts/
+assets/lib/
+assets/keyed/
+vendor/

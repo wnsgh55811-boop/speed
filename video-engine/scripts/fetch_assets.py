@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
-"""Key the 3D objects and pictograms of a project out of their plates.
+"""Pull a project's generated assets into assets/lib and key the icons.
 
-    python3 keyicons.py <library.json url|path> <put-map.json> [--sheet]
+    python3 scripts/fetch_assets.py examples/<project>/library.json
 
-Generated icons ship on an opaque studio plate, which reads as a dark box on
-the composition. Two keys, picked per image:
+library.json maps {key: url}. Photos, illustrations and clips are saved as-is
+(assets/lib/<key>.<ext>); the composition references them by relative path so
+a render never depends on the CDN mid-capture.
+
+Generated icons (ico_*, pic_*) ship on an opaque studio plate, which reads as
+a dark box on the composition. Two keys, picked per image:
   · dark-plate line pictograms  → luminance key, so the glow keeps its falloff
   · everything else             → rembg (isnet-general-use), then a soft edge
-Each cutout is trimmed, padded to a square and uploaded to its presigned PUT.
+Each cutout is trimmed and padded to a square in assets/keyed/<key>.png.
 """
 import io, json, os, subprocess, sys, urllib.request
 
 import numpy as np
 from PIL import Image, ImageFilter
 
-OUT = "keyed"
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+LIB = os.path.join(ROOT, "assets", "lib")
+OUT = os.path.join(ROOT, "assets", "keyed")
+os.makedirs(LIB, exist_ok=True)
 os.makedirs(OUT, exist_ok=True)
 
 
@@ -24,8 +31,10 @@ def load(src):
     return json.load(open(src))
 
 
-def fetch(url):
-    return Image.open(io.BytesIO(urllib.request.urlopen(url).read())).convert("RGB")
+def download(url, dst):
+    if not os.path.exists(dst) or os.path.getsize(dst) == 0:
+        subprocess.run(["curl", "-fsSL", "--retry", "5", "-o", dst, url], check=True)
+    return dst
 
 
 def plate_luma(im):
@@ -72,21 +81,18 @@ def square(im, pad=0.08, size=900):
 
 if __name__ == "__main__":
     lib = load(sys.argv[1])
-    puts = load(sys.argv[2]) if len(sys.argv) > 2 and os.path.exists(sys.argv[2]) else {}
     for k, url in sorted(lib.items()):
+        ext = url.rsplit(".", 1)[-1].lower()
+        raw = download(url, f"{LIB}/{k}.{ext}")
         if not k.startswith(("ico_", "pic_")):
             continue
         dst = f"{OUT}/{k}.png"
-        if not os.path.exists(dst):
-            im = fetch(url)
-            lum, plate = plate_luma(im)
-            how = "luma" if (k.startswith("pic_") and lum < 60) else "rembg"
-            cut = luma_key(im, plate) if how == "luma" else rembg_key(im)
-            square(cut).save(dst)
-            print(f"{k:16s} {how} plate={lum:.0f}", flush=True)
-        if k in puts:
-            r = subprocess.run(["curl", "-sf", "-X", "PUT", "-H", "Content-Type: image/png",
-                                "--data-binary", "@" + dst, puts[k], "-o", "/dev/null",
-                                "-w", "%{http_code}"], capture_output=True, text=True)
-            print(f"  PUT {k} {r.stdout}", flush=True)
-    print("KEY DONE", flush=True)
+        if os.path.exists(dst):
+            continue
+        im = Image.open(raw).convert("RGB")
+        lum, plate = plate_luma(im)
+        how = "luma" if (k.startswith("pic_") and lum < 60) else "rembg"
+        cut = luma_key(im, plate) if how == "luma" else rembg_key(im)
+        square(cut).save(dst)
+        print(f"{k:16s} {how} plate={lum:.0f}", flush=True)
+    print("FETCH DONE", flush=True)
