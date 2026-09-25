@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Write ../index.html — the full 602s composition.
+"""Write a project's index.html — one HyperFrames composition.
 
-    python3 src/emit.py [--audio assets/audio/master.wav]
+    PROJECT=examples/gonggam python3 src/emit.py [--audio assets/audio/master.wav]
 
+The project directory holds plan.py (PLAN, optionally LINES / SECTION /
+WATERMARK) and timings.txt; lines come from plan.LINES or chunks.json.
 Tracks: 0 backgrounds · 1 content · 2 captions · 3 watermark.
 """
 import json
@@ -10,12 +12,15 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+PROJECT = os.path.abspath(os.environ.get("PROJECT", os.path.join(HERE, "..", "examples", "idasa")))
 sys.path.insert(0, HERE)
+sys.path.insert(0, PROJECT)
 from build import (W, H, CDN, IMG, ALIAS, NEON_FIG, FAMILIES,   # noqa: E402
                    esc, caption_cards, motes)
-from plan import PLAN                                            # noqa: E402
+import plan as _plan                                             # noqa: E402
+PLAN = _plan.PLAN
 
-OUT = os.path.join(HERE, "..", "index.html")
+OUT = os.environ.get("OUT", os.path.join(PROJECT, "index.html"))
 
 
 # ── figures (SVG) ───────────────────────────────────────────────────────────
@@ -94,7 +99,7 @@ def fig_panels():
 # Added so that no single diagram carries more than two moments in the film.
 # Each one is shaped around the sentence it plays under, not a generic slot.
 
-def fig_surge():
+def fig_surge(label="불안"):
     """A flat line that spikes — 불안이 확 올라오는 순간."""
     d = ("M60 400 L360 400 L430 396 L500 404 L560 398 "
          "C 640 396, 690 330, 740 160 C 770 62, 800 60, 830 150 "
@@ -103,11 +108,12 @@ def fig_surge():
             f'<path class="edge" d="M60 400 L1180 400" opacity=".35"/>'
             f'<path class="edge-hot glow fg-draw" d="{d}"/>'
             '<circle class="node glow fg-pop" cx="830" cy="98" r="14"/>'
-            f'<text class="dlabel" x="830" y="48" text-anchor="middle">불안</text>'
+            f'<text class="dlabel" x="830" y="48" text-anchor="middle">{esc(label)}</text>'
             '</svg>')
 
 
-def fig_meter(level=0.82):
+def fig_meter(level=0.82, label="불안"):
+    level = float(level)
     """A vertical gauge filling up — 다시 불안해집니다."""
     top, bot = 70, 470
     y = bot - (bot - top) * level
@@ -119,7 +125,7 @@ def fig_meter(level=0.82):
             + "".join(f'<path class="edge" d="M330 {bot-(bot-top)*t:.0f} L370 '
                       f'{bot-(bot-top)*t:.0f}" opacity=".5"/>'
                       for t in (.25, .5, .75))
-            + '<text class="dlabel" x="560" y="120" text-anchor="start">불안</text>'
+            + f'<text class="dlabel" x="560" y="{max(y, 120):.0f}" text-anchor="start">{esc(label)}</text>'
             '</svg>')
 
 
@@ -159,7 +165,7 @@ def fig_dial(angle=-38):
             '</svg>')
 
 
-def fig_bridge():
+def fig_bridge(a="정보", b="사람"):
     """Two banks joined — 대화가 사람 얘기로 건너갑니다."""
     return ('<svg width="1320" height="480" viewBox="0 0 1320 480">'
             '<rect x="40" y="300" width="330" height="120" rx="12" '
@@ -169,8 +175,8 @@ def fig_bridge():
             '<path class="edge-hot glow fg-draw" d="M370 300 C 560 140, 760 140, 950 300"/>'
             + "".join(f'<path class="edge" d="M{x} {y:.0f} L{x} 300"/>'
                       for x, y in ((470, 216), (660, 178), (850, 216)))
-            + '<text class="dlabel-dim" x="205" y="380" text-anchor="middle">정보</text>'
-            '<text class="dlabel" x="1115" y="380" text-anchor="middle">사람</text>'
+            + f'<text class="dlabel-dim" x="205" y="380" text-anchor="middle">{esc(a)}</text>'
+            f'<text class="dlabel" x="1115" y="380" text-anchor="middle">{esc(b)}</text>'
             '</svg>')
 
 
@@ -187,20 +193,20 @@ def fig_flow():
             + '<circle class="node glow fg-pop" cx="1260" cy="250" r="13"/></svg>')
 
 
-def fig_weave():
+def fig_weave(a="관심", b="표현"):
     """Two strands crossing in turn — 관심, 그리고 표현."""
-    a = "M80 240 C 260 60, 440 60, 620 240 S 980 420, 1160 240"
-    b = "M80 240 C 260 420, 440 420, 620 240 S 980 60, 1160 240"
+    pa = "M80 240 C 260 60, 440 60, 620 240 S 980 420, 1160 240"
+    pb = "M80 240 C 260 420, 440 420, 620 240 S 980 60, 1160 240"
     return ('<svg width="1240" height="500" viewBox="0 0 1240 500">'
-            f'<path class="edge-hot glow fg-draw" d="{a}"/>'
-            f'<path class="edge glow fg-draw2" d="{b}" stroke="#D8B368"/>'
+            f'<path class="edge-hot glow fg-draw" d="{pa}"/>'
+            f'<path class="edge glow fg-draw2" d="{pb}" stroke="#D8B368"/>'
             '<circle class="node glow" cx="620" cy="240" r="13"/>'
-            '<text class="dlabel" x="80" y="150" text-anchor="start">관심</text>'
-            '<text class="dlabel" x="1160" y="150" text-anchor="end">표현</text>'
+            f'<text class="dlabel" x="80" y="150" text-anchor="start">{esc(a)}</text>'
+            f'<text class="dlabel" x="1160" y="150" text-anchor="end">{esc(b)}</text>'
             '</svg>')
 
 
-def fig_pendulum():
+def fig_pendulum(a="상대", b="나"):
     """One weight, two ends — 다시 상대에게, 다시 나에게."""
     return ('<svg width="1180" height="540" viewBox="0 0 1180 540">'
             '<circle class="node-dim" cx="590" cy="70" r="12"/>'
@@ -209,8 +215,8 @@ def fig_pendulum():
             '<path class="edge glow" d="M590 70 L892 352" opacity=".45"/>'
             '<circle class="node glow fg-pop" cx="288" cy="352" r="30"/>'
             '<circle class="node-dim glow" cx="892" cy="352" r="22"/>'
-            '<text class="dlabel" x="288" y="452" text-anchor="middle">상대</text>'
-            '<text class="dlabel-dim" x="892" y="444" text-anchor="middle">나</text>'
+            f'<text class="dlabel" x="288" y="452" text-anchor="middle">{esc(a)}</text>'
+            f'<text class="dlabel-dim" x="892" y="444" text-anchor="middle">{esc(b)}</text>'
             '</svg>')
 
 
@@ -227,7 +233,7 @@ def fig_rally():
             + dots + '<circle class="node glow fg-pop" cx="1030" cy="300" r="15"/></svg>')
 
 
-def fig_split():
+def fig_split(a="관심", b="표현"):
     """One line separating into two named tracks — 그걸 구분하기 시작하면."""
     return ('<svg width="1280" height="500" viewBox="0 0 1280 500">'
             '<path class="edge-hot glow" d="M70 250 L430 250"/>'
@@ -235,19 +241,21 @@ def fig_split():
             '<path class="edge-hot glow fg-draw" d="M430 250 C 640 250, 700 120, 940 120"/>'
             '<path class="edge glow fg-draw2" d="M430 250 C 640 250, 700 380, 940 380" '
             'stroke="#D8B368"/>'
-            '<text class="dlabel" x="980" y="138" text-anchor="start">관심</text>'
-            '<text class="dlabel" x="980" y="398" text-anchor="start">표현</text>'
+            f'<text class="dlabel" x="980" y="138" text-anchor="start">{esc(a)}</text>'
+            f'<text class="dlabel" x="980" y="398" text-anchor="start">{esc(b)}</text>'
             '</svg>')
 
 
-def fig_twocheck():
+def fig_twocheck(a="상대에게 관심을", b="내 생각을 보여주기"):
     """Two things you can now do — 관심도, 내 생각도."""
     rows = []
-    for k, (lab, y) in enumerate((("상대에게 관심을", 170), ("내 생각을 보여주기", 340))):
-        rows.append(f'<circle class="node glow" cx="230" cy="{y}" r="26"/>')
-        rows.append(f'<path d="M212 {y} l14 16 l26 -32" stroke="#0B0B0D" stroke-width="7" '
+    # centre the block on the frame: circle + gap + the longer label
+    x0 = int(620 - (52 + 44 + 46 * max(len(a), len(b))) / 2) + 26
+    for k, (lab, y) in enumerate(((a, 170), (b, 340))):
+        rows.append(f'<circle class="node glow" cx="{x0}" cy="{y}" r="26"/>')
+        rows.append(f'<path d="M{x0-18} {y} l14 16 l26 -32" stroke="#0B0B0D" stroke-width="7" '
                     'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
-        rows.append(f'<text class="dlabel" x="300" y="{y+16}" text-anchor="start">{lab}</text>')
+        rows.append(f'<text class="dlabel" x="{x0+70}" y="{y+16}" text-anchor="start">{esc(lab)}</text>')
     return ('<svg width="1240" height="500" viewBox="0 0 1240 500">'
             + "".join(rows) + '</svg>')
 
@@ -265,12 +273,12 @@ def fig_cutoff():
             '</svg>')
 
 
-def fig_tree(items=("사실", "감정", "이유", "취향")):
+def fig_tree(items=("사실", "감정", "이유", "취향"), root="한 문장"):
     """One sentence holding several topics — 소재가 세 개, 네 개."""
     s = ['<svg width="1300" height="540" viewBox="0 0 1300 540">',
          '<rect x="60" y="216" width="330" height="108" rx="18" '
          'fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.22)" stroke-width="3"/>',
-         '<text class="dlabel-dim" x="225" y="286" text-anchor="middle">한 문장</text>']
+         f'<text class="dlabel-dim" x="225" y="286" text-anchor="middle">{esc(root)}</text>']
     n = len(items)
     for k, lab in enumerate(items):
         y = 100 + k * (340 / max(n - 1, 1))
@@ -295,7 +303,7 @@ def fig_fan():
     return "".join(s)
 
 
-def fig_lens():
+def fig_lens(label="감정"):
     """A magnifier held over the sentence — 그 문장 안에 뭐가 있는지."""
     bars = "".join(f'<rect x="{200+k*0}" y="{212+k*54}" width="{760-k*150}" height="20" '
                    f'rx="10" fill="rgba(255,255,255,{0.20-k*0.05:.2f})"/>' for k in range(3))
@@ -305,7 +313,7 @@ def fig_lens():
             'stroke="#5AD8F7" stroke-width="7" class="glow fg-pop"/>'
             '<path d="M918 374 L1060 516" stroke="#5AD8F7" stroke-width="18" '
             'stroke-linecap="round" class="glow"/>'
-            '<text class="dlabel" x="800" y="274" text-anchor="middle">감정</text>'
+            f'<text class="dlabel" x="800" y="274" text-anchor="middle">{esc(label)}</text>'
             '</svg>')
 
 
@@ -351,7 +359,7 @@ def fig_stretch():
             '</svg>')
 
 
-def fig_elapsed():
+def fig_elapsed(label="한 시간 뒤"):
     """A long stretch of talking with nothing learned — 한 시간 넘게."""
     ticks = "".join(f'<path class="edge" d="M{120+k*115} 250 L{120+k*115} '
                     f'{200 if k % 4 == 0 else 224}" opacity=".5"/>' for k in range(11))
@@ -360,7 +368,7 @@ def fig_elapsed():
             + '<path class="edge-hot glow fg-draw" d="M120 250 L1270 250"/>'
             '<circle class="node glow fg-pop" cx="1270" cy="250" r="14"/>'
             '<text class="dlabel-dim" x="120" y="340" text-anchor="start">시작</text>'
-            '<text class="dlabel" x="1270" y="340" text-anchor="end">한 시간 뒤</text>'
+            f'<text class="dlabel" x="1270" y="340" text-anchor="end">{esc(label)}</text>'
             '</svg>')
 
 
@@ -412,6 +420,133 @@ FIGS = {"loop4": fig_loop4, "branch": fig_branch, "twonodes": fig_twonodes,
         "countdown": fig_countdown, "stretch": fig_stretch, "elapsed": fig_elapsed,
         "plainchips": fig_plain_chips, "asktoss": fig_ask_toss, "askagain": fig_ask_again}
 
+
+# ── figures added for "공감과 동의" ─────────────────────────────────────────
+def fig_venn(label="공통점"):
+    """Two circles sharing a middle — 공통점 / 잘 맞는 느낌."""
+    return ('<svg width="1240" height="560" viewBox="0 0 1240 560">'
+            '<circle cx="480" cy="280" r="220" fill="rgba(90,216,247,.07)" '
+            'stroke="#1E7C96" stroke-width="4"/>'
+            '<circle class="fg-pop" cx="760" cy="280" r="220" fill="rgba(216,179,104,.07)" '
+            'stroke="#D8B368" stroke-width="4"/>'
+            '<path class="glow" d="M620 110 A 220 220 0 0 1 620 450 A 220 220 0 0 1 620 110" '
+            'fill="rgba(90,216,247,.20)"/>'
+            '<text class="dlabel-dim" x="370" y="294" text-anchor="middle">상대</text>'
+            '<text class="dlabel-dim" x="870" y="294" text-anchor="middle">나</text>'
+            f'<text class="dlabel" x="620" y="296" text-anchor="middle" font-size="40">{esc(label)}</text>'
+            '</svg>')
+
+
+def fig_converge(a="A", b="B", label="이해"):
+    """Two different lines meeting — 달랐는데 더 깊이 이해하게 됐다."""
+    return ('<svg width="1300" height="520" viewBox="0 0 1300 520">'
+            '<path class="edge-hot glow fg-draw" d="M260 110 C 520 110, 560 260, 760 260"/>'
+            '<path class="edge glow fg-draw2" d="M260 410 C 520 410, 560 260, 760 260" '
+            'stroke="#D8B368"/>'
+            '<path class="edge-hot glow" d="M760 260 L1040 260"/>'
+            '<circle class="node glow fg-pop" cx="760" cy="260" r="18"/>'
+            '<circle class="node-dim" cx="260" cy="110" r="12"/>'
+            '<circle cx="260" cy="410" r="12" fill="#D8B368"/>'
+            f'<text class="dlabel" x="220" y="126" text-anchor="end">{esc(a)}</text>'
+            f'<text class="dlabel" x="220" y="426" text-anchor="end">{esc(b)}</text>'
+            f'<text class="dlabel" x="1070" y="276" text-anchor="start">{esc(label)}</text>'
+            '</svg>')
+
+
+def fig_thermo(level=0.3, label="미지근"):
+    """A thermometer — 대화의 온도."""
+    level = float(level)
+    top, bot = 60, 400
+    y = bot - (bot - top) * level
+    marks = "".join(
+        f'<path class="edge" d="M{548} {bot-(bot-top)*t:.0f} L{588} {bot-(bot-top)*t:.0f}" opacity=".6"/>'
+        for t in (.2, .4, .6, .8))
+    return ('<svg width="1000" height="560" viewBox="0 0 1000 560">'
+            f'<rect x="440" y="{top-30}" width="100" height="{bot-top+60}" rx="50" '
+            'fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.28)" stroke-width="4"/>'
+            '<circle cx="490" cy="450" r="78" fill="rgba(255,255,255,.05)" '
+            'stroke="rgba(255,255,255,.28)" stroke-width="4"/>'
+            '<circle class="glow" cx="490" cy="450" r="60" fill="#5AD8F7"/>'
+            f'<rect class="fg-fill glow" x="462" y="{y:.0f}" width="56" height="{450-y:.0f}" '
+            'rx="28" fill="#5AD8F7"/>'
+            + marks +
+            f'<path class="edge-hot" d="M600 {y:.0f} L650 {y:.0f}"/>'
+            f'<text class="dlabel" x="670" y="{y+16:.0f}" text-anchor="start">{esc(label)}</text>'
+            '<text class="dlabel-dim" x="400" y="80" text-anchor="end">뜨거움</text>'
+            '<text class="dlabel-dim" x="400" y="420" text-anchor="end">차가움</text>'
+            '</svg>')
+
+
+def fig_wave(mode="sync"):
+    """Two frequencies — 주파수를 맞춘다 / 주파수가 깨졌다."""
+    import math
+
+    def path(amp, freq, phase, x0=80, x1=1220, jitter=0.0):
+        pts = []
+        for k in range(0, 121):
+            x = x0 + (x1 - x0) * k / 120
+            j = jitter * math.sin(k * 2.7) * (1 if k % 3 else -1)
+            y = 260 + amp * math.sin(freq * (x - x0) / 180 + phase) + j
+            pts.append(f"{x:.0f} {y:.0f}")
+        return "M" + " L".join(pts)
+    if mode == "broken":
+        a = path(90, 1.0, 0, x1=640)
+        b = path(120, 2.6, 1.2, x0=660, jitter=26)
+        return ('<svg width="1300" height="520" viewBox="0 0 1300 520">'
+                f'<path class="edge-hot glow fg-draw" d="{a}"/>'
+                f'<path class="edge fg-draw2" d="{b}" stroke="#F0538F" stroke-width="5"/>'
+                '<path d="M650 120 L650 400" stroke="#F0538F" stroke-width="8" '
+                'stroke-linecap="round" stroke-dasharray="18 16"/>'
+                '<text class="dlabel" x="650" y="480" text-anchor="middle">주파수가 깨짐</text>'
+                '</svg>')
+    a = path(100, 1.0, 0)
+    b = path(80, 1.0, 0.5)
+    return ('<svg width="1300" height="520" viewBox="0 0 1300 520">'
+            f'<path class="edge-hot glow fg-draw" d="{a}"/>'
+            f'<path class="edge glow fg-draw2" d="{b}" stroke="#D8B368" stroke-width="5"/>'
+            '<text class="dlabel-dim" x="80" y="110" text-anchor="start">상대</text>'
+            '<text class="dlabel-dim" x="80" y="460" text-anchor="start">나</text>'
+            '<text class="dlabel" x="1220" y="480" text-anchor="end">속도 · 감정 · 깊이</text>'
+            '</svg>')
+
+
+def fig_finish():
+    """Running alone to the finish line — 혼자 관계의 결승선까지."""
+    flag = ('<path d="M1130 120 L1130 360" stroke="#F4F3EF" stroke-width="6" stroke-linecap="round"/>'
+            '<path d="M1130 124 L1230 150 L1130 180 Z" fill="#F0538F"/>')
+    return ('<svg width="1320" height="480" viewBox="0 0 1320 480">'
+            '<path class="edge" d="M90 360 L1230 360" opacity=".55"/>'
+            + "".join(f'<path class="edge" d="M{90+k*114} 360 L{90+k*114} 340" opacity=".45"/>'
+                      for k in range(11))
+            + '<path class="edge-hot glow fg-draw" d="M150 360 L1110 360"/>'
+            + flag +
+            '<circle class="node-dim" cx="150" cy="330" r="22"/>'
+            '<circle class="node glow fg-pop" cx="1100" cy="330" r="22"/>'
+            '<text class="dlabel-dim" x="150" y="440" text-anchor="middle">상대</text>'
+            '<text class="dlabel" x="1100" y="440" text-anchor="middle">나</text>'
+            '<text class="dlabel-dim" x="1180" y="96" text-anchor="middle">결승선</text>'
+            '</svg>')
+
+
+def fig_balance(a="내 생각", b="상대 생각"):
+    """A level scale — 둘 중 하나를 지울 필요가 없다."""
+    return ('<svg width="1200" height="540" viewBox="0 0 1200 540">'
+            '<path d="M600 90 L600 440 M500 450 L700 450" stroke="#F4F3EF" stroke-width="7" '
+            'stroke-linecap="round" opacity=".8"/>'
+            '<circle class="node glow" cx="600" cy="90" r="16"/>'
+            '<path class="edge-hot glow fg-draw" d="M260 120 L940 120"/>'
+            '<path class="edge" d="M260 120 L190 280 M260 120 L330 280"/>'
+            '<path class="edge" d="M940 120 L870 280 M940 120 L1010 280"/>'
+            '<path d="M170 280 Q 260 340 350 280 Z" fill="rgba(90,216,247,.22)" stroke="#5AD8F7" stroke-width="4"/>'
+            '<path d="M850 280 Q 940 340 1030 280 Z" fill="rgba(216,179,104,.22)" stroke="#D8B368" stroke-width="4"/>'
+            f'<text class="dlabel" x="260" y="400" text-anchor="middle">{esc(a)}</text>'
+            f'<text class="dlabel" x="940" y="400" text-anchor="middle">{esc(b)}</text>'
+            '</svg>')
+
+
+
+FIGS.update({"venn": fig_venn, "converge": fig_converge, "thermo": fig_thermo,
+             "wave": fig_wave, "finish": fig_finish, "balance": fig_balance})
 
 # ── pictograms ──────────────────────────────────────────────────────────────
 # Review note: "픽토그램 ... 최대한 많이 활용해서 다채롭게."  The line-reading
@@ -481,6 +616,64 @@ _PICTO = {
                 '<rect x="104" y="44" width="58" height="104" rx="10" stroke="#D8B368"/>'
                 '<path d="M96 30v132" stroke-dasharray="10 12"/>',
 }
+
+_PICTO.update({
+    "heart":    _PICTO["hobby"],
+    "nolink":   '<path d="M20 60h62a14 14 0 0 1 14 14v30a14 14 0 0 1-14 14H50l-18 16v-16h-12z"/>'
+                '<path d="M172 84h-62a14 14 0 0 0-14 14v30a14 14 0 0 0 14 14h32l18 16v-16h12z" stroke="#D8B368"/>'
+                '<path d="M78 164l36-36" stroke="#F0538F"/>',
+    "ok":       '<path d="M60 88v70H34V88z"/><path d="M60 92l30-50c16 0 20 10 16 26l-6 20h40a14 14 0 0 1 13 17l-12 44a14 14 0 0 1-14 11H60"/>',
+    "blank":    '<circle cx="96" cy="64" r="30"/><path d="M40 168q0-50 56-50t56 50"/>'
+                '<path d="M86 52a12 12 0 1 1 14 12v8" stroke="#D8B368"/>'
+                '<circle cx="100" cy="84" r="4" fill="#D8B368" stroke="none"/>',
+    "point":    '<circle cx="96" cy="96" r="66"/><path d="M96 56v50"/>'
+                '<circle cx="96" cy="134" r="7" fill="currentColor" stroke="none"/>',
+    "bowl":     '<path d="M28 96h136a68 58 0 0 1-136 0z"/><path d="M70 158h52"/>'
+                '<path d="M70 72q-10-14 0-28M96 72q-10-14 0-28M122 72q-10-14 0-28" stroke="#F0538F"/>'
+                '<path d="M124 20l44 70M140 16l40 66" stroke="#D8B368"/>',
+    "mask":     '<path d="M36 50q60-24 120 0v50q0 58-60 72-60-14-60-72z"/>'
+                '<path d="M60 88q12-10 24 0M108 88q12-10 24 0"/><path d="M70 128q26 18 52 0"/>',
+    "chat":     '<path d="M24 38h96a14 14 0 0 1 14 14v42a14 14 0 0 1-14 14H64l-24 20v-20H24a14 14 0 0 1-14-14V52a14 14 0 0 1 14-14z"/>'
+                '<path d="M150 82h18a14 14 0 0 1 14 14v36a14 14 0 0 1-14 14h-6v18l-22-18h-40a14 14 0 0 1-14-14v-6" stroke="#D8B368"/>',
+    "hill":     '<path d="M14 162l58-86 34 46 22-30 50 70z"/><path d="M72 76V28l32 12-32 12" stroke="#D8B368"/>',
+    "target":   '<circle cx="90" cy="102" r="64"/><circle cx="90" cy="102" r="38"/>'
+                '<circle cx="90" cy="102" r="10" fill="currentColor" stroke="none"/>'
+                '<path d="M92 100l72-72M140 28h24v24" stroke="#D8B368"/>',
+    "dice":     '<rect x="40" y="40" width="112" height="112" rx="22" transform="rotate(12 96 96)"/>'
+                '<circle cx="74" cy="74" r="8" fill="currentColor" stroke="none"/>'
+                '<circle cx="96" cy="98" r="8" fill="currentColor" stroke="none"/>'
+                '<circle cx="118" cy="122" r="8" fill="currentColor" stroke="none"/>',
+    "eye":      '<path d="M14 96q82-86 164 0-82 86-164 0z"/><circle cx="96" cy="96" r="28"/>'
+                '<circle cx="96" cy="96" r="10" fill="currentColor" stroke="none"/>',
+    "shield":   '<path d="M96 22l62 22v44c0 42-26 70-62 84-36-14-62-42-62-84V44z"/>'
+                '<path d="M70 96l18 18 34-36" stroke="#D8B368"/>',
+    "swap":     '<path d="M30 70h124m-26-26 26 26-26 26"/><path d="M162 126H38m26-26-26 26 26 26" stroke="#D8B368"/>',
+    "nod":      '<circle cx="96" cy="96" r="66"/><path d="M64 98l22 22 44-46"/>',
+    "bulb":     '<path d="M96 24a50 50 0 0 0-30 90c8 7 10 14 10 22h40c0-8 2-15 10-22a50 50 0 0 0-30-90z"/>'
+                '<path d="M78 156h36M84 176h24"/><path d="M96 100v36" stroke="#D8B368"/>',
+    "give":     '<path d="M40 60h84a40 40 0 0 1 0 80H52"/><path d="M76 112l-28 28 28 28" stroke="#D8B368"/>',
+    "bandage":  '<rect x="24" y="68" width="144" height="56" rx="28" transform="rotate(-35 96 96)"/>'
+                '<rect x="72" y="72" width="48" height="48" rx="8" transform="rotate(-35 96 96)"/>'
+                '<circle cx="90" cy="92" r="4" fill="currentColor" stroke="none"/>'
+                '<circle cx="102" cy="100" r="4" fill="currentColor" stroke="none"/>',
+    "smile":    '<circle cx="96" cy="96" r="66"/><path d="M68 80q8-10 16 0M108 80q8-10 16 0"/>'
+                '<path d="M62 110q34 44 68 0z" fill="currentColor" fill-opacity=".25"/>',
+    "ring":     '<circle cx="96" cy="118" r="52"/><path d="M76 52l20-24 20 24-20 18z" stroke="#D8B368"/>',
+    "mic":      '<rect x="70" y="20" width="52" height="92" rx="26"/><path d="M46 92a50 50 0 0 0 100 0"/>'
+                '<path d="M96 142v30M66 172h60"/><path d="M160 50q14 22 0 44M176 38q24 34 0 68" stroke="#D8B368"/>',
+    "ball":     '<circle cx="96" cy="96" r="68"/><path d="M96 70l24 18-9 28H81l-9-28z" fill="currentColor" fill-opacity=".3"/>'
+                '<path d="M96 70V30M120 88l36-12M111 116l22 30M81 116l-22 30M72 88l-36-12"/>',
+    "weight":   '<path d="M70 56a26 26 0 1 1 52 0"/><path d="M50 60h92l20 108H30z"/>'
+                '<path d="M76 118h40" stroke="#D8B368"/>',
+    "puzzle":   '<path d="M30 60h40a16 16 0 1 1 32 0h40v40a16 16 0 1 0 0 32v40H102a16 16 0 1 0-32 0H30v-40a16 16 0 1 1 0-32z"/>',
+    "list":     '<rect x="42" y="24" width="108" height="148" rx="14"/>'
+                '<path d="M64 64l8 8 14-16M64 104l8 8 14-16M64 144l8 8 14-16"/>'
+                '<path d="M98 66h30M98 106h30M98 146h30" stroke="#D8B368"/>',
+    "anchor":   '<circle cx="96" cy="38" r="16"/><path d="M96 54v116M64 80h64"/>'
+                '<path d="M30 118q10 50 66 52 56-2 66-52M30 118l-10 14M162 118l10 14"/>',
+    "play":     '<rect x="20" y="40" width="152" height="112" rx="22"/>'
+                '<path d="M82 72l42 24-42 24z" fill="currentColor" stroke-linejoin="round"/>',
+})
 
 
 def picto(name, size=200):
@@ -665,6 +858,141 @@ GRAPHICS = {
 }
 
 
+
+# ── spec-driven graphics ────────────────────────────────────────────────────
+# A plan can name a graphic inline instead of registering it above:
+#   rows:제목|a;b;c|q|muted   chips:제목|a;b|hot;hot   chain:a;b;c
+#   two:제목|왼쪽|오른쪽      bars:제목|라벨:0.8:tone;...|왼축;오른축
+#   checks:제목|a;b          nots:제목|a;b              steps:a;b;c;d
+#   vs:왼머리|a;b|오른머리|c;d   react:조건=행동;...    thread:w=말;m=말
+#   echo:말
+# Elements marked `seq` reveal on the narration lines the scene spans.
+def _sp(x):
+    return [t.strip() for t in x.split(";") if t.strip()]
+
+
+def g_seqrows(title, items, flag=""):
+    h = ['<div class="stage"><div class="scrim wide"></div>']
+    if title:
+        h.append(f'<div class="hl md gtitle">{esc(title)}</div>')
+    h.append('<div class="rows" style="margin-top:46px">')
+    for it in items:
+        cls = "row seq" + (" muted" if flag == "muted" else "")
+        extra = '<span class="qmark">?</span>' if flag == "q" else ""
+        h.append(f'<div class="{cls}"><i class="tick"></i><span>{esc(it)}</span>{extra}</div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_checks(title, items):
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle">{esc(title)}</div>' if title else '',
+         '<div class="rows" style="margin-top:46px">']
+    for it in items:
+        h.append('<div class="row seq" style="color:var(--ink)"><svg class="ck" width="56" height="56" '
+                 'viewBox="0 0 56 56"><circle cx="28" cy="28" r="26" fill="#5AD8F7"/>'
+                 '<path d="M16 29l8 8 16-17" stroke="#0B0B0D" stroke-width="6" fill="none" '
+                 f'stroke-linecap="round" stroke-linejoin="round"/></svg><span>{esc(it)}</span></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_nots(title, items):
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle">{esc(title)}</div>' if title else '',
+         '<div class="chips" style="margin-top:56px;gap:60px">']
+    for it in items:
+        h.append(f'<span class="chip seq nx">{esc(it)}<svg class="strike sm" viewBox="0 0 100 100">'
+                 '<line x1="14" y1="14" x2="86" y2="86"/><line x1="14" y1="86" x2="86" y2="14"/></svg></span>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_steps(items):
+    h = ['<div class="stage"><div class="scrim wide"></div><div class="steps">']
+    for k, it in enumerate(items):
+        if k:
+            h.append('<i class="step-line"></i>')
+        h.append(f'<div class="step seq"><div class="step-n">{k+1}</div>'
+                 f'<div class="step-t">{esc(it)}</div></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_vs(lh, litems, rh, ritems):
+    h = ['<div class="stage"><div class="scrim wide"></div><div class="vs">',
+         f'<div class="vs-row"><div class="vs-h">{esc(lh)}</div><div class="vs-mid"></div>'
+         f'<div class="vs-h hot">{esc(rh)}</div></div>']
+    for a, b in zip(litems, ritems):
+        h.append(f'<div class="vs-row vrow seq"><div class="vs-c">{esc(a)}</div>'
+                 f'<div class="vs-mid">&rarr;</div><div class="vs-c hot">{esc(b)}</div></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_react(pairs):
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         '<div class="hl md gtitle">상대 반응을 보면서</div>',
+         '<div class="rows" style="margin-top:46px;gap:30px">']
+    for a, _, b in (p.partition("=") for p in pairs):
+        h.append(f'<div class="row seq"><span style="color:var(--ink)">{esc(a)}</span>'
+                 f'<span class="arrow" style="color:var(--cyan);font-weight:800">&rarr;</span>'
+                 f'<span style="color:var(--amber);font-weight:700">{esc(b)}</span></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_thread(msgs):
+    h = ['<div class="stage"><div class="thread">']
+    for m in msgs:
+        who, _, txt = m.partition("=")
+        h.append(f'<div class="tb-row {"r" if who == "m" else "l"}">'
+                 f'<div class="tb seq {who}">{esc(txt)}</div></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def g_echo(word):
+    spots = ((0, 0, 1.0, 1.0), (-420, -190, .82, .72), (430, -150, .78, .62),
+             (-360, 200, .7, .5), (400, 220, .64, .42), (20, -300, .56, .32))
+    h = ['<div class="stage">']
+    for k, (x, y, sc, op) in enumerate(spots):
+        h.append(f'<div class="eb-wrap" style="transform:translate({x}px,{y}px) scale({sc});opacity:{op}">'
+                 f'<div class="eb">{esc(word)}</div></div>')
+    h.append("</div>")
+    return "".join(h)
+
+
+def g_spec(spec):
+    tmpl, _, rest = spec.partition(":")
+    f = rest.split("|")
+    if tmpl == "rows":
+        return g_seqrows(f[0], _sp(f[1]), f[2] if len(f) > 2 else "")
+    if tmpl == "chips":
+        return g_chips(f[0] or None, _sp(f[1]), hot=tuple(_sp(f[2])) if len(f) > 2 else ())
+    if tmpl == "chain":
+        return g_chain(_sp(rest))
+    if tmpl == "two":
+        return g_twobranch(f[0], f[1], f[2])
+    if tmpl == "bars":
+        data = [(a, float(b), c) for a, b, c in (x.split(":") for x in _sp(f[1]))]
+        return g_bars(f[0], data, axis=tuple(_sp(f[2])) if len(f) > 2 else ("얕음", "깊음"))
+    if tmpl == "checks":
+        return g_checks(f[0], _sp(f[1]))
+    if tmpl == "nots":
+        return g_nots(f[0], _sp(f[1]))
+    if tmpl == "steps":
+        return g_steps(_sp(rest))
+    if tmpl == "vs":
+        return g_vs(f[0], _sp(f[1]), f[2], _sp(f[3]))
+    if tmpl == "react":
+        return g_react(_sp(rest))
+    if tmpl == "thread":
+        return g_thread(_sp(rest))
+    if tmpl == "echo":
+        return g_echo(rest)
+    raise KeyError(f"unknown graphic spec {spec!r}")
+
 # ── scene builders ──────────────────────────────────────────────────────────
 def src(key):
     """Asset URL. Keyed figures carry a whole URL; the originals are CDN names."""
@@ -736,8 +1064,16 @@ def content(i, kind, arg, line):
         h.append("</div>")
         return "".join(h)
     if kind == "N":
-        return (f'<div class="diag"><div class="scrim wide"></div>'
-                f'{FIGS[NEON_FIG[arg]]() if NEON_FIG[arg] != "qmarks" else fig_qmarks(i)}</div>')
+        key, _, params = arg.partition(":")
+        name = NEON_FIG.get(key, key)
+        if name == "qmarks":
+            body = fig_qmarks(i)
+        elif name == "tree" and "|" in params:
+            root, _, items = params.partition("|")
+            body = fig_tree(_sp(items), root)
+        else:
+            body = FIGS[name](*(_sp(params) if params else []))
+        return f'<div class="diag"><div class="scrim wide"></div>{body}</div>'
     if kind == "P":
         mark, _, txt = arg.partition("|")
         words = txt or line
@@ -762,8 +1098,9 @@ def content(i, kind, arg, line):
         strike = ('<svg class="strike" viewBox="0 0 100 100">'
                   '<line x1="10" y1="10" x2="90" y2="90"/><line x1="10" y1="90" x2="90" y2="10"/>'
                   '</svg>') if crossed else ""
+        said = line.strip().strip('"\u201c\u201d')
         return (f'<div class="bub-row {side}"><div class="bub {who}">'
-                f'<span class="who" data-layout-allow-overflow>{esc(tag)}</span>{esc(line)}{strike}</div></div>')
+                f'<span class="who" data-layout-allow-overflow>{esc(tag)}</span>{esc(said)}{strike}</div></div>')
     if kind == "H":
         num, _, word = arg.partition("|")
         label = num[1:] if num.startswith("n") else (num.lstrip("0") or num)
@@ -772,7 +1109,7 @@ def content(i, kind, arg, line):
                 f'<div class="chap-word">{esc(word)}</div></div>')
     if kind == "G":
         fn = GRAPHICS.get(arg)
-        body = fn() if fn else ""
+        body = fn() if fn else g_spec(arg)
         if arg in ("g_loop", "g_loop_full"):
             return f'<div class="diag"><div class="scrim wide"></div>{body}</div>'
         return body
@@ -785,43 +1122,84 @@ def main():
     if "--audio" in sys.argv:
         audio = sys.argv[sys.argv.index("--audio") + 1]
 
-    raw = open(os.path.join(HERE, "timings.txt"), encoding="utf-8").read()
+    raw = open(os.path.join(PROJECT, "timings.txt"), encoding="utf-8").read()
     total = float(raw.split("TOTAL ")[1].split()[0])
     times = [tuple(float(x) for x in p.split(","))
              for p in raw.split("TIMES ")[1].split()]
-    lines = [l for c in json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))
-             for l in c["lines"]]
-    chunk_of = []
-    for si, c in enumerate(json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))):
-        chunk_of.extend([si] * len(c["lines"]))
-    assert len(lines) == len(times) == len(PLAN) == 251
+    if hasattr(_plan, "LINES"):
+        lines, chunk_of = _plan.LINES, _plan.SECTION
+    else:
+        chunks = json.load(open(os.path.join(PROJECT, "chunks.json"), encoding="utf-8"))
+        lines = [l for c in chunks for l in c["lines"]]
+        chunk_of = [si for si, c in enumerate(chunks) for _ in c["lines"]]
+    assert len(lines) == len(times) == len(PLAN), (len(lines), len(times), len(PLAN))
+
+    # "+" lines hand their time to the next scene, "=" lines to the previous
+    # one; every other line owns a scene of its own.
+    owner = [None] * len(PLAN)
+    for i, (kind, _) in enumerate(PLAN):
+        if kind == "=":
+            owner[i] = owner[i - 1]
+        elif kind != "+":
+            owner[i] = i
+    for i in range(len(PLAN) - 1, -1, -1):
+        if PLAN[i][0] == "+":
+            owner[i] = owner[i + 1]
+    span, seq = {}, {}
+    for i, o in enumerate(owner):
+        t0, t1 = times[i]
+        a0, a1 = span.get(o, (t0, t1))
+        span[o] = (min(a0, t0), max(a1, t1))
+        if PLAN[i][0] != "+":
+            seq.setdefault(o, []).append(round(t0, 2))
+
+    # rule 4: no image or diagram more than twice in the film
+    from collections import Counter
+    use = Counter()
+    for kind, arg in PLAN:
+        if kind == "P":
+            use["P:" + arg.partition("|")[0]] += 1
+        elif kind == "N":
+            use["N:" + arg.partition(":")[0]] += 1
+    over = {k: v for k, v in use.items() if v > 2}
+    assert not over, f"used more than twice: {over}"
 
     bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
     cap_n = 0
-    for i, ((kind, arg), (t0, t1), line) in enumerate(zip(PLAN, times, lines)):
-        d = max(0.4, t1 - t0)
-        fam, inner = background(i, kind, arg, chunk_of[i])
-        background.prev.append(fam)
-        bg_html.append(
-            f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
-            f'data-duration="{d:.2f}" data-track-index="0">'
-            f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
-            f'<div class="grain"></div><div class="vig"></div></div></div>')
+    for i, ((kind, arg), line) in enumerate(zip(PLAN, lines)):
+        if owner[i] == i:
+            t0, t1 = span[i]
+            # the next scene's start is this one's end, so plates never gap
+            nxt = min((span[o][0] for o in span if span[o][0] > t0), default=total)
+            d = max(0.4, nxt - t0)
+            fam, inner = background(i, kind, arg, chunk_of[i])
+            background.prev.append(fam)
+            bg_html.append(
+                f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
+                f'data-duration="{d:.2f}" data-track-index="0">'
+                f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
+                f'<div class="grain"></div><div class="vig"></div></div></div>')
+            body = content(i, kind, arg, line)
+            if body:
+                fg_html.append(
+                    f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
+                    f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
+            anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
+                         "has": bool(body), "q": seq.get(i, [])})
 
-        body = content(i, kind, arg, line)
-        if body:
-            fg_html.append(
-                f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
-                f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
-        anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
-                     "has": bool(body)})
-
-        # Review note: where the sentence is already set large across the middle
-        # of frame, repeating it along the bottom just stacks the same words on
-        # themselves. Those scenes carry no caption card.
-        if kind in ("T", "H", "P"):
+        # Review note: where the sentence is already on screen — set large
+        # across the middle, or written inside a quote bubble — repeating it
+        # along the bottom just stacks the same words on themselves. A centre
+        # line that only boils the sentence down keeps its caption.
+        if kind in ("H", "K"):
             continue
+        if kind in ("T", "P"):
+            shown = arg.partition("|")[2] if kind == "P" else arg
+            if not shown or shown.replace("|", " ").strip() == line.strip():
+                continue
 
+        t0, t1 = times[i]
+        d = t1 - t0
         cards = caption_cards(line)
         per = d / len(cards)
         for j, c in enumerate(cards):
@@ -835,6 +1213,7 @@ def main():
             cap_n += 1
 
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
+    wm = getattr(_plan, "WATERMARK", "이다사")
     audio_tag = (f'\n  <audio id="vo" src="{audio}" data-start="0"></audio>' if audio else "")
 
     doc = f"""<!doctype html>
@@ -854,7 +1233,7 @@ def main():
 {chr(10).join(fg_html)}
 {chr(10).join(cap_html)}
   <div class="clip" id="wmclip" data-start="0" data-duration="{total:.3f}" data-track-index="3">
-    <div class="wm">이다사</div>
+    <div class="wm">{esc(wm)}</div>
   </div>{audio_tag}
 </div>
 <script>
@@ -911,16 +1290,54 @@ SC.forEach(function (s) {{
     var fl = Math.max(0, Math.floor((s.d - dur - 0.2) / 1.6) - 1);
     if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.2, duration: 0.8,
                 ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
+  }} else if (s.k === "P") {{
+    T(f + " .pmark", {{ opacity: 0, scale: 0.7, rotation: -6 }},
+              {{ opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: "back.out(1.7)" }}, t);
+    T(f + " .hl", {{ opacity: 0, yPercent: 34 }},
+              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power3.out" }}, t + 0.16);
+    var pb = Math.max(0, Math.floor((s.d - 0.8) / 1.8) - 1);
+    if (pb > 0 && document.querySelector(f + " .pmark"))
+      tl.to(f + " .pmark", {{ yPercent: -4, duration: 0.9, ease: "sine.inOut",
+                              yoyo: true, repeat: pb }}, t + 0.6);
   }} else if (s.k === "N") {{
     T(f + " svg", {{ scale: 0.94, opacity: 0 }},
               {{ scale: 1, opacity: 1, duration: dur, ease: "power2.out" }}, t);
+    // strokes marked fg-draw trace themselves in
+    document.querySelectorAll(f + " .fg-draw, " + f + " .fg-draw2").forEach(function (el, k) {{
+      var L = el.getTotalLength ? el.getTotalLength() : 0;
+      if (!L) return;
+      tl.fromTo(el, {{ strokeDasharray: L, strokeDashoffset: L }},
+                {{ strokeDashoffset: 0, duration: Math.min(1.4, s.d * 0.5),
+                   ease: "power2.inOut" }}, t + 0.1 + k * 0.25);
+    }});
+    T(f + " .fg-pop", {{ scale: 0, transformOrigin: "50% 50%" }},
+              {{ scale: 1, duration: 0.5, ease: "back.out(2)" }}, t + 0.5);
+    T(f + " .fg-fill", {{ scaleY: 0, transformOrigin: "50% 100%" }},
+              {{ scaleY: 1, duration: 0.9, ease: "power2.out" }}, t + 0.3);
   }} else if (s.k === "G") {{
     T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
-    T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk",
-              {{ yPercent: 36, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
-                 stagger: 0.08 }}, t + 0.14);
+    var sq = document.querySelectorAll(f + " .seq"), n = sq.length, q = s.q;
+    if (n > 1 && q.length > 1 && (q.length === n || q.length % n === 0)) {{
+      // one element per narration line the scene spans
+      var step = q.length / n;
+      for (var k = 0; k < n; k++) {{
+        tl.fromTo(sq[k], {{ yPercent: 30, opacity: 0, scale: 0.97 }},
+                  {{ yPercent: 0, opacity: 1, scale: 1, duration: 0.42,
+                     ease: "power3.out" }}, Math.max(t, q[k * step] + 0.05));
+      }}
+    }} else {{
+      T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk, " +
+        f + " .tb, " + f + " .step, " + f + " .vrow",
+                {{ yPercent: 36, opacity: 0 }},
+                {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
+                   stagger: Math.min(0.22, Math.max(0.06, (s.d * 0.55) / Math.max(n, 1))) }}, t + 0.14);
+    }}
+    T(f + " .eb", {{ scale: 0.6, opacity: 0 }},
+              {{ scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.8)",
+                 stagger: 0.12 }}, t);
+    T(f + " .step-line", {{ scaleX: 0 }},
+              {{ scaleX: 1, duration: 0.5, ease: "power2.out", stagger: 0.2 }}, t + 0.2);
     T(f + " .bar-fill", {{ scaleX: 0 }},
               {{ scaleX: 1, duration: 0.7, ease: "expo.out", stagger: 0.1 }}, t + 0.26);
     T(f + " svg", {{ opacity: 0, scale: 0.95 }},

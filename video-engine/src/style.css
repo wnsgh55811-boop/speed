@@ -250,3 +250,47 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 /* ── pictogram marks ───────────────────────────────────────────────────── */
 .pmark{display:flex;align-items:center;justify-content:center;color:var(--cyan)}
 .picto{overflow:visible;filter:drop-shadow(0 0 16px rgba(90,216,247,.55))}
+
+/* ── added for spec-driven graphics ────────────────────────────────────── */
+.row .ck{flex:0 0 auto;filter:drop-shadow(0 0 12px rgba(90,216,247,.6))}
+.chip.nx{position:relative}
+.strike.sm{width:100px;height:100px}
+
+/* numbered flow: 공감 → 차이 → 이유 → 자기 표현 */
+.steps{display:flex;align-items:flex-start}
+.step{display:flex;flex-direction:column;align-items:center;width:250px}
+.step-n{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:56px;color:#0B0B0D;
+  background:radial-gradient(circle at 38% 34%, #BFF1FF 0%, #5AD8F7 60%, #2A9CC0 100%);
+  box-shadow:0 0 46px rgba(90,216,247,.55)}
+.step-t{margin-top:30px;font-weight:800;font-size:52px;color:var(--ink);white-space:nowrap;
+  text-shadow:0 3px 18px rgba(0,0,0,.7)}
+.step-line{display:block;width:90px;height:6px;margin-top:57px;border-radius:3px;
+  background:var(--cyan-deep);transform-origin:left center}
+
+/* two-column comparison */
+.vs{display:flex;flex-direction:column;gap:26px}
+.vs-row{display:grid;grid-template-columns:620px 120px 620px;align-items:center}
+.vs-h{font-weight:800;font-size:64px;text-align:center;color:var(--ink);
+  padding-bottom:18px;border-bottom:4px solid rgba(255,255,255,.18);
+  text-shadow:0 3px 18px rgba(0,0,0,.7)}
+.vs-h.hot{color:#F2CD7E;border-bottom-color:var(--amber)}
+.vs-mid{text-align:center;font-size:54px;font-weight:800;color:var(--cyan)}
+.vs-c{font-weight:600;font-size:46px;text-align:center;color:var(--ink-2);
+  background:rgba(255,255,255,.07);border-radius:22px;padding:22px 26px;
+  word-break:keep-all;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.vs-c.hot{color:var(--ink);background:rgba(216,179,104,.16)}
+
+/* a chat thread */
+.thread{display:flex;flex-direction:column;gap:22px;width:1320px}
+.tb-row{display:flex}
+.tb-row.r{justify-content:flex-end}
+.tb{max-width:920px;border-radius:26px;padding:20px 34px;font-weight:600;font-size:42px;
+  line-height:1.3;color:#211F1D;word-break:keep-all;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.tb.w{background:var(--kakao-w)}
+.tb.m{background:var(--kakao-y)}
+
+/* the same reply echoing */
+.eb-wrap{position:absolute}
+.eb{background:var(--kakao-y);color:#211F1D;font-weight:800;font-size:70px;
+  border-radius:40px;padding:26px 56px;box-shadow:0 18px 46px rgba(0,0,0,.55);white-space:nowrap}
