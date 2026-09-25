@@ -286,3 +286,27 @@
 .dtag.dim{fill:#9B9993;font-size:36px}
 .colstack.solo .thread{width:auto}
 .colstack.solo .brow{justify-content:center}
+
+/* plates lifted toward the reference film (frame median luma ~80): the v1
+   families sat at 20-35, which read as black on a phone next to the photos */
+.bg-canvas{background:
+  repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 3px),
+  radial-gradient(ellipse 95% 85% at 45% 40%, #45414A 0%, #2E2B33 55%, #1A181D 100%)}
+.bg-ink{background:
+  radial-gradient(ellipse 55% 48% at 28% 32%, rgba(90,216,247,.26) 0%, transparent 62%),
+  radial-gradient(ellipse 100% 90% at 60% 56%, #2A3A52 0%, #1C2638 58%, #10151F 100%)}
+.bg-ember{background:
+  radial-gradient(ellipse 62% 46% at 34% 76%, rgba(206,84,66,.34) 0%, transparent 68%),
+  radial-gradient(ellipse 100% 90% at 50% 44%, #4E3430 0%, #2E1F1E 56%, #181010 100%)}
+.bg-teal{background:
+  linear-gradient(180deg, transparent 0 54%, rgba(90,216,247,.14) 55%, transparent 59%),
+  radial-gradient(ellipse 98% 88% at 50% 48%, #234A55 0%, #16323B 58%, #0C1B21 100%)}
+.bg-grid{background:
+  repeating-linear-gradient(0deg,  rgba(150,210,230,.10) 0 1px, transparent 1px 72px),
+  repeating-linear-gradient(90deg, rgba(150,210,230,.10) 0 1px, transparent 1px 72px),
+  radial-gradient(ellipse 95% 88% at 50% 46%, #2D323B 0%, #1E222A 60%, #121419 100%)}
+.bg-dust{background:radial-gradient(ellipse 95% 88% at 50% 44%, #34323F 0%, #22212B 58%, #141319 100%)}
+.bg-spot{background:
+  radial-gradient(ellipse 46% 54% at 50% 44%, rgba(236,230,212,.26) 0%, transparent 64%),
+  radial-gradient(ellipse 100% 92% at 50% 50%, #2C2A30 0%, #1B1A1E 62%, #0E0E10 100%)}
+.vig{background:radial-gradient(ellipse 82% 78% at 50% 46%, transparent 0%, transparent 50%, rgba(0,0,0,.30) 82%, rgba(0,0,0,.55) 100%)}

@@ -5,7 +5,7 @@ The real file comes from aligning the rendered narration (align.py). Rates
 are for the ElevenLabs read after the single 1.2x tempo pass.
 """
 import json, re
-SYL, DOT, COMMA = 8.0, 0.42, 0.16
+SYL, DOT, COMMA = 9.2, 0.30, 0.10   # reference film: ~7.7 syl/s incl. pauses
 lines = json.load(open("lines.json", encoding="utf-8"))
 t, out = 0.25, []
 for l in lines:

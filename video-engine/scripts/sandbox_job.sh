@@ -7,6 +7,8 @@
 #   voice <branch> <proj> "<mp3,mp3,mp3>"          takes → vo.wav → align; prints
 #                                                  timings.txt + spans.json to commit
 #   seg   <branch> <proj> <a> <b> <PUT url>         render [a,b) silent, upload
+#   silent <branch> <proj> "<seg mp4 urls>" <PUT master> <PUT light>
+#                                                  picture-only cut for review before the voice exists
 #   final <branch> <proj> "<mp3,...>" "<seg mp4 urls>" <PUT master> <PUT light>
 #                                                  audio + SFX mix, concat, master/light
 set -uo pipefail
@@ -73,6 +75,19 @@ seg)
   echo "=== SEG END $(date -u +%T) ==="
   ffprobe -v error -show_entries format=duration -of csv=p=0 /home/user/seg.mp4
   curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/seg.mp4 "$6" -o /dev/null -w 'SEG PUT %{http_code}\n' ;;
+silent)
+  IFS=',' read -ra S <<< "$4"; : > segs.txt
+  for i in "${!S[@]}"; do curl -fsSL --retry 5 -o "seg$i.mp4" "${S[$i]}" || exit 27; echo "file 'seg$i.mp4'" >> segs.txt; done
+  ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i segs.txt -c copy -movflags +faststart /home/user/master.mp4 || exit 28
+  DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 /home/user/master.mp4)
+  VB=$(python3 -c "print(int(96*8*1024/float('$DUR')))")
+  ffmpeg -hide_banner -loglevel error -y -i /home/user/master.mp4 -c:v libx264 -preset slow \
+    -b:v ${VB}k -maxrate $((VB * 2))k -bufsize $((VB * 4))k -pix_fmt yuv420p -movflags +faststart /home/user/light.mp4 || exit 29
+  ffprobe -v error -show_entries format=duration:stream=codec_name,width,height -of csv=p=0 /home/user/master.mp4
+  ls -la /home/user/master.mp4 /home/user/light.mp4
+  curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/master.mp4 "$5" -o /dev/null -w 'MASTER PUT %{http_code}\n'
+  curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/light.mp4 "$6" -o /dev/null -w 'LIGHT PUT %{http_code}\n'
+  echo "=== ALL DONE $(date -u +%T) ===" ;;
 final)
   takes "$4"
   python3 "$E/align.py" --splice-only || exit 23
