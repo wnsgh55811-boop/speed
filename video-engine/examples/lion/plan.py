@@ -38,8 +38,8 @@ SCENES = [
     (21, 21, "media", dict(photo="ph_date", tint="center", kicker="데이트 장소 하나에도",
                            title="상대 눈치")),
     (22, 25, "media", dict(photo="ph_bed", tint="left", focus="60% 50%",
-                           thoughts=[(23, "내 외모가 부족한가?", "tl"),
-                                     (24, "여자는 원래 나쁜 남자를 좋아하나?", "bl")])),
+                           thoughts=[(23, "내 외모가 부족한가?", "l"),
+                                     (24, "여자는 원래 나쁜 남자를 좋아하나?", "l")])),
     (26, 28, "rows", dict(icon="ico_magnifier", head="문제를 다르게 보면", rows=[
         (27, "외모가 중요하지 않다", "x", ""), (28, "대화 기술이 필요 없다", "x", "")],
         nocap=[])),

@@ -166,6 +166,15 @@ def thought(text, line, side="r", tone=""):
             f'<span>{esc(text)}</span><i></i><i></i></div>')
 
 
+def thought_groups(c, items):
+    """Bubbles on the same side stack in one column, in narration order."""
+    sides = {}
+    for line, txt, sd in items:
+        c.nocap.add(line)
+        sides.setdefault(sd, []).append(thought(txt, line, sd))
+    return "".join(f'<div class="tw {sd}">{"".join(b)}</div>' for sd, b in sides.items())
+
+
 # ── scene kinds ─────────────────────────────────────────────────────────────
 def k_media(c, o):
     """Photo or clip plate with optional title, tags and thought bubbles."""
@@ -179,9 +188,7 @@ def k_media(c, o):
         for line, txt, tone in tags:
             h.append(f'<span class="tag {tone}" {L(line, "left")}>{esc(txt)}</span>')
         h.append("</div>")
-    for line, txt, sd in o.get("thoughts", []):
-        c.nocap.add(line)
-        h.append(f'<div class="tw {sd}">{thought(txt, line, sd)}</div>')
+    h.append(thought_groups(c, o.get("thoughts", [])))
     if o.get("quote"):
         line, txt = o["quote"]
         c.nocap.add(line)
@@ -199,9 +206,7 @@ def k_cut(c, o):
         h.append(f'<div class="cutc" {L(at, "up", 0.05 + j * 0.1)}><img src="{asset(key)}" '
                  f'alt="" style="height:{ht}px"></div>')
     h.append("</div>")
-    for line, txt, sd in o.get("thoughts", []):
-        c.nocap.add(line)
-        h.append(f'<div class="tw {sd}">{thought(txt, line, sd)}</div>')
+    h.append(thought_groups(c, o.get("thoughts", [])))
     if o.get("kicker"):
         h.append(f'<div class="cutkick" {L(c.a, "fade")}>{esc(o["kicker"])}</div>')
     if o.get("tags"):

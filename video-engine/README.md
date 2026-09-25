@@ -82,6 +82,34 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
 - **오디오 누락으로 렌더 즉시 실패** — 컴포지션이 참조하는 오디오 파일은
   렌더 시작 전에 존재해야 한다. 병렬로 만들면 늦는다.
 
+## v2 파이프라인 (씬 그룹 · 샌드박스 렌더)
+
+`examples/lion/` ("하이에나의 태도 vs 사자의 태도")부터 쓰는 구조. 한 씬이 대본 여러 줄을
+묶고, 각 요소는 `data-l="<줄 번호>"` 로 **그 말이 나오는 순간** 등장한다.
+
+| 경로 | 내용 |
+|---|---|
+| `src/emit_v2.py` | 씬 그룹 빌더. 사진/클립 + 태그·생각풍선, 컷아웃, 그래프(선·레벨·막대), 관계 도식, 채팅·폰·검색·퀴즈 UI, 체크리스트, CTA, 테이크어웨이 |
+| `src/style_v2.css` | v2 추가 스타일 (자막 52px · 하단 112px, 콘텐츠는 자막 띠 위에 중앙 정렬) |
+| `scripts/fetch_assets.py` | library.json 에셋 다운로드 → 아이콘 키잉(rembg/루마키) → 어두운 스틸·클립 미드톤 리프트 |
+| `scripts/mkaudio_v2.py` | 긴 TTS 테이크(1100~1300자씩) 이어붙이기, 1.2× 는 여기서 **한 번만** |
+| `examples/<p>/align.py` | faster-whisper 로 줄 타이밍 산출 + 핵심 문장 앞 길이가 다른 pause 삽입 |
+| `scripts/mix_sfx.py` | 모션 큐(sfx.json)에 맞춰 SFX 합성·믹스, −14.5 LUFS / −1.5 dBTP 마스터링 |
+| `scripts/qa_frames.py` | 스냅샷 노출·크러시·키잉 수치 + 작은 검수 시트 |
+| `scripts/sandbox_job.sh` | Higgsfield 샌드박스에서 `snap`(QA) / `render`(MASTER+LIGHT 업로드) 한 번에 |
+
+작성 컨테이너는 에셋 CDN(cloudfront)에 못 붙으므로 렌더·사진 QA 는 샌드박스에서 돈다.
+샌드박스 출력은 ~20KB 에서 잘리니, 사진 프레임은 수치로 보고 레이아웃은 로컬 스냅샷으로 본다.
+
+```
+python3 examples/lion/mkchunks.py      # script.txt → lines.json + chunks.json (TTS 3건)
+python3 examples/lion/estimate.py      # 음성 전 임시 타이밍 (레이아웃 확인용)
+python3 src/emit_v2.py examples/lion   # index.html
+npx hyperframes snapshot . --at ...    # 로컬 레이아웃 QA
+bash scripts/sandbox_job.sh <branch> lion snap "<t,...>"            # 사진/클립 QA
+bash scripts/sandbox_job.sh <branch> lion render "<mp3,...>" <PUT master> <PUT light>
+```
+
 ## 결과물 전달
 
 Claude 아티팩트 페이지는 네트워크 정책상 이미지 CDN을 못 불러오는 환경이라

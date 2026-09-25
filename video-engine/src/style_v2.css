@@ -60,7 +60,7 @@
 .tags{position:absolute;display:flex;flex-direction:column;gap:20px}
 .tags.left{left:120px;top:50%;transform:translateY(-50%);align-items:flex-start}
 .tags.right{right:120px;top:50%;transform:translateY(-50%);align-items:flex-end}
-.tags.bottom{left:0;right:0;bottom:30px;flex-direction:row;justify-content:center}
+.tags.bottom{left:0;right:0;bottom:90px;flex-direction:row;justify-content:center}
 .tag{font-weight:700;font-size:48px;padding:18px 34px;border-radius:18px;color:var(--ink);
   background:rgba(12,14,18,.72);border:2px solid rgba(255,255,255,.16);
   box-shadow:0 12px 30px rgba(0,0,0,.45);white-space:nowrap}
@@ -72,8 +72,8 @@
 /* thought bubbles */
 .tw{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center}
 .tw.r{right:120px;align-items:flex-end} .tw.l{left:120px;align-items:flex-start}
-.tw.tr{right:140px;top:40px;bottom:auto} .tw.tl{left:140px;top:40px;bottom:auto}
-.tw.br{right:140px;bottom:30px;top:auto} .tw.bl{left:140px;bottom:30px;top:auto}
+.tw.tr{right:140px;top:70px;bottom:auto} .tw.tl{left:140px;top:70px;bottom:auto}
+.tw.br{right:140px;bottom:150px;top:auto} .tw.bl{left:140px;bottom:150px;top:auto}
 .thought{position:relative;background:rgba(246,244,238,.95);color:#211F1D;border-radius:44px;
   padding:30px 48px;font-weight:700;font-size:52px;white-space:nowrap;
   box-shadow:0 18px 44px rgba(0,0,0,.5)}
@@ -82,7 +82,7 @@
 .thought.r i:nth-of-type(2){width:18px;height:18px;left:18px;bottom:-60px}
 .thought.l i:nth-of-type(1),.thought.tl i:nth-of-type(1){width:30px;height:30px;right:40px;bottom:-34px}
 .thought.l i:nth-of-type(2),.thought.tl i:nth-of-type(2){width:18px;height:18px;right:18px;bottom:-60px}
-.tw .thought + .thought{margin-top:80px}
+.tw{gap:84px}
 
 /* cutouts */
 .cutrow{display:flex;align-items:center;justify-content:center;gap:40px;height:100%}
