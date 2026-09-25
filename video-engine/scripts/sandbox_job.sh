@@ -7,8 +7,9 @@
 #   bash sandbox_job.sh <branch> <project> snap "<t1,t2,...>"
 #   bash sandbox_job.sh <branch> <project> render "<voice mp3 urls, comma-sep>" "<put master>" "<put light>"
 #
-# Snap output: small JPEG grids printed as base64 between ===SHEET n=== markers
-# in job.log, so frames can be inspected without a shared filesystem.
+# Snap output: exposure/keying numbers in job.log plus small sheets in qa/
+# (pull one back with `base64 -w0 qa/sheet_0.jpg`; the sandbox caps output
+# at ~20 KB, so sheets are kept under 14 KB).
 set -uo pipefail
 BR=$1; PRJ=$2; MODE=$3
 cd /home/user
@@ -42,19 +43,8 @@ echo "=== ASSETS READY $(date -u +%T) ==="
 if [ "$MODE" = "snap" ]; then
   python3 src/emit_v2.py "examples/$PRJ" || exit 16
   rm -rf snapshots
-  npx hyperframes snapshot . --at "$4" --no-end --timeout 20000 >/dev/null 2>&1 || exit 17
-  ls snapshots/frame-*.png | sort -V > frames.txt
-  # 3 frames per grid, each 480x270 (enough to judge crop, exposure, keying)
-  split -l 3 -d frames.txt grp_
-  n=0
-  for g in grp_*; do
-    montage $(cat "$g") -tile 3x1 -geometry 480x270+2+2 -background '#222' "sheet_$n.jpg" 2>/dev/null
-    convert "sheet_$n.jpg" -quality 55 "sheet_$n.jpg"
-    echo "===SHEET $n $(tr '\n' ' ' < "$g")==="
-    base64 -w0 "sheet_$n.jpg"; echo
-    echo "===END $n==="
-    n=$((n + 1))
-  done
+  npx hyperframes snapshot . --at "$4" --no-end --timeout 20000 > snap.log 2>&1 || { tail -20 snap.log; exit 17; }
+  python3 scripts/qa_frames.py "$4"
   echo "=== SNAP DONE ==="
   exit 0
 fi

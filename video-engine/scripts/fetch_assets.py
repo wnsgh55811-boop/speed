@@ -12,8 +12,13 @@ a dark box on the composition. Two keys, picked per image:
   · dark-plate line pictograms  → luminance key, so the glow keeps its falloff
   · everything else             → rembg (isnet-general-use), then a soft edge
 Each cutout is trimmed and padded to a square in assets/keyed/<key>.png.
+
+Night-scene stills and clips come out of the generator with a median luma
+of 20-40, which reads as a black box once the plate grade and caption scrim
+sit on top. Anything with a median below LIFT_BELOW gets a midtone gamma so
+its median lands near LIFT_TO — shadows stay dark, faces become visible.
 """
-import io, json, os, subprocess, sys, urllib.request
+import io, json, math, os, subprocess, sys, urllib.request
 
 import numpy as np
 from PIL import Image, ImageFilter
@@ -69,6 +74,40 @@ def rembg_key(im):
     return out
 
 
+LIFT_BELOW, LIFT_TO = 60, 74
+
+
+def lift_gamma(median):
+    """Exponent that maps the median to LIFT_TO (1.0 = untouched)."""
+    if median >= LIFT_BELOW:
+        return 1.0
+    return max(0.55, math.log(LIFT_TO / 255) / math.log(max(median, 8) / 255))
+
+
+def lift_still(path):
+    im = Image.open(path).convert("RGB")
+    lum = np.asarray(im.convert("L").resize((480, 270))).astype(np.float32)
+    g = lift_gamma(float(np.median(lum)))
+    if g < 1.0:
+        a = np.asarray(im).astype(np.float32) / 255.0
+        Image.fromarray((np.power(a, g) * 255).clip(0, 255).astype(np.uint8)).save(path)
+    return g
+
+
+def lift_clip(path):
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "2", "-i", path, "-frames:v", "1",
+                          "-vf", "scale=480:270,format=gray", "-f", "rawvideo", "-"],
+                         capture_output=True).stdout
+    g = lift_gamma(float(np.median(np.frombuffer(raw, np.uint8))))
+    if g < 1.0:
+        tmp = path + ".tmp.mp4"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", path, "-vf", f"eq=gamma={1 / g:.3f}",
+                        "-c:v", "libx264", "-crf", "16", "-preset", "medium", "-pix_fmt", "yuv420p",
+                        "-an", tmp], check=True)
+        os.replace(tmp, path)
+    return g
+
+
 def square(im, pad=0.08, size=900):
     bb = im.getchannel("A").point(lambda v: 255 if v > 12 else 0).getbbox()
     if bb:
@@ -83,7 +122,13 @@ if __name__ == "__main__":
     lib = load(sys.argv[1])
     for k, url in sorted(lib.items()):
         ext = url.rsplit(".", 1)[-1].lower()
-        raw = download(url, f"{LIB}/{k}.{ext}")
+        dst0 = f"{LIB}/{k}.{ext}"
+        fresh = not os.path.exists(dst0)
+        raw = download(url, dst0)
+        if fresh and k.startswith(("ph_", "ill_")):
+            print(f"{k:16s} lift gamma {lift_still(raw):.2f}", flush=True)
+        if fresh and k.startswith("vid_"):
+            print(f"{k:16s} lift gamma {lift_clip(raw):.2f}", flush=True)
         if not k.startswith(("ico_", "pic_")):
             continue
         dst = f"{OUT}/{k}.png"
