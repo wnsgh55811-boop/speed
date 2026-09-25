@@ -117,7 +117,13 @@ def s_photo(sc, key, kb="in", tags=(), side=None, tint=True, dim=0.0, steps=None
     elif side == "L":
         shade += '<div class="sideL"></div>'
     if dim:
-        shade += f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"></div>'
+        # with key type on top, the photo stays bright until the first line
+        # arrives and only then goes dark behind it
+        fx = ""
+        if steps:
+            s0 = steps[0]
+            fx = A(C.T(s0[0], s0[3] if len(s0) > 3 else .05) - .25, "fade", .45)
+        shade += f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"{fx}></div>'
     h = [f'<div class="plate"><div class="kb" data-kb="{kb}">{img(key)}</div>{shade}</div>']
     for (ln, txt, pos, cls) in tags:
         h.append(f'<div style="position:absolute;{pos}"><span class="pill {cls}"'
@@ -197,7 +203,8 @@ def s_chat(sc, msgs, title="", read_at=None, typing_at=None, side="c", bgkey=Non
     return dict(html="".join(h), plate=bool(bgkey))
 
 
-def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None, title=None, dim=0.0):
+def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None, title=None, dim=0.0,
+             center=False, arrows=()):
     """Quote / thought cards over a photo or a cut-out figure.
     quotes: [(line, text, style)] style ∈ y (spoken), dk (thought), am, cy."""
     h = []
@@ -207,14 +214,15 @@ def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None, title=
                  f'<div class="shade"></div>{f"<div class={chr(34)}{sd}{chr(34)}></div>" if sd else ""}'
                  + (f'<div class="dimmer" style="background:rgba(6,7,10,{dim})"></div>' if dim else "") + '</div>')
     if cut:
-        # keyed figures stand on the bottom edge: a portrait cropped at the waist
-        # must meet the frame, never float above the captions
-        h.append(f'<div class="cutfig" style="left:{120 if side!="L" else 1120}px;top:auto;bottom:0;'
-                 f'height:900px;width:680px;align-items:flex-end"'
-                 f'{A(sc["t0"], "up")}>{img(cut, "cutimg", "max-height:900px;width:auto;max-width:680px;object-fit:contain;object-position:bottom")}</div>')
+        # keyed figure centred in the content zone; a portrait cropped at the
+        # waist fades out at its lower edge so the cut never reads as a hard line
+        h.append(f'<div class="cutfig" style="left:{120 if side!="L" else 1120}px;width:680px"'
+                 f'{A(sc["t0"], "up")}>{img(cut, "cutimg fadeb", "max-height:760px;width:auto;max-width:680px;object-fit:contain")}</div>')
     x0 = 330 if (cut or bgkey) and side != "L" else 0
     if side == "L":
         x0 = -330
+    if center:
+        x0 = 0
     h.append(f'<div class="zone"><div class="col" style="gap:{"60px" if len(quotes) < 3 else "44px"};'
              f'transform:translateX({x0}px)">')
     if title:                          # in the column, so it can never overlap a card
@@ -223,8 +231,11 @@ def s_quotes(sc, quotes, bgkey=None, cut=None, layout="stack", side=None, title=
         ln, txt, st = q[0], q[1], q[2]
         cls = "thought" if st == "th" else f"qcard {st}"  # no float: text never drifts
         off = (i % 2) * 70 - 35 if layout == "zig" else 0
+        arrow = ('<svg class="qarrow" width="120" height="60" viewBox="0 0 120 60">'
+                 '<path d="M6 30 L100 30 M76 8 L104 30 L76 52" fill="none" stroke="#D8B368" '
+                 'stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>') if i in arrows else ""
         h.append(f'<div class="{cls}" style="transform:translateX({off}px)"'
-                 f'{A(C.T(ln, .05), "pop")}>{esc(txt)}</div>')
+                 f'{A(C.T(ln, .05), "pop")}>{arrow}{esc(txt)}</div>')
         C.sfx.append([C.T(ln, .05), "click"])
     h.append('</div></div>')
     return dict(html="".join(h), plate=bool(bgkey))
@@ -326,6 +337,19 @@ def s_graph_reverse(sc, a_at, b_at, lab_a, lab_b, xlab="시간", note=None):
     return dict(html=h)
 
 
+def vtext(txt, x, y, step=58, gap=34, cls="dt-am"):
+    """Korean axis label set vertically, one syllable per row, reading down.
+    A space in the label becomes an extra gap instead of an empty row."""
+    out, yy = [], y
+    for ch in txt:
+        if ch == " ":
+            yy += gap
+            continue
+        out.append(f'<text class="{cls}" x="{x}" y="{yy}" text-anchor="middle">{esc(ch)}</text>')
+        yy += step
+    return "".join(out)
+
+
 def s_graph_effort(sc, draw_at, peak_at, xl=("강함", "약함"), ylab="내 노력", xlab="상대 반응"):
     """Effort climbs as the other side's response weakens."""
     X0, Y0, X1 = 330, 660, 1600
@@ -336,7 +360,7 @@ def s_graph_effort(sc, draw_at, peak_at, xl=("강함", "약함"), ylab="내 노�
     h = (f'<div class="zone"><svg class="dg" width="1920" height="820" viewBox="0 0 1920 820">'
          f'<g{A(sc["t0"], "fade")}>{ticks}'
          f'<path class="ln ax" d="M{X0} 70 L{X0} {Y0} L{X1+30} {Y0}"/>'
-         f'<text class="dt-am" x="{X0-110}" y="370" text-anchor="middle" transform="rotate(-90 {X0-110} 370)">{esc(ylab)}</text>'
+         + vtext(ylab, X0 - 90, 300) +
          f'<text class="dt-s" x="{X0+10}" y="{Y0+56}">{esc(xl[0])}</text>'
          f'<text class="dt-s" x="{X1}" y="{Y0+56}" text-anchor="end">{esc(xl[1])}</text>'
          f'<text class="dt-cy" x="{(X0+X1)//2}" y="{Y0+60}" text-anchor="middle">{esc(xlab)} →</text></g>'
@@ -357,7 +381,7 @@ def s_scale(sc, steps, left="상대", right="나", drops=(), title=None):
     if title:
         h.append(f'<div class="big xs c-am" style="position:absolute;top:-40px;left:0;right:0"'
                  f'{A(sc["t0"], "up")}>{esc(title)}</div>')
-    stp = ";".join(f"{C.T(l, .1):.3f}:{d}" for l, d in steps)
+    stp = ";".join(f"{C.T(st[0], st[2] if len(st) > 2 else .1):.3f}:{st[1]}" for st in steps)
     h.append(f'<svg class="dg" width="1500" height="760" viewBox="0 0 1500 760" style="position:absolute;inset:0;overflow:visible">'
              f'<path class="ln ax" d="M750 250 L750 650" style="stroke-width:10;stroke:#8d8a83"/>'
              f'<path d="M620 690 L880 690 L820 650 L680 650 Z" fill="#8d8a83"/>'
@@ -368,11 +392,13 @@ def s_scale(sc, steps, left="상대", right="나", drops=(), title=None):
              f'<path class="ln" d="M190 250 L110 430 M190 250 L270 430" style="stroke:#bdbab3;stroke-width:4"/>'
              f'<path d="M80 430 L300 430 Q190 500 80 430 Z" class="fl-am"/>'
              f'<text class="dt-am" x="190" y="570" text-anchor="middle" style="font-size:60px">{esc(left)}</text>')
-    for k, (ln, lab) in enumerate(drops):
+    for k, dr in enumerate(drops):
+        ln, lab = dr[0], dr[1]
+        dt = dr[2] if len(dr) > 2 else .05
         y = 410 - k * 66
-        h.append(f'<g{A(C.T(ln, .05), "drop")}><rect x="40" y="{y-48}" width="300" height="58" rx="29" fill="#F4F1E8"/>'
+        h.append(f'<g{A(C.T(ln, dt), "drop")}><rect x="40" y="{y-48}" width="300" height="58" rx="29" fill="#F4F1E8"/>'
                  f'<text x="190" y="{y-8}" text-anchor="middle" style="font-weight:700;font-size:34px;fill:#1b1a16">{esc(lab)}</text></g>')
-        C.sfx.append([C.T(ln, .05), "tick"])
+        C.sfx.append([C.T(ln, dt), "tick"])
     h.append(f'</g><g class="pan" data-counter="1" style="transform-origin:1310px 250px">'
              f'<path class="ln" d="M1310 250 L1230 430 M1310 250 L1390 430" style="stroke:#bdbab3;stroke-width:4"/>'
              f'<path d="M1200 430 L1420 430 Q1310 500 1200 430 Z" class="fl-cy"/>'
@@ -599,7 +625,7 @@ def s_check(sc, num, title, quotes=(), rows=(), card=None):
         for r in rows:
             ln, txt, mk = r[0], r[1], r[2]
             glyph = {"ok": "✓", "no": "✕", "q": "?", "n": "·"}.get(mk, "")
-            body += (f'<div class="li" style="font-size:48px"{A(C.T(ln, .05), "left")}><span class="ic {mk}">{glyph}</span>'
+            body += (f'<div class="li" style="font-size:48px"{A(C.T(ln, r[3] if len(r) > 3 else .05), "left")}><span class="ic {mk}">{glyph}</span>'
                      f'<span class="t">{esc(txt)}</span></div>')
         body += '</div>'
     for q in quotes:
@@ -674,6 +700,25 @@ def steps_html(sc, parts, box_style="position:absolute;inset:0", base_px=104, ma
                  f'<div class="kt {colc}" style="font-size:{px}px"{A(ts[k], "up", .5)}>{inner}{strike}</div>'
                  f'</div></div>')
     return "".join(h)
+
+
+def s_words(sc, words, lead=None, sep="/"):
+    """Words that build one by one on the syllable that says them.
+    words: [(line, text, dt)]; lead: optional (line, text, cls) step shown first."""
+    h = ['<div class="zone keyzone">']
+    t0 = C.T(words[0][0], words[0][2])
+    if lead:
+        h.append(f'<div class="tstep" style="position:absolute;inset:0"><div class="wrap"{A(t0 - .3, "hide", .22)}>'
+                 f'<div class="kt c-dim" style="font-size:88px"{A(C.T(lead[0], .05), "up", .5)}>{esc(lead[1])}</div></div></div>')
+    h.append('<div class="row2" style="gap:44px">')
+    for k, (ln, txt, dt) in enumerate(words):
+        t = C.T(ln, dt)
+        if k:
+            h.append(f'<span class="kt c-dim" style="font-size:96px"{A(t, "fade", .3)}>{esc(sep)}</span>')
+        h.append(f'<span class="kt c-am" style="font-size:112px"{A(t, "pop", .45)}>{esc(txt)}</span>')
+        C.sfx.append([t, "tick"])
+    h.append('</div></div>')
+    return dict(html="".join(h), bg="bg-spot")
 
 
 def s_bubbles(sc, msgs, bgkey=None, dim=.6, title=None):
@@ -815,6 +860,8 @@ var FX = {
   growx: function(el,t,d){ tl.fromTo(el,{scaleX:0},{scaleX:1,duration:d||.7,ease:"expo.out",transformOrigin:"left center"},t); },
   growy: function(el,t,d){ tl.fromTo(el,{scaleY:0},{scaleY:1,duration:d||.7,ease:"expo.out",transformOrigin:"center top"},t); },
   draw:  function(el,t,d){ var L = el.getTotalLength ? el.getTotalLength() : 1000;
+           // hidden until it starts: a round cap on a zero-length dash still paints a dot
+           tl.fromTo(el,{opacity:0},{opacity:1,duration:.01},t);
            tl.fromTo(el,{strokeDasharray:L,strokeDashoffset:L},{strokeDashoffset:0,duration:d||1,ease:"power2.inOut"},t); },
   sweep: function(el,t,d){ var L = num(el,'len',1000);
            tl.fromTo(el,{strokeDashoffset:L},{strokeDashoffset:0,duration:d||2,ease:"none"},t); },

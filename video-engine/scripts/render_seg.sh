@@ -13,7 +13,10 @@ W=${W:-/home/user/R}; mkdir -p $W && cd $W
 [ -f pack.zip ] || curl -fsSL --retry 5 -o pack.zip "$ZIP" || exit 11
 unzip -oq pack.zip || exit 12
 if [ -f cuts.url ] && [ ! -f assets/.cuts ]; then
-  mkdir -p assets && curl -fsSL --retry 5 -o cuts.zip "$(cat cuts.url)" && unzip -oq cuts.zip -d assets && touch assets/.cuts || exit 19
+  mkdir -p assets && curl -fsSL --retry 5 -o cuts.zip "$(cat cuts.url)" && unzip -oq cuts.zip -d assets || exit 19
+  # same shadow lift cutout.py applies, for cuts keyed before it existed
+  python3 -c "import glob, cutout; from PIL import Image
+[cutout.lift(Image.open(f).convert('RGBA')).save(f) for f in glob.glob('assets/cut_*.png')]" && touch assets/.cuts || exit 19
 fi
 
 mkdir -p assets/fonts

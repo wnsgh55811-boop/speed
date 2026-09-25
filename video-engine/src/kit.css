@@ -197,3 +197,8 @@
 .tok{font-size:40px}
 .kt.c-am{color:var(--amber)}.kt.c-cy{color:var(--cyan)}.kt.c-dim{color:#a9a7a1}.kt.c-red{color:#F0707A}
 .kt.c-am .hl-bg{background:rgba(216,179,104,.24)}
+/* v3 */
+.kt.c-cy .hl-bg{background:rgba(90,216,247,.30)}
+.cutimg.fadeb{-webkit-mask-image:linear-gradient(180deg,#000 72%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 72%,transparent 100%)}
+.qarrow{position:absolute;right:100%;top:50%;margin:-30px 26px 0 0}
