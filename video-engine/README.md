@@ -138,6 +138,10 @@ flip check cta` — 모든 씬에 `nocap=[줄]`(중앙 타이포와 같은 말�
   (어두운 배경 위에서 실루엣이 되기 때문).
 - **TTS 숫자 오독** — "4시간"을 "사시간"으로 읽음. 해당 문장만 "네 시간"으로 다시 합성해
   `scripts/splice.py` 로 같은 구간에 끼워 넣는다(길이·음량 맞춤, 다른 타이밍 불변).
+- **TTS 청크 이음새의 무음** — 긴 청크끼리 붙인 자리에 0.7~0.8초 무음이 생겨 "붕 뜬다".
+  `scripts/tighten.py` 로 오디오와 timings.txt 를 같은 목록으로 함께 줄인다(0.3초만 남김).
+- **특정 단어에 맞춰야 하는 요소** — 줄 시작이 아니라 ASR 단어 시각(faster-whisper
+  word_timestamps)으로 오프셋을 준다(`(line, text, cls, dt)`).
 - **긴 URL 을 명령에 다시 타이핑하지 말 것** — presigned PUT URL 은 로컬에서 파일로 저장하고
   작은 PUT 으로 먼저 검증한 뒤 팩(zip)에 넣어 보낸다(`put_seg_<k>.url`).
 
