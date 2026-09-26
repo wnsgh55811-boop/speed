@@ -225,7 +225,11 @@ def mirror():
     def gauge(x, lab, gy, fillcls):
         return (f'<rect x="{x}" y="80" width="150" height="400" rx="75" '
                 'fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.25)" stroke-width="3"/>'
-                f'<rect class="{fillcls}" data-gy="{gy}" x="{x+8}" y="88" width="134" height="384" rx="67"/>'
+                # the fill is a plain bar clipped to the capsule, so scaling it
+                # never squashes rounded ends out past the outline
+                f'<clipPath id="cap{x}"><rect x="{x+8}" y="88" width="134" height="384" rx="67"/></clipPath>'
+                f'<g clip-path="url(#cap{x})"><rect class="{fillcls}" data-gy="{gy}" x="{x+8}" y="88" '
+                'width="134" height="384"/></g>'
                 f'<text class="dlabel" x="{x+75}" y="560" text-anchor="middle">{lab}</text>')
     return ('<div class="diag"><div class="scrim wide"></div>'
             '<svg width="1300" height="620" viewBox="0 0 1300 620">'

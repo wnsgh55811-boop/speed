@@ -38,6 +38,8 @@ ASSETS = {
     "i_lens":     H + "47_31ec4408-aa76-4be7-a110-e9b0cb4382ea.png",
     "i_bell":     H + "47_3c744381-eadb-42f3-a3bf-8633813766bb.png",
     "i_scale":    H + "47_dd57c68b-f341-4ac5-9e5f-0f5195360b76.png",
+    "ph_busstop": "hf_20260926_133310_3d38d160-cdb5-41b4-a984-44de6e215e26.png",
+    "ph_date2":   "hf_20260926_133309_b9b76555-030d-4387-9385-92129dbfd5aa.png",
     "i_relief":   "hf_20260926_122012_63a92111-3868-4a95-8045-7e7e5871c18c.png",
 }
 LIFT = ("ph_insta", "ph_night", "ph_cafe", "il_hyena", "il_lion", "br_phone_1")
@@ -175,6 +177,7 @@ GROUPS = [
     (294, "I", "i_mask|여유가 아니라, 연기"),
     # ── FINAL TAKEAWAY + CTA ─────────────────────────────────────────────
     (296, "T", ["*바꿔야 할 것은", "@1~카톡 기술", "@2^카톡을 보내는 사람의 태도"]),
-    (299, "B", {"img": "ph_walk"}),
+    (299, "B", {"img": "ph_busstop"}),
+    (302, "B", {"img": "ph_date2"}),
     (304, "G", F.cta),
 ]

@@ -860,6 +860,8 @@ def main():
     audio = arg("--audio")
     out = arg("--out", OUT)
     total, times, lines = load_timeline()
+    global P_CHUNKS
+    P_CHUNKS = json.load(open(os.path.join(PROJECT, "chunks.json"), encoding="utf-8"))
     t_from = float(arg("--from", 0))
     t_to = min(total, float(arg("--to", total)))
 
@@ -893,7 +895,9 @@ def main():
                    "fx": ("coaster" if isinstance(garg, str) and "coaster" in garg else "")})
         # sound design cues, kept sparse: a soft whoosh on chapter / key type,
         # a tiny click per chat bubble
-        if kind in ("H",) or (kind == "T" and gi > 0):
+        # no whoosh where a TTS pass ends: over that breath it read as a hollow gap
+        joins = {sum(len(c["lines"]) for c in P_CHUNKS[:k]) for k in range(1, len(P_CHUNKS))}
+        if (kind in ("H",) or (kind == "T" and gi > 0)) and l0 not in joins:
             sfx.append((round(t0, 2), "whoosh"))
         if kind == "M":
             for m in garg["msgs"]:
