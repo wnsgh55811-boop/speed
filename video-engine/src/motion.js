@@ -20,6 +20,7 @@ function lenOf(el) {
 // plates drift so no frame is ever dead still (Ken Burns on photos too)
 SC.forEach(function (s) {
   var id = "#bgm" + String(s.i).padStart(3, "0");
+  if (!document.querySelector(id)) return;
   var dir = (s.i % 2) ? 1 : -1;
   full.fromTo(id, { scale: 1.0, xPercent: 0 },
     { scale: 1.05, xPercent: dir * 1.1, duration: Math.max(1, s.d), ease: "sine.inOut" }, s.t);
@@ -28,6 +29,7 @@ SC.forEach(function (s) {
 SC.forEach(function (s) {
   if (!s.has) return;
   var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.06;
+  if (!document.querySelector(f)) return;
   var dur = Math.min(0.6, Math.max(0.32, s.d * 0.3));
   var root = document.querySelector(f);
 
