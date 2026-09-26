@@ -175,8 +175,6 @@ def fig_bridge():
             '<rect x="950" y="300" width="330" height="120" rx="12" '
             'fill="rgba(90,216,247,.07)" stroke="#1E7C96" stroke-width="3"/>'
             '<path class="edge-hot glow fg-draw" d="M370 300 C 560 140, 760 140, 950 300"/>'
-            + "".join(f'<path class="edge" d="M{x} {y:.0f} L{x} 300"/>'
-                      for x, y in ((470, 216), (660, 178), (850, 216)))
             + '<text class="dlabel-dim" x="205" y="380" text-anchor="middle">정보</text>'
             '<text class="dlabel" x="1115" y="380" text-anchor="middle">사람</text>'
             '</svg>')
@@ -767,10 +765,10 @@ def content(i, kind, arg, lines):
     if kind == "B":
         h = []
         if arg.get("title"):
-            h.append('<div class="ph-title">' + "".join(
+            h.append(f'<div class="ph-title {arg.get("tpos", "")}">' + "".join(
                 f'<div class="hl lg"{F2.B(k)}>{esc(t)}</div>'
                 for k, t in enumerate(arg["title"])) + '</div>')
-        h.append(F2.tags_html(arg.get("tags", [])))
+        h.append(F2.tags_html(arg.get("tags", []), arg.get("tagpos")))
         return "".join(h)
     if kind == "M":
         return F2.thread(arg["msgs"], arg.get("title", ""), arg.get("tag"), arg.get("tagcls", ""))
@@ -780,6 +778,8 @@ def content(i, kind, arg, lines):
         names = arg["who"].split("+")
         cols = ["left:0;right:0"] if len(names) == 1 else ["left:0;width:50%",
                                                           "left:50%;width:50%"]
+        if arg.get("side"):            # figure left, words right
+            cols = ["left:0;width:50%"]
         h = []
         for n, col in zip(names, cols):
             key = pick(n, i)
@@ -787,7 +787,7 @@ def content(i, kind, arg, lines):
             h.append(f'<div class="cut" style="{col}">'
                      f'<img id="{sid}-c{len(h)}" class="shadowed" src="{src(key)}" alt="" '
                      f'style="height:{int(760*sc)}px"></div>')
-        h.append(F2.tags_html(arg.get("tags", [])))
+        h.append(F2.tags_html(arg.get("tags", []), arg.get("tagpos")))
         return "".join(h)
     if kind == "I":
         key, _, badge = arg.partition("|")
@@ -813,8 +813,11 @@ def content(i, kind, arg, lines):
                 f'<div class="pmark">{picto(mark, 252)}</div>'
                 f'<div class="hl {size}" style="margin-top:34px">{esc(words)}</div></div>')
     if kind == "T":
+        swap = isinstance(arg, dict)
+        if swap:
+            arg = arg["parts"]
         parts = arg if isinstance(arg, list) else [p for p in arg.split("|") if p.strip()]
-        return F2.typo(parts)
+        return F2.typo(parts, swap=swap)
     if kind == "K":
         who, _, txt = arg.partition("|")
         cls = {"m": "m", "w": "w"}.get(who, "n")
@@ -886,6 +889,7 @@ def main():
                 f'data-duration="{d:.2f}" data-track-index="1"><div class="fgm">{body}</div></div>')
         sc.append({"i": gi, "t": round(t0, 2), "d": round(d, 2), "k": kind,
                    "has": bool(body), "b": beats,
+                   "zoom": kind == "B" and not garg.get("title") and not garg.get("tags"),
                    "fx": ("coaster" if isinstance(garg, str) and "coaster" in garg else "")})
         # sound design cues, kept sparse: a soft whoosh on chapter / key type,
         # a tiny click per chat bubble

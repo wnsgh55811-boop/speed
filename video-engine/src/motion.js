@@ -21,9 +21,9 @@ function lenOf(el) {
 SC.forEach(function (s) {
   var id = "#bgm" + String(s.i).padStart(3, "0");
   if (!document.querySelector(id)) return;
-  var dir = (s.i % 2) ? 1 : -1;
-  full.fromTo(id, { scale: 1.0, xPercent: 0 },
-    { scale: 1.05, xPercent: dir * 1.1, duration: Math.max(1, s.d), ease: "sine.inOut" }, s.t);
+  // slow push-in only on a full-bleed photo carrying nothing but captions
+  if (!s.zoom) return;
+  full.fromTo(id, { scale: 1.0 }, { scale: 1.04, duration: Math.max(1, s.d), ease: "sine.inOut" }, s.t);
 });
 
 SC.forEach(function (s) {
@@ -34,8 +34,7 @@ SC.forEach(function (s) {
   var root = document.querySelector(f);
 
   // micro-motion on the whole content layer: slow push + tiny drift
-  full.fromTo(f + " .fgm", { scale: 1.0, y: 6 },
-    { scale: 1.028, y: -8, duration: Math.max(1, s.d), ease: "sine.inOut" }, s.t);
+
 
   // entrances by kind
   if (s.k === "T") {
@@ -112,6 +111,11 @@ SC.forEach(function (s) {
       isSvg ? { opacity: 1, duration: 0.4, ease: "power2.out" }
             : { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, at);
   });
+  root.querySelectorAll(".swap > .tline").forEach(function (el, n, all) {
+    if (n + 1 < all.length)
+      full.to(el, { opacity: 0, y: -26, duration: 0.3, ease: "power2.in" },
+        beatAt(s, all[n + 1].getAttribute("data-b")) - 0.05);
+  });
   root.querySelectorAll("[data-bo]").forEach(function (el) {
     full.to(el, { opacity: 0, duration: 0.3, ease: "power1.in" }, beatAt(s, el.getAttribute("data-bo")));
   });
@@ -123,7 +127,7 @@ SC.forEach(function (s) {
     var at = beatAt(s, el.getAttribute("data-bs"));
     full.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.out" }, at);
     var host = el.closest(".tline, .row, .msg");
-    if (host) full.to(host, { opacity: 0.5, duration: 0.3 }, at + 0.1);
+    if (host && !host.closest(".swap")) full.to(host, { opacity: 0.5, duration: 0.3 }, at + 0.1);
   });
   root.querySelectorAll("[data-bd]").forEach(function (el) {
     var L = lenOf(el);

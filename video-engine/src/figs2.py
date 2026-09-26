@@ -54,10 +54,11 @@ def thread(msgs, title="", tag=None, tagcls=""):
 
 
 # ── typography with beats and strikes ─────────────────────────────────────
-def typo(parts, size=None):
+def typo(parts, size=None, swap=False):
     """parts: '@k' prefix = beat, '~' prefix = dim + strike on next beat,
     '^' prefix = amber accent, '*' = small kicker line."""
-    h = ['<div class="stage"><div class="scrim wide"></div>']
+    h = ['<div class="stage"><div class="scrim wide"></div>'
+         + ('<div class="swap">' if swap else '')]
     for p in parts:
         b = 0
         if p.startswith("@"):
@@ -67,20 +68,20 @@ def typo(parts, size=None):
         if p.startswith("~"):
             p = p[1:]
             cls += " dimmed"
-            strike = f'<i class="strk" data-bs="{b + 1}"></i>'
+            strike = f'<i class="strk" data-bs="{(str(b) + "+0.7") if swap else b + 1}"></i>'
         if p.startswith("^"):
             p, cls = p[1:], cls + " accent"
         if p.startswith("*"):
             p, cls = p[1:], "kick"
         h.append(f'<div class="{cls} tline"{B(b)}><span class="tw">{esc(p)}{strike}</span></div>')
-    h.append("</div>")
+    h.append("</div></div>" if swap else "</div>")
     return "".join(h)
 
 
-def tags_html(tags):
-    """Thought chips floating over a photo or a cutout."""
+def tags_html(tags, where=None):
+    """Thought chips floating over a photo or a cutout (where: fixed spot)."""
     pos = ["t1", "t2", "t3", "t4"]
-    return "".join(f'<div class="ftag {pos[i % 4]}"{B(b)}>{esc(t)}</div>'
+    return "".join(f'<div class="ftag {where or pos[i % 4]}"{B(b)}>{esc(t)}</div>'
                    for i, (b, t) in enumerate(tags))
 
 
@@ -273,8 +274,9 @@ def interview():
     h = ['<div class="stage"><div class="scrim wide"></div><div class="iv">',
          '<div class="iv-head"><span>나</span><span>상대</span></div>']
     for b in (0, 1, 2):
-        h.append(f'<div class="iv-row"{B(b)}><span class="q">질문 ?</span>'
-                 '<i class="iv-ar">&rarr;</i><span class="a">대답</span></div>')
+        h.append(f'<div class="iv-row"><span class="q"{B(b)}>질문 ?</span>'
+                 f'<i class="iv-ar" data-b="{b}+0.45">&rarr;</i>'
+                 f'<span class="a" data-b="{b}+0.6">대답</span></div>')
     h.append('<div class="stamp" data-b="4">인터뷰</div></div></div>')
     return "".join(h)
 
