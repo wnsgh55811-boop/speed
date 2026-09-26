@@ -39,7 +39,7 @@ ASSETS = {
     "i_bell":     H + "47_3c744381-eadb-42f3-a3bf-8633813766bb.png",
     "i_scale":    H + "47_dd57c68b-f341-4ac5-9e5f-0f5195360b76.png",
 }
-LIFT = ("ph_insta",)
+LIFT = ("ph_insta", "ph_night", "ph_cafe", "il_hyena", "il_lion", "br_phone_1")
 
 
 def _p(name):
