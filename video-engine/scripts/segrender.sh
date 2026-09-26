@@ -19,4 +19,5 @@ npx hyperframes render . -o /home/user/$SEG_NAME.mp4 -q delivery -f 30 -w ${WORK
 ffprobe -v error -show_entries format=duration -of csv=p=0 /home/user/$SEG_NAME.mp4
 [ -n "$PUT_URL" ] && curl -f -X PUT -H "Content-Type: video/mp4" --upload-file /home/user/$SEG_NAME.mp4 "$PUT_URL" \
   -o /dev/null -w "UPLOAD %{http_code}\n"
+python3 scripts/segqa.py /home/user/$SEG_NAME.mp4 $SEG_FROM > /home/user/qa_$SEG_NAME.txt
 echo SEGDONE
