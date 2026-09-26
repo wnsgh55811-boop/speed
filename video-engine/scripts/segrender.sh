@@ -8,6 +8,9 @@ cd "$(dirname "$0")/.."
 export PATH=/home/user/node-v22.11.0-linux-x64/bin:$PATH
 PROJECT=${PROJECT:-examples/katalk} python3 src/emit.py --from $SEG_FROM --to $SEG_TO --out index.html || exit 11
 export HF_SEGMENTED_CAPTURE=true
+# the sandbox runner exits its wrapper shell once the job is detached; without
+# this the CLI treats that as the parent dying and cancels the render
+export HYPERFRAMES_RENDER_DETACHED=1
 npx hyperframes render . -o /home/user/$SEG_NAME.mp4 -q delivery -f 30 -w ${WORKERS:-6} \
   --resolution 1080p --no-browser-gpu --best-effort --browser-timeout 180 \
   --protocol-timeout 900000 --quiet || exit 16
