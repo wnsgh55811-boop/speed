@@ -1,5 +1,11 @@
 # 카톡이 어려워지는 진짜 이유 — 결과물
 
+## rev2 (피드백 반영)
+- MASTER https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/8561455f-6fe8-4061-a039-899150abdad4.mp4
+- LIGHT https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/2c71d34e-a1a5-4671-a134-00a618f2a078.mp4
+
+## rev1
+
 - MASTER (1920×1080 · 30fps · H.264 CRF15 · AAC 320k · 356 MB)
   https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/0bc48392-dcf1-45bf-91ec-6a6fb7d1f454.mp4
 - LIGHT (1920×1080 · 1.86 Mbps · AAC 160k · 98 MB · faststart)
