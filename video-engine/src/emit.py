@@ -687,10 +687,24 @@ GRAPHICS = {
 
 
 # ── scene builders ──────────────────────────────────────────────────────────
+LOCAL = os.environ.get("LOCAL_ASSETS") == "1"
+MANIFEST = {}
+
+
 def src(key):
-    """Asset URL. Keyed figures carry a whole URL; the originals are CDN names."""
+    """Asset URL. Keyed figures carry a whole URL; the originals are CDN names.
+
+    With LOCAL_ASSETS=1 the page points at assets/img/ instead and the URL is
+    recorded for scripts/fetch_assets.py: remote multi-MB stills were not
+    always decoded by the time a frame was captured, which left empty plates.
+    """
     v = IMG[key]
-    return v if v.startswith("http") else CDN + v
+    url = v if v.startswith("http") else CDN + v
+    if not LOCAL:
+        return url
+    name = key + os.path.splitext(url)[1]
+    MANIFEST["assets/img/" + name] = url
+    return "assets/img/" + name
 
 
 _ROT = {}
@@ -968,6 +982,8 @@ var WIN = [{t_from:.3f}, {t_to:.3f}];
 """
     open(out, "w", encoding="utf-8").write(doc)
     json.dump(sfx, open(os.path.join(PROJECT, "sfx.json"), "w"))
+    if LOCAL:
+        json.dump(MANIFEST, open(os.path.join(HERE, "..", "assets_manifest.json"), "w"), indent=0)
     print(f"wrote {out}")
     print(f"  window {t_from:.1f}-{t_to:.1f}s · groups {len(groups)} · caption cards {len(cap_t)}")
     from collections import Counter

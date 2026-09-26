@@ -6,7 +6,9 @@
 set -x
 cd "$(dirname "$0")/.."
 export PATH=/home/user/node-v22.11.0-linux-x64/bin:$PATH
+export LOCAL_ASSETS=1
 PROJECT=${PROJECT:-examples/katalk} python3 src/emit.py --from $SEG_FROM --to $SEG_TO --out index.html || exit 11
+python3 scripts/fetch_assets.py assets_manifest.json > /dev/null || exit 12
 export HF_SEGMENTED_CAPTURE=true
 # the sandbox runner exits its wrapper shell once the job is detached; without
 # this the CLI treats that as the parent dying and cancels the render
