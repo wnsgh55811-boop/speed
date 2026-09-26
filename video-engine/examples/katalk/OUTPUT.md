@@ -1,5 +1,9 @@
 # 카톡이 어려워지는 진짜 이유 — 결과물
 
+## rev4
+- MASTER https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/e2eecfe4-cbe7-45c7-be00-3661fe71744b.mp4
+- LIGHT https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/41dda14b-b3bd-4851-85b5-71a3a8980b63.mp4
+
 ## rev3
 - MASTER https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/9a1f3daf-8987-4172-8910-cb3e9f44fb3e.mp4
 - LIGHT https://d2ol7oe51mr4n9.cloudfront.net/user_36TmLGicluGODkcYejmrwLWoKV7/f803295c-3e64-43ba-aec2-db349737ab84.mp4
