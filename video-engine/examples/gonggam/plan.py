@@ -34,3 +34,8 @@ for raw in io.open(os.path.join(HERE, "script.txt"), encoding="utf-8"):
 
 assert all(k in "+=TPKNGHBCI" and len(k) == 1 for k, _ in PLAN), \
     [k for k, _ in PLAN if k not in "+=TPKNGHBCI"]
+
+# reference layout: illustration cards on a gray grid, red chapter cards
+STYLE = "card"
+import json as _json
+ASSETS = _json.load(open(os.path.join(HERE, "assets.json"), encoding="utf-8"))

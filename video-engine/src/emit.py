@@ -1023,6 +1023,9 @@ def background(i, kind, arg, section):
         key = pick(arg, i)
         return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt="">'
                             f'<div class="tint"></div>')
+    if CARD_MODE:
+        # the reference keeps one quiet gray grid plate; chapters cut to red
+        return ("bg-red" if kind == "H" else "bg-ref"), ""
     fam = FAMILIES[(section * 3 + i // 2) % len(FAMILIES)]
     # never three alike in a row
     if i >= 2 and fam == background.prev[-1] == background.prev[-2]:
@@ -1034,8 +1037,43 @@ def background(i, kind, arg, section):
 background.prev = ["", ""]
 
 
+CARD_MODE = getattr(_plan, "STYLE", "") == "card"
+ASSETS = getattr(_plan, "ASSETS", {})
+CHAPTER_MARK = {"01": "heart", "02": "chat", "03": "anchor", "04": "radar",
+                "05": "target", "06": "list", "n1": "nod", "n2": "bulb", "n3": "give"}
+
+
+def card(sid, key, cap="", bubble="", who="", crossed=False):
+    """Illustration in a white frame, optional headline above, optional speech
+    bubble pinned to the speaker's side of the frame — the reference layout."""
+    h = ['<div class="cardstage">']
+    if cap:
+        h.append(f'<div class="cap-top">{esc(cap)}</div>')
+    h.append(f'<div class="card"><img id="{sid}-im" class="card-img" src="{ASSETS[key]}" alt="">')
+    if bubble:
+        side = "r" if who == "m" else "l"
+        strike = ('<svg class="strike" viewBox="0 0 100 100">'
+                  '<line x1="10" y1="10" x2="90" y2="90"/><line x1="10" y1="90" x2="90" y2="10"/>'
+                  '</svg>') if crossed else ""
+        h.append(f'<div class="sbub {side}" data-layout-allow-overflow>{esc(bubble)}{strike}</div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
 def content(i, kind, arg, line):
     sid = f"fg{i:03d}"
+    if CARD_MODE and kind == "I":
+        key, _, cap = arg.partition("|")
+        return card(sid, key, cap=cap)
+    if CARD_MODE and kind == "K" and ":" in arg:
+        who, _, key = arg.partition(":")
+        said = line.strip().strip('"\u201c\u201d')
+        return card(sid, key, bubble=said, who=who[0], crossed=who.endswith("x"))
+    if CARD_MODE and kind == "H":
+        num, _, word = arg.partition("|")
+        mark = CHAPTER_MARK.get(num, "point")
+        return (f'<div class="stage"><div class="chap-tile">{picto(mark, 150)}</div>'
+                f'<div class="chap-word">{esc(word)}</div></div>')
     if kind == "B":
         return ""
     if kind == "C":
@@ -1209,8 +1247,36 @@ def main():
                 f'data-duration="{cd:.2f}" data-track-index="2">'
                 f'<div class="cap-wrap"><div class="cap-scrim" data-layout-allow-overflow></div>'
                 f'<div class="cap">{esc(c)}</div></div></div>')
-            cap_t.append(round(cs, 2))
+            cap_t.append([round(cs, 2), cap_n])
             cap_n += 1
+
+    # WINDOW=a,b renders one slice of the film (a and b should be scene starts,
+    # so no scene straddles a seam). Clips and tweens shift by -a.
+    if os.environ.get("WINDOW"):
+        import re as _re
+        a, b = (float(x) for x in os.environ["WINDOW"].split(","))
+        b = min(b, total)
+
+        def _cut(items):
+            out = []
+            for h in items:
+                st = float(_re.search(r'data-start="([\d.]+)"', h).group(1))
+                if a - 0.001 <= st < b - 0.001:
+                    d = float(_re.search(r'data-duration="([\d.]+)"', h).group(1))
+                    d = min(d, b - st)
+                    h = _re.sub(r'data-start="[\d.]+"', f'data-start="{st-a:.2f}"', h, 1)
+                    h = _re.sub(r'data-duration="[\d.]+"', f'data-duration="{d:.2f}"', h, 1)
+                    out.append(h)
+            return out
+        bg_html, fg_html, cap_html = _cut(bg_html), _cut(fg_html), _cut(cap_html)
+        keep = [x for x in anim if a - 0.001 <= x["t"] < b - 0.001]
+        for x in keep:
+            x["t"] = round(x["t"] - a, 2)
+            x["q"] = [round(q - a, 2) for q in x["q"]]
+        anim = keep
+        cap_t = [[round(c - a, 2), n] for c, n in cap_t if a - 0.001 <= c < b - 0.001]
+        total = b - a
+        audio = None
 
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
     wm = getattr(_plan, "WATERMARK", "이다사")
@@ -1263,6 +1329,24 @@ SC.forEach(function (s) {{
   if (!s.has) return;
   var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
   var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
+  if (document.querySelector(f + " .card")) {{
+    T(f + " .card", {{ scale: 0.94, opacity: 0, yPercent: 3 }},
+              {{ scale: 1, opacity: 1, yPercent: 0, duration: 0.45, ease: "power3.out" }}, t);
+    T(f + " .card-img", {{ scale: 1.0 }},
+              {{ scale: 1.06, duration: Math.max(1, s.d), ease: "none" }}, t);
+    T(f + " .cap-top", {{ yPercent: -40, opacity: 0 }},
+              {{ yPercent: 0, opacity: 1, duration: 0.4, ease: "power3.out" }}, t + 0.12);
+    T(f + " .sbub", {{ scale: 0.6, opacity: 0 }},
+              {{ scale: 1, opacity: 1, duration: 0.42, ease: "back.out(1.9)" }}, t + 0.22);
+    return;
+  }}
+  if (document.querySelector(f + " .chap-tile")) {{
+    T(f + " .chap-tile", {{ scale: 0.5, opacity: 0, rotation: -8 }},
+              {{ scale: 1, opacity: 1, rotation: 0, duration: 0.55, ease: "back.out(1.8)" }}, t);
+    T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
+              {{ yPercent: 0, opacity: 1, duration: 0.5, ease: "power3.out" }}, t + 0.2);
+    return;
+  }}
   if (s.k === "T") {{
     T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out",
@@ -1352,8 +1436,8 @@ SC.forEach(function (s) {{
 }});
 
 // captions: one line, fading up at each card's own start
-CAPT.forEach(function (ct, c) {{
-  var cid = "#cap" + String(c).padStart(3, "0") + " .cap";
+CAPT.forEach(function (cn) {{
+  var ct = cn[0], cid = "#cap" + String(cn[1]).padStart(3, "0") + " .cap";
   tl.fromTo(cid, {{ opacity: 0, yPercent: 26 }},
             {{ opacity: 1, yPercent: 0, duration: 0.22, ease: "power2.out" }}, ct);
 }});
