@@ -174,6 +174,23 @@ SC.forEach(function (s) {
     full.to(el, { borderColor: "rgba(216,179,104,.95)", boxShadow: "0 0 40px rgba(216,179,104,.35)",
       duration: 0.5 }, beatAt(s, el.getAttribute("data-warn")));
   });
+  // a shape riding a path: progress is tweened and the position is read off
+  // the path on every render, so seeking to any frame lands it exactly
+  root.querySelectorAll("[data-ride]").forEach(function (el) {
+    var path = root.querySelector(el.getAttribute("data-ride"));
+    if (!path) return;
+    var L = path.getTotalLength(), st = { p: 0 };
+    var place = function () {
+      var a = path.getPointAtLength(st.p * L), b = path.getPointAtLength(Math.min(L, st.p * L + 2));
+      var ang = Math.atan2(b.y - a.y, b.x - a.x) * 57.3;
+      el.setAttribute("transform", "translate(" + a.x + "," + (a.y - 40) + ") rotate(" + (ang * 0.35) + ") scale(1.8)");
+    };
+    place();
+    var at = beatAt(s, el.getAttribute("data-ride-at") || 0);
+    full.fromTo(st, { p: 0 }, { p: 1, duration: Math.max(1.5, s.t + s.d - at - 0.3), ease: "sine.inOut",
+      onUpdate: place, immediateRender: false }, at);
+    full.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3 }, at - 0.3);
+  });
   root.querySelectorAll(".fs-her").forEach(function (el) {
     full.to(el, { flexGrow: 0.0001, width: 0, padding: 0, borderWidth: 0, marginLeft: -14, duration: 0.8,
       ease: "power2.inOut" }, beatAt(s, 6));

@@ -358,10 +358,12 @@ def fillspace():
 def drag():
     return ('<div class="diag"><div class="scrim wide"></div>'
             '<svg width="1500" height="560" viewBox="0 0 1500 560">'
+            # me, rope and the dragged relation travel as one piece so the rope
+            # can never come unhooked from either end
             '<g class="dragger"><circle cx="330" cy="290" r="70" class="ring"/>'
-            '<text class="dlabel" x="330" y="306" text-anchor="middle">나</text></g>'
+            '<text class="dlabel" x="330" y="306" text-anchor="middle">나</text>'
             '<path class="edge-hot glow" data-bd="0" d="M400 290 C 640 250, 860 330, 1060 290"/>'
-            '<g class="dragged"><circle cx="1130" cy="290" r="70" class="ring warmring" opacity=".55"/>'
+            '<circle cx="1130" cy="290" r="70" class="ring warmring" opacity=".55"/>'
             '<text class="dlabel-dim" x="1130" y="306" text-anchor="middle">관계</text></g>'
             '<path class="edge-hot" data-b="1" d="M250 430 L90 430 M130 400 L85 430 L130 460"/>'
             '<text class="dlabel" data-b="2" x="750" y="140" text-anchor="middle">혼자 끌고 온 관계</text>'
@@ -397,3 +399,22 @@ def cta():
             '<div class="cta-s">카톡·소개팅·썸에서 반복되는 태도</div></div>'
             '<div class="cta-btn" data-b="1">설명란에서 확인하기 <span class="cta-ar">&darr;</span></div>'
             '</div>')
+
+
+def coaster():
+    """A heart riding the ups and downs of a track — 감정이 롤러코스터를 탑니다."""
+    d = ("M90 420 C 190 420, 230 150, 330 150 C 430 150, 450 470, 560 470 "
+         "C 660 470, 690 110, 800 110 C 910 110, 930 440, 1040 440 "
+         "C 1140 440, 1170 230, 1260 230 L 1360 230")
+    heart = ('<path d="M0 12 C -22 -6, -30 -24, -15 -34 C -6 -40, 0 -32, 0 -26 '
+             'C 0 -32, 6 -40, 15 -34 C 30 -24, 22 -6, 0 12 Z" fill="#E0A458" '
+             'stroke="#FFF3DF" stroke-width="3"/>')
+    return ('<div class="diag"><div class="scrim wide"></div>'
+            '<svg width="1450" height="600" viewBox="0 0 1450 600">'
+            '<path class="edge" d="M90 520 L1360 520" opacity=".35"/>'
+            f'<path id="cst" class="edge-hot glow" data-bd="0" d="{d}"/>'
+            f'<g class="rider" data-ride="#cst" data-ride-at="1">{heart}</g>'
+            '<text class="dlabel" data-b="0" x="90" y="80">말투 하나에</text>'
+            '<text class="dlabel warm" data-b="1" x="1360" y="80" text-anchor="end">감정이 오르락내리락</text>'
+            '<text class="dlabel-dim" data-b="2" x="725" y="580" text-anchor="middle">카톡이 재미있을 수가 없다</text>'
+            '</svg></div>')
