@@ -5,16 +5,24 @@
 
 Tracks: 0 backgrounds · 1 content · 2 captions · 3 watermark.
 """
+import html
 import json
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+# Project data (plan.py, chunks.json, timings.txt) lives in its own folder so
+# the engine in src/ stays shared between films: PROJECT=examples/<name>.
+PROJECT = os.path.abspath(os.environ.get("PROJECT", HERE))
+sys.path.insert(0, PROJECT)
 from build import (W, H, CDN, IMG, ALIAS, NEON_FIG, FAMILIES,   # noqa: E402
-                   esc, caption_cards, motes)
-from plan import PLAN                                            # noqa: E402
+                   esc, caption_cards, motes, text_w, font, CAP_MAX)
+import figs2 as F2                                               # noqa: E402
+import plan as P                                                 # noqa: E402
 
+IMG.update(getattr(P, "ASSETS", {}))
+ALIAS.update(getattr(P, "ALIASES", {}))
 OUT = os.path.join(HERE, "..", "index.html")
 
 
@@ -477,6 +485,17 @@ _PICTO = {
     "listen":   '<path d="M118 44a44 44 0 0 0-44 44v34a22 22 0 0 0 22 22"/>'
                 '<circle cx="74" cy="122" r="16"/>'
                 '<path d="M140 70q18 26 0 52" stroke="#D8B368"/>',
+    "office":   '<rect x="46" y="40" width="100" height="126" rx="8"/>'
+                '<path d="M70 68h14M108 68h14M70 96h14M108 96h14M70 124h14M108 124h14"/>'
+                '<path d="M84 166v-22h24v22"/>',
+    "friends":  '<circle cx="66" cy="70" r="20"/><circle cx="126" cy="70" r="20"/>'
+                '<path d="M30 150q0-40 36-40t36 40"/><path d="M90 150q0-40 36-40t36 40"/>'
+                '<path d="M84 34h24a8 8 0 0 1 8 8v10a8 8 0 0 1-8 8h-14l-8 8v-8h-2a8 8 0 0 1-8-8V42a8 8 0 0 1 8-8z" stroke="#D8B368"/>',
+    "calc":     '<rect x="48" y="30" width="96" height="132" rx="14"/><rect x="64" y="46" width="64" height="30" rx="5"/>'
+                '<circle cx="74" cy="100" r="5" fill="currentColor" stroke="none"/><circle cx="96" cy="100" r="5" fill="currentColor" stroke="none"/>'
+                '<circle cx="118" cy="100" r="5" fill="currentColor" stroke="none"/><circle cx="74" cy="124" r="5" fill="currentColor" stroke="none"/>'
+                '<circle cx="96" cy="124" r="5" fill="currentColor" stroke="none"/><circle cx="118" cy="124" r="5" fill="currentColor" stroke="none"/>'
+                '<path d="M68 146h56"/>',
     "mirror":   '<rect x="30" y="44" width="58" height="104" rx="10"/>'
                 '<rect x="104" y="44" width="58" height="104" rx="10" stroke="#D8B368"/>'
                 '<path d="M96 30v132" stroke-dasharray="10 12"/>',
@@ -489,6 +508,8 @@ def picto(name, size=200):
             'fill="none" stroke="currentColor" stroke-width="5.5" '
             f'stroke-linecap="round" stroke-linejoin="round">{_PICTO[name]}</svg>')
 
+
+F2.picto = picto
 
 # ── DOM graphic primitives ──────────────────────────────────────────────────
 def g_rows(title, items, muted=(), mark=None):
@@ -676,29 +697,36 @@ _ROT = {}
 
 
 def pick(alias, i):
-    """Round-robin over the alias pool.
-
-    `i % len(opts)` looked like rotation but the scene indices for a given
-    alias were near-uniformly congruent, so one variant carried almost every
-    use of it. A per-alias counter spreads them evenly instead — with the
-    widened pools that holds every still to at most two appearances.
-    """
+    """Round-robin over the alias pool (per-alias counter, see README)."""
+    if alias not in ALIAS:
+        return alias
     opts = ALIAS[alias]
     n = _ROT.get(alias, 0)
     _ROT[alias] = n + 1
     return opts[n % len(opts)]
 
 
-def background(i, kind, arg, section):
+LIFT = set(getattr(P, "LIFT", ()))     # stills shot too dark to sit as-is
+
+
+def background(i, kind, arg):
     """Return (css_class, inner_html). Photos own their own plate."""
-    if kind == "B":
-        key = pick(arg, i)
-        return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt="">'
-                            f'<div class="tint"></div>')
-    fam = FAMILIES[(section * 3 + i // 2) % len(FAMILIES)]
-    # never three alike in a row
-    if i >= 2 and fam == background.prev[-1] == background.prev[-2]:
-        fam = FAMILIES[(FAMILIES.index(fam) + 3) % len(FAMILIES)]
+    if kind == "H" and arg.count("|") == 2:
+        arg, kind = {"bg": arg.split("|")[2]}, "M"
+    if kind == "B" or (kind == "M" and isinstance(arg, dict) and arg.get("bg")):
+        key = pick(arg["img"] if kind == "B" else arg["bg"], i)
+        cls = "lift" if key in LIFT else ""
+        soft = " soft" if kind == "M" else ""
+        return "bg-photo" + soft, (f'<img id="ph{i:03d}" class="{cls}" src="{src(key)}" alt="">'
+                                   f'<div class="tint"></div>')
+    fam = FAMILIES[(i * 5 + i // 3) % len(FAMILIES)]
+    # never three alike in a row, never the same as the one just before
+    if fam == background.prev[-1] or fam == background.prev[-2]:
+        for k in range(1, len(FAMILIES)):
+            alt = FAMILIES[(FAMILIES.index(fam) + k) % len(FAMILIES)]
+            if alt != background.prev[-1] and alt != background.prev[-2]:
+                fam = alt
+                break
     inner = f'<div class="motes">{motes(i)}</div>' if fam == "bg-dust" else ""
     return fam, inner
 
@@ -706,15 +734,36 @@ def background(i, kind, arg, section):
 background.prev = ["", ""]
 
 
-def content(i, kind, arg, line):
+def shown_texts(kind, arg):
+    """Words a scene already puts on screen — their captions are dropped."""
+    out = []
+    if kind == "M":
+        out += [m[2] for m in arg["msgs"]]
+    if isinstance(arg, dict):
+        out += [t for _, t in arg.get("tags", [])]
+        out += arg.get("title", [])
+    if kind == "K":
+        out.append(arg.partition("|")[2])
+    return out
+
+
+def content(i, kind, arg, lines):
     sid = f"fg{i:03d}"
+    line = lines[0]
     if kind == "B":
-        return ""
+        h = []
+        if arg.get("title"):
+            h.append('<div class="ph-title">' + "".join(
+                f'<div class="hl lg"{F2.B(k)}>{esc(t)}</div>'
+                for k, t in enumerate(arg["title"])) + '</div>')
+        h.append(F2.tags_html(arg.get("tags", [])))
+        return "".join(h)
+    if kind == "M":
+        return F2.thread(arg["msgs"], arg.get("title", ""), arg.get("tag"), arg.get("tagcls", ""))
     if kind == "C":
-        who, _, _bg = arg.partition("@")
-        names = who.split("+")
-        # each figure gets its own column and centres inside it, so nothing
-        # depends on a transform the entrance tween will overwrite
+        if isinstance(arg, str):
+            arg = {"who": arg}
+        names = arg["who"].split("+")
         cols = ["left:0;right:0"] if len(names) == 1 else ["left:0;width:50%",
                                                           "left:50%;width:50%"]
         h = []
@@ -722,20 +771,24 @@ def content(i, kind, arg, line):
             key = pick(n, i)
             sc = 1.0 if len(names) == 1 else 0.82
             h.append(f'<div class="cut" style="{col}">'
-                     f'<img id="{sid}-c{len(h)}" class="shadowed" '
-                     f'src="{src(key)}" alt="" '
-                     f'style="height:{int(820*sc)}px"></div>')
+                     f'<img id="{sid}-c{len(h)}" class="shadowed" src="{src(key)}" alt="" '
+                     f'style="height:{int(760*sc)}px"></div>')
+        h.append(F2.tags_html(arg.get("tags", [])))
         return "".join(h)
     if kind == "I":
         key, _, badge = arg.partition("|")
         h = [f'<div class="stage"><div class="scrim tight"></div>'
-             f'<img id="{sid}-ic" class="icon3d" src="{src(pick(key, i))}" alt="" '
-             f'style="width:560px;height:auto;filter:drop-shadow(0 22px 40px rgba(0,0,0,.6))">']
+             f'<div class="icwrap"><img id="{sid}-ic" class="icon3d" src="{src(pick(key, i))}" alt=""></div>']
         if badge:
-            h.append(f'<div class="hl md" style="margin-top:26px">{esc(badge)}</div>')
+            h.append(f'<div class="hl md badge" data-b="0">{esc(badge)}</div>')
         h.append("</div>")
         return "".join(h)
     if kind == "N":
+        if callable(arg):
+            return arg()
+        fn = getattr(F2, arg, None)
+        if fn:
+            return fn()
         return (f'<div class="diag"><div class="scrim wide"></div>'
                 f'{FIGS[NEON_FIG[arg]]() if NEON_FIG[arg] != "qmarks" else fig_qmarks(i)}</div>')
     if kind == "P":
@@ -746,97 +799,144 @@ def content(i, kind, arg, line):
                 f'<div class="pmark">{picto(mark, 252)}</div>'
                 f'<div class="hl {size}" style="margin-top:34px">{esc(words)}</div></div>')
     if kind == "T":
-        txt = arg if arg else line
-        parts = [p for p in txt.split("|") if p.strip()]
-        size = "xl" if (len(parts) == 1 and len(parts[0]) <= 14) else "lg"
-        h = ['<div class="stage"><div class="scrim wide"></div>']
-        for p in parts:
-            h.append(f'<div class="hl {size}">{esc(p)}</div>')
-        h.append("</div>")
-        return "".join(h)
+        parts = arg if isinstance(arg, list) else [p for p in arg.split("|") if p.strip()]
+        return F2.typo(parts)
     if kind == "K":
-        crossed = arg.endswith("x")
-        who = arg[0]
-        side = "right" if who == "m" else "left"
-        tag = "남자" if who == "m" else ("여자" if who == "w" else "내담자")
-        strike = ('<svg class="strike" viewBox="0 0 100 100">'
-                  '<line x1="10" y1="10" x2="90" y2="90"/><line x1="10" y1="90" x2="90" y2="10"/>'
-                  '</svg>') if crossed else ""
-        return (f'<div class="bub-row {side}"><div class="bub {who}">'
-                f'<span class="who" data-layout-allow-overflow>{esc(tag)}</span>{esc(line)}{strike}</div></div>')
+        who, _, txt = arg.partition("|")
+        cls = {"m": "m", "w": "w"}.get(who, "n")
+        side = {"m": "right", "w": "left"}.get(who, "center")
+        return (f'<div class="bub-row {side}"><div class="bub {cls}" data-b="0">'
+                f'{esc(txt or line)}</div></div>')
     if kind == "H":
-        num, _, word = arg.partition("|")
-        label = num[1:] if num.startswith("n") else (num.lstrip("0") or num)
+        num, word = arg.split("|")[:2]
+        label = num.lstrip("0") or num
         return (f'<div class="stage"><div class="scrim"></div>'
                 f'<div class="pearl">{esc(label)}</div>'
                 f'<div class="chap-word">{esc(word)}</div></div>')
     if kind == "G":
+        if callable(arg):
+            return arg()
         fn = GRAPHICS.get(arg)
-        body = fn() if fn else ""
-        if arg in ("g_loop", "g_loop_full"):
-            return f'<div class="diag"><div class="scrim wide"></div>{body}</div>'
-        return body
+        return fn() if fn else ""
     return ""
+
+
+def load_timeline():
+    raw = open(os.path.join(PROJECT, "timings.txt"), encoding="utf-8").read()
+    total = float(raw.split("TOTAL ")[1].split()[0])
+    times = [tuple(float(x) for x in p.split(","))
+             for p in raw.split("TIMES ")[1].split()]
+    chunks = json.load(open(os.path.join(PROJECT, "chunks.json"), encoding="utf-8"))
+    lines = [l for c in chunks for l in c["lines"]]
+    assert len(lines) == len(times), (len(lines), len(times))
+    return total, times, lines
+
+
+def norm(s):
+    import re
+    return re.sub(r"[^0-9A-Za-z가-힣ㅋㅎ]", "", s)
 
 
 # ── main ────────────────────────────────────────────────────────────────────
 def main():
-    audio = None
-    if "--audio" in sys.argv:
-        audio = sys.argv[sys.argv.index("--audio") + 1]
+    arg = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+    audio = arg("--audio")
+    out = arg("--out", OUT)
+    total, times, lines = load_timeline()
+    t_from = float(arg("--from", 0))
+    t_to = min(total, float(arg("--to", total)))
 
-    raw = open(os.path.join(HERE, "timings.txt"), encoding="utf-8").read()
-    total = float(raw.split("TOTAL ")[1].split()[0])
-    times = [tuple(float(x) for x in p.split(","))
-             for p in raw.split("TIMES ")[1].split()]
-    lines = [l for c in json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))
-             for l in c["lines"]]
-    chunk_of = []
-    for si, c in enumerate(json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))):
-        chunk_of.extend([si] * len(c["lines"]))
-    assert len(lines) == len(times) == len(PLAN) == 251
-
-    bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
-    cap_n = 0
-    for i, ((kind, arg), (t0, t1), line) in enumerate(zip(PLAN, times, lines)):
-        d = max(0.4, t1 - t0)
-        fam, inner = background(i, kind, arg, chunk_of[i])
+    groups = P.GROUPS
+    starts = [g[0] for g in groups]
+    assert starts == sorted(starts) and starts[0] == 0, "groups must start at 0, ascending"
+    bg_html, fg_html, cap_html, sc, cap_t, sfx = [], [], [], [], [], []
+    for gi, (l0, kind, garg) in enumerate(groups):
+        l1 = (starts[gi + 1] - 1) if gi + 1 < len(groups) else len(lines) - 1
+        t0, t1 = times[l0][0], times[l1][1]
+        d = t1 - t0
+        beats = [round(times[k][0] - t0, 2) for k in range(l0, l1 + 1)]
+        glines = lines[l0:l1 + 1]
+        fam, inner = background(gi, kind, garg)
         background.prev.append(fam)
         bg_html.append(
-            f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
+            f'<div class="clip" id="bgc{gi:03d}" data-start="{t0:.2f}" '
             f'data-duration="{d:.2f}" data-track-index="0">'
-            f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
+            f'<div class="layer"><div class="bgmove {fam}" id="bgm{gi:03d}" data-layout-allow-overflow>{inner}</div>'
             f'<div class="grain"></div><div class="vig"></div></div></div>')
-
-        body = content(i, kind, arg, line)
+        body = content(gi, kind, garg, glines)
+        import re as _re
+        onscreen_all = norm(html.unescape(_re.sub(r"<[^>]+>", " ", body)))
         if body:
             fg_html.append(
-                f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
-                f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
-        anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
-                     "has": bool(body)})
+                f'<div class="clip" id="fg{gi:03d}" data-start="{t0:.2f}" '
+                f'data-duration="{d:.2f}" data-track-index="1"><div class="fgm">{body}</div></div>')
+        sc.append({"i": gi, "t": round(t0, 2), "d": round(d, 2), "k": kind,
+                   "has": bool(body), "b": beats,
+                   "fx": ("coaster" if isinstance(garg, str) and "coaster" in garg else "")})
+        # sound design cues, kept sparse: a soft whoosh on chapter / key type,
+        # a tiny click per chat bubble
+        if kind in ("H",) or (kind == "T" and gi > 0):
+            sfx.append((round(t0, 2), "whoosh"))
+        if kind == "M":
+            for m in garg["msgs"]:
+                if m[1] in ("me", "her"):
+                    sfx.append((round(t0 + beats[m[0]] + 0.08, 2), "click"))
 
-        # Review note: where the sentence is already set large across the middle
-        # of frame, repeating it along the bottom just stacks the same words on
-        # themselves. Those scenes carry no caption card.
-        if kind in ("T", "H", "P"):
+        # captions: one line each; dropped where the frame already carries the
+        # same words (typography, chapter cards, chat bubbles, thought chips)
+        if kind in ("T", "P"):
             continue
+        onscreen = {onscreen_all}
+        k = 0
+        while k < len(glines):
+            li = l0 + k
+            txt = lines[li]
+            if len(norm(txt)) >= 2 and norm(txt) in onscreen_all:
+                k += 1
+                continue
+            cs, ce = times[li]
+            # a blink-length line rides with the next one if both fit one line
+            if (ce - cs) < 0.6 and k + 1 < len(glines):
+                nxt = lines[li + 1]
+                joined = txt + " " + nxt
+                if norm(nxt) not in onscreen and text_w(joined, font(44)) <= CAP_MAX:
+                    txt, ce = joined, times[li + 1][1]
+                    k += 1
+            cards = caption_cards(txt)
+            per = (ce - cs) / len(cards)
+            for j, c in enumerate(cards):
+                a = cs + j * per
+                cap_html.append(
+                    f'<div class="clip" id="cap{len(cap_t):03d}" data-start="{a:.2f}" '
+                    f'data-duration="{per:.2f}" data-track-index="2">'
+                    f'<div class="cap-wrap"><div class="cap-scrim" data-layout-allow-overflow></div>'
+                    f'<div class="cap">{esc(c)}</div></div></div>')
+                cap_t.append(round(a, 2))
+            k += 1
 
-        cards = caption_cards(line)
-        per = d / len(cards)
-        for j, c in enumerate(cards):
-            cs, cd = t0 + j * per, per
-            cap_html.append(
-                f'<div class="clip" id="cap{cap_n:03d}" data-start="{cs:.2f}" '
-                f'data-duration="{cd:.2f}" data-track-index="2">'
-                f'<div class="cap-wrap"><div class="cap-scrim" data-layout-allow-overflow></div>'
-                f'<div class="cap">{esc(c)}</div></div></div>')
-            cap_t.append(round(cs, 2))
-            cap_n += 1
+    # optional window for segmented renders: clips are re-timed, and the
+    # master timeline is scrubbed through the matching slice of the full one
+    def window(htmls):
+        import re
+        outl = []
+        for h in htmls:
+            m = re.search(r'data-start="([\d.]+)" data-duration="([\d.]+)"', h)
+            s0, dd = float(m.group(1)), float(m.group(2))
+            s1 = s0 + dd
+            if s1 <= t_from or s0 >= t_to:
+                continue
+            ns, ne = max(s0, t_from) - t_from, min(s1, t_to) - t_from
+            outl.append(h.replace(m.group(0), f'data-start="{ns:.3f}" data-duration="{ne-ns:.3f}"', 1))
+        return outl
+    seg = (t_from, t_to) != (0, total)
+    if seg:
+        bg_html, fg_html, cap_html = window(bg_html), window(fg_html), window(cap_html)
+    dur = t_to - t_from
 
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    audio_tag = (f'\n  <audio id="vo" src="{audio}" data-start="0"></audio>' if audio else "")
-
+    audio_tag = (f'\n  <audio id="vo" src="{audio}" data-start="0" data-track-index="4"></audio>'
+                 if audio and not seg else "")
+    js = open(os.path.join(HERE, "motion.js"), encoding="utf-8").read()
     doc = f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -849,108 +949,29 @@ def main():
 </head>
 <body>
 <div id="root" data-composition-id="main" data-width="{W}" data-height="{H}"
-     data-start="0" data-duration="{total:.3f}">
+     data-start="0" data-duration="{dur:.3f}">
 {chr(10).join(bg_html)}
 {chr(10).join(fg_html)}
 {chr(10).join(cap_html)}
-  <div class="clip" id="wmclip" data-start="0" data-duration="{total:.3f}" data-track-index="3">
+  <div class="clip" id="wmclip" data-start="0" data-duration="{dur:.3f}" data-track-index="3">
     <div class="wm">이다사</div>
   </div>{audio_tag}
 </div>
 <script>
-var tl = gsap.timeline({{ paused: true }});
-
-// Tween only what exists — recipes are shared across scene kinds, and GSAP
-// logs a console warning for every selector that matches nothing.
-function T(sel, from, to, at) {{
-  if (!document.querySelector(sel)) return;
-  tl.fromTo(sel, from, to, at);
-}}
-var SC = {json.dumps(anim, separators=(",", ":"))};
+var SC = {json.dumps(sc, separators=(",", ":"))};
 var CAPT = {json.dumps(cap_t, separators=(",", ":"))};
-
-// plates drift so no frame is ever dead still
-SC.forEach(function (s) {{
-  var id = "#bgm" + String(s.i).padStart(3, "0");
-  var dir = (s.i % 2) ? 1 : -1;
-  var span = Math.min(s.d, 8);
-  tl.fromTo(id, {{ scale: 1.0, xPercent: 0 }},
-            {{ scale: 1.045, xPercent: dir * 0.9, duration: span,
-               ease: "sine.inOut" }}, s.t);
-}});
-
-// content entrances, one recipe per scene kind
-SC.forEach(function (s) {{
-  if (!s.has) return;
-  var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
-  var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
-  if (s.k === "T") {{
-    T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out",
-                 stagger: 0.09 }}, t);
-  }} else if (s.k === "K") {{
-    T(f + " .bub", {{ scale: 0.93, opacity: 0, yPercent: 10 }},
-              {{ scale: 1, opacity: 1, yPercent: 0, duration: dur,
-                 ease: "back.out(1.5)" }}, t);
-    T(f + " .who", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3,
-              ease: "power1.out" }}, t + 0.14);
-  }} else if (s.k === "H") {{
-    T(f + " .pearl", {{ scale: 0.3, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t);
-    T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }}, t + 0.18);
-  }} else if (s.k === "C") {{
-    T(f + " .cut", {{ yPercent: 8, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out",
-                 stagger: 0.12 }}, t);
-  }} else if (s.k === "I") {{
-    T(f + " .icon3d", {{ scale: 0.86, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: dur, ease: "back.out(1.3)" }}, t);
-    T(f + " .hl", {{ opacity: 0, yPercent: 30 }},
-              {{ opacity: 1, yPercent: 0, duration: 0.42, ease: "power2.out" }}, t + 0.2);
-    var fl = Math.max(0, Math.floor((s.d - dur - 0.2) / 1.6) - 1);
-    if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.2, duration: 0.8,
-                ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
-  }} else if (s.k === "N") {{
-    T(f + " svg", {{ scale: 0.94, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: dur, ease: "power2.out" }}, t);
-  }} else if (s.k === "G") {{
-    T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
-    T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk",
-              {{ yPercent: 36, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
-                 stagger: 0.08 }}, t + 0.14);
-    T(f + " .bar-fill", {{ scaleX: 0 }},
-              {{ scaleX: 1, duration: 0.7, ease: "expo.out", stagger: 0.1 }}, t + 0.26);
-    T(f + " svg", {{ opacity: 0, scale: 0.95 }},
-              {{ opacity: 1, scale: 1, duration: dur, ease: "power2.out" }}, t);
-    T(f + " .pmark", {{ opacity: 0, scale: 0.84 }},
-              {{ opacity: 1, scale: 1, duration: 0.52, ease: "back.out(1.6)" }}, t + 0.06);
-    T(f + " .hl, " + f + " .sub, " + f + " .gapline",
-              {{ opacity: 0, yPercent: 26 }},
-              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out",
-                 stagger: 0.08 }}, t + 0.1);
-  }}
-}});
-
-// captions: one line, fading up at each card's own start
-CAPT.forEach(function (ct, c) {{
-  var cid = "#cap" + String(c).padStart(3, "0") + " .cap";
-  tl.fromTo(cid, {{ opacity: 0, yPercent: 26 }},
-            {{ opacity: 1, yPercent: 0, duration: 0.22, ease: "power2.out" }}, ct);
-}});
-
-window.__timelines["main"] = tl;
+var WIN = [{t_from:.3f}, {t_to:.3f}];
+{js}
 </script>
 </body>
 </html>
 """
-    open(OUT, "w", encoding="utf-8").write(doc)
-    print(f"wrote {OUT}")
-    print(f"  duration {total:.2f}s · scenes {len(PLAN)} · caption cards {cap_n}")
+    open(out, "w", encoding="utf-8").write(doc)
+    json.dump(sfx, open(os.path.join(PROJECT, "sfx.json"), "w"))
+    print(f"wrote {out}")
+    print(f"  window {t_from:.1f}-{t_to:.1f}s · groups {len(groups)} · caption cards {len(cap_t)}")
     from collections import Counter
-    print("  bg families:", dict(Counter(background.prev[2:])))
+    print("  kinds:", dict(Counter(g[1] for g in groups)))
 
 
 if __name__ == "__main__":

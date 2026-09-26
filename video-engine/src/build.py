@@ -20,7 +20,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from plan import PLAN                                    # noqa: E402
+
 from PIL import ImageFont, ImageDraw, Image              # noqa: E402
 
 W, H, FPS = 1920, 1080, 30

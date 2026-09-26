@@ -4,3 +4,8 @@ renders/
 snapshots/
 assets/audio/
 index.html
+node_modules/
+assets/fonts/
+assets/img/
+vendor/
+preview/
