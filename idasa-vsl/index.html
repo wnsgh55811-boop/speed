@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이다사 12주 부트캠프 VSL</title>
+<style>
+@font-face{font-family:P;src:url(fonts/Pretendard-Regular.woff2) format("woff2");font-weight:400}
+@font-face{font-family:P;src:url(fonts/Pretendard-Medium.woff2) format("woff2");font-weight:500}
+@font-face{font-family:P;src:url(fonts/Pretendard-SemiBold.woff2) format("woff2");font-weight:600}
+@font-face{font-family:P;src:url(fonts/Pretendard-Bold.woff2) format("woff2");font-weight:700}
+@font-face{font-family:P;src:url(fonts/Pretendard-ExtraBold.woff2) format("woff2");font-weight:800}
+:root{--paper:#F6F4EE;--ink:#1A1A1A;--mint:#D7E8D5;--green:#1F5A43;--deep:#173F30}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:P,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;letter-spacing:-0.02em;word-break:keep-all}
+#stage{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;background:var(--paper)}
+.scene{position:absolute;inset:0;overflow:hidden;visibility:hidden;background:var(--paper)}
+.scene.green{background:var(--green)}
+.abs{position:absolute}
+.photo{position:absolute;background-size:cover;background-position:center;will-change:transform}
+.frame{position:absolute;overflow:hidden;border-radius:28px}
+.frame .photo{inset:-4%}
+.h1{font-weight:800;font-size:84px;line-height:1.14;letter-spacing:-0.035em}
+.h2{font-weight:800;font-size:64px;line-height:1.18;letter-spacing:-0.03em}
+.eyebrow{font-weight:700;font-size:28px;color:var(--green);letter-spacing:-0.01em}
+.card{position:absolute;border-radius:28px;background:var(--mint)}
+.card.line{background:var(--paper);border:3px solid var(--mint)}
+.card.strong{background:var(--green);color:var(--paper)}
+.pill{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:999px;font-weight:700;white-space:nowrap}
+.icon{position:absolute;background-size:contain;background-repeat:no-repeat;background-position:center}
+.ln{display:block;overflow:hidden;padding-bottom:.06em}
+.ln>span{display:inline-block}
+/* subtitles: bottom only, 70% black, white gothic */
+#sub{position:absolute;left:0;right:0;bottom:58px;display:flex;justify-content:center;z-index:50;pointer-events:none}
+#sub .box{background:rgba(0,0,0,.7);color:#fff;font-weight:600;font-size:46px;line-height:1.25;padding:14px 36px 16px;border-radius:12px;white-space:nowrap;letter-spacing:-0.01em}
+#grain{position:absolute;inset:0;z-index:60;pointer-events:none;opacity:.05;mix-blend-mode:multiply}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="grain" width="960" height="540"></canvas><div id="sub"><div class="box" id="subtext"></div></div></div>
+<script src="gsap.min.js"></script>
+<script src="scenes.js"></script>
+<script>
+// ---------------------------------------------------------------- helpers
+const W = 1920, H = 1080, FPS = 30;
+const stage = document.getElementById('stage');
+const A = (k) => k.startsWith('i') ? `assets/${k}.png` : `assets/${k}.jpg`;
+function el(parent, cls, css = {}, html = '') {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  Object.assign(d.style, css);
+  if (html) d.innerHTML = html;
+  parent.appendChild(d);
+  return d;
+}
+const px = (v) => (typeof v === 'number' ? v + 'px' : v);
+function box(parent, cls, x, y, w, h, css = {}, html = '') {
+  return el(parent, cls, { left: px(x), top: px(y), width: px(w), height: px(h), ...css }, html);
+}
+// text block whose lines slide up one by one
+function lines(parent, text, x, y, cls, css = {}) {
+  const d = el(parent, 'abs ' + cls, { left: px(x), top: px(y), ...css });
+  d.innerHTML = text.split('\n').map((t) => `<span class="ln"><span>${t}</span></span>`).join('');
+  return d;
+}
+function revealLines(tl, d, t, stagger = 0.09) {
+  tl.from(d.querySelectorAll('.ln>span'), { yPercent: 110, duration: 0.8, ease: 'power4.out', stagger }, t);
+}
+function pop(tl, target, t, extra = {}) {
+  tl.from(target, { autoAlpha: 0, y: 40, scale: 0.94, duration: 0.7, ease: 'power3.out', ...extra }, t);
+}
+function fadeUp(tl, target, t, extra = {}) {
+  tl.from(target, { autoAlpha: 0, y: 30, duration: 0.7, ease: 'power3.out', ...extra }, t);
+}
+function photo(parent, key, css = {}) {
+  return el(parent, 'photo', { backgroundImage: `url(${A(key)})`, inset: '0', ...css });
+}
+function frame(parent, key, x, y, w, h, radius = 28) {
+  const f = box(parent, 'frame', x, y, w, h, { borderRadius: px(radius) });
+  const p = photo(f, key);
+  return { f, p };
+}
+function kenburns(tl, p, t0, dur, from = 1.04, to = 1.13, xs = 0) {
+  tl.fromTo(p, { scale: from, xPercent: 0 }, { scale: to, xPercent: xs, duration: dur, ease: 'none' }, t0);
+}
+function float(tl, target, t0, dur, amp = 10, period = 2.6) {
+  const n = Math.max(1, Math.floor(dur / period));
+  tl.to(target, { y: '-=' + amp, duration: period / 2, ease: 'sine.inOut', yoyo: true, repeat: n * 2 - 1 }, t0);
+}
+function icon(parent, key, x, y, s) {
+  return box(parent, 'icon', x, y, s, s, { backgroundImage: `url(${A(key)})` });
+}
+function counter(tl, node, t, from, to, dur, fmt) {
+  const o = { v: from };
+  node.textContent = fmt(from);
+  tl.to(o, { v: to, duration: dur, ease: 'power2.out', onUpdate: () => (node.textContent = fmt(o.v)) }, t);
+}
+const comma = (v) => Math.round(v).toLocaleString('ko-KR');
+// green check / cross / ban marks drawn in SVG so they can animate
+const svgCheck = (c = '#1F5A43') => `<svg viewBox="0 0 48 48" width="100%" height="100%"><path d="M12 25 L21 34 L37 15" fill="none" stroke="${c}" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" class="draw"/></svg>`;
+const svgCross = (c = '#1F5A43') => `<svg viewBox="0 0 48 48" width="100%" height="100%"><path d="M14 14 L34 34 M34 14 L14 34" fill="none" stroke="${c}" stroke-width="5.5" stroke-linecap="round" pathLength="1" class="draw"/></svg>`;
+const svgBan = (c = '#1F5A43') => `<svg viewBox="0 0 48 48" width="100%" height="100%"><circle cx="24" cy="24" r="17" fill="none" stroke="${c}" stroke-width="4.5" pathLength="1" class="draw"/><path d="M12 12 L36 36" stroke="${c}" stroke-width="4.5" stroke-linecap="round" pathLength="1" class="draw"/></svg>`;
+function draw(tl, root, t, dur = 0.6) {
+  const ps = root.querySelectorAll('.draw');
+  ps.forEach((p) => { p.style.strokeDasharray = 1; p.style.strokeDashoffset = 1; });
+  tl.to(ps, { strokeDashoffset: 0, duration: dur, ease: 'power2.inOut', stagger: 0.15 }, t);
+}
+function gradient(parent, css) { return el(parent, 'abs', { inset: '0', ...css }); }
+
+// ---------------------------------------------------------------- timing
+// No narration yet: each caption gets a natural reading/narration length.
+function lineDur(s) {
+  const n = s.replace(/\s/g, '').length;
+  return Math.max(1.9, 0.75 + n * 0.165);
+}
+const GAP = 0.18;          // pause between captions
+const SCENE_PAD = 0.45;    // breathing room at scene edges
+let T = 0.4;
+const CAPS = [];
+SCENES.forEach((sc) => {
+  sc.t0 = T;
+  T += SCENE_PAD;
+  sc.L = sc.lines.map((s) => {
+    const st = T, d = lineDur(s);
+    CAPS.push({ s, st, en: st + d });
+    T += d + GAP;
+    return st;
+  });
+  T += SCENE_PAD;
+  sc.t1 = T;
+});
+const TOTAL = T + 0.6;
+const tl = gsap.timeline({ paused: true });
+const XF = 0.5; // crossfade
+
+// ---------------------------------------------------------------- scene builders
+const B = {};
+B.hookPhoto = (s, sc) => {
+  const p = photo(s, sc.img);
+  gradient(s, { background: 'linear-gradient(90deg,rgba(14,22,18,.82) 0%,rgba(14,22,18,.45) 55%,rgba(14,22,18,.15) 100%)' });
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.12, 1.02);
+  const t = lines(s, sc.title, 140, 330, 'h1', { color: 'var(--paper)', fontSize: '104px' });
+  revealLines(tl, t, sc.t0 + 0.3, 0.14);
+};
+B.photoTags = (s, sc) => {
+  const p = photo(s, sc.img);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.03, 1.12, -2);
+  gradient(s, { background: 'linear-gradient(270deg,rgba(14,22,18,.55) 0%,rgba(14,22,18,0) 55%)' });
+  sc.tags.forEach((tag, i) => {
+    const pl = box(s, 'pill', 1290, 300 + i * 120, 'auto', 84, { padding: '0 40px', background: i === 2 ? 'var(--green)' : 'var(--paper)', color: i === 2 ? 'var(--paper)' : 'var(--ink)', fontSize: '36px', gap: '18px' },
+      `<span style="width:14px;height:14px;border-radius:50%;background:${i === 2 ? 'var(--mint)' : 'var(--green)'}"></span>${tag}`);
+    pop(tl, pl, sc.L[Math.min(i + 1, sc.L.length - 1)] + 0.1, { x: 40, y: 0 });
+  });
+};
+B.search = (s, sc) => {
+  const p = photo(s, sc.img, { filter: 'blur(18px) brightness(.9)', inset: '-60px' });
+  gradient(s, { background: 'rgba(246,244,238,.82)' });
+  const bar = box(s, 'abs', 360, 330, 1200, 130, { background: 'var(--paper)', border: '4px solid var(--green)', borderRadius: '999px', boxShadow: '0 30px 80px rgba(23,63,48,.18)' });
+  icon(bar, 'i119', 40, 17, 88);
+  const q = el(bar, 'abs', { left: '150px', top: '0', height: '122px', display: 'flex', alignItems: 'center', fontSize: '52px', fontWeight: 700 });
+  const caret = el(bar, 'abs', { top: '36px', width: '4px', height: '54px', background: 'var(--green)' });
+  pop(tl, bar, sc.t0 + 0.1);
+  const type = (str, t, d) => {
+    const o = { n: 0 };
+    tl.to(o, { n: str.length, duration: d, ease: 'none', onUpdate: () => { q.textContent = str.slice(0, Math.round(o.n)); caret.style.left = (150 + q.offsetWidth + 8) + 'px'; } }, t);
+  };
+  type(sc.queries[0], sc.L[0] + 0.3, 0.9);
+  type(sc.queries[1], sc.L[1] + 0.2, 1.1);
+  tl.to(caret, { opacity: 0, duration: 0.01, yoyo: true, repeat: Math.floor((sc.t1 - sc.t0) / 0.5), repeatDelay: 0.5 }, sc.t0);
+  for (let i = 0; i < 4; i++) {
+    const r = box(s, 'abs', 420, 520 + i * 70, 1080 - i * 140, 30, { background: 'var(--mint)', borderRadius: '15px' });
+    fadeUp(tl, r, sc.L[1] + 1.2 + i * 0.12, { y: 20 });
+  }
+};
+B.promise = (s, sc) => {
+  s.classList.add('green');
+  const t = lines(s, sc.big, 140, 250, 'h1', { color: 'var(--paper)', fontSize: '128px' });
+  revealLines(tl, t, sc.L[0] + 0.2, 0.15);
+  const strike = box(s, 'abs', 140, 335, 0, 10, { background: 'var(--mint)', borderRadius: '5px' });
+  tl.to(strike, { width: 560, duration: 0.6, ease: 'power3.inOut' }, sc.L[1] + 0.6);
+  const chips = ['왜 흐지부지 끝나는지', '12주 동안 무엇을 바꾸는지'];
+  chips.forEach((c, i) => {
+    const pl = box(s, 'pill', 1080, 330 + i * 130, 'auto', 96, { padding: '0 46px', background: 'var(--mint)', color: 'var(--green)', fontSize: '40px' }, c);
+    pop(tl, pl, sc.L[2 + i] + 0.1, { x: 40, y: 0 });
+  });
+};
+B.counter = (s, sc) => {
+  const { f, p } = frame(s, sc.img, 960, 150, 820, 640, 32);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.02, 1.1);
+  pop(tl, f, sc.t0 + 0.2, { y: 60, scale: 1 });
+  const e = el(s, 'abs eyebrow', { left: '140px', top: '250px' }, '연애가 어려운 남성분들만');
+  fadeUp(tl, e, sc.L[0] + 0.2);
+  const n = box(s, 'abs', 130, 300, 800, 240, { fontSize: '210px', fontWeight: 800, color: 'var(--green)', letterSpacing: '-0.05em', display: 'flex', alignItems: 'baseline' });
+  const num = el(n, '', {}, '0');
+  el(n, '', { fontSize: '96px', marginLeft: '12px' }, sc.unit);
+  fadeUp(tl, n, sc.L[2] - 0.1);
+  counter(tl, num, sc.L[2], 0, sc.value, 2.2, comma);
+  const lab = el(s, 'abs', { left: '140px', top: '560px', fontSize: '44px', fontWeight: 700 }, sc.label);
+  fadeUp(tl, lab, sc.L[3]);
+};
+B.process = (s, sc) => {
+  const { f, p } = frame(s, sc.img, 120, 150, 860, 640, 32);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.1, 1.02);
+  pop(tl, f, sc.t0 + 0.1, { y: 60, scale: 1 });
+  const rail = box(s, 'abs', 1146, 260, 6, 0, { background: 'var(--mint)', borderRadius: '3px' });
+  tl.to(rail, { height: 360, duration: 1.6, ease: 'power2.inOut' }, sc.L[1]);
+  sc.steps.forEach(([ik, label], i) => {
+    const row = box(s, 'abs', 1080, 190 + i * 180, 740, 140);
+    const c = box(row, 'abs', 0, 0, 140, 140, { background: 'var(--mint)', borderRadius: '50%' });
+    icon(c, ik, 20, 20, 100);
+    el(row, 'abs', { left: '176px', top: '20px', fontSize: '24px', fontWeight: 700, color: 'var(--green)' }, `STEP 0${i + 1}`);
+    el(row, 'abs', { left: '176px', top: '58px', fontSize: '46px', fontWeight: 800 }, label);
+    pop(tl, row, sc.L[1] + i * 0.55, { x: 40, y: 0 });
+  });
+  const hl = box(s, 'pill', 1080, 760, 'auto', 84, { padding: '0 40px', background: 'var(--green)', color: 'var(--paper)', fontSize: '36px' }, '무너지는 순간을 정확히 압니다');
+  pop(tl, hl, sc.L[4] + 0.2, { y: 20 });
+};
+B.messages = (s, sc) => {
+  const h = lines(s, '지금도 도착하는\n변화의 메시지', 140, 330, 'h1');
+  revealLines(tl, h, sc.L[1]);
+  const hi = icon(s, 'i112', 130, 590, 170);
+  pop(tl, hi, sc.L[2], { scale: 0.6 });
+  float(tl, hi, sc.L[2], sc.t1 - sc.L[2], 12);
+  for (let i = 0; i < 5; i++) {
+    const card = box(s, 'abs', 1060, 130 + i * 140, 700, 116, { background: i % 2 ? 'var(--mint)' : 'var(--paper)', border: '3px solid var(--mint)', borderRadius: '26px' });
+    const av = box(card, 'abs', 26, 25, 62, 62, { background: 'var(--green)', borderRadius: '50%' });
+    el(card, 'abs', { left: '112px', top: '20px', fontSize: '24px', fontWeight: 700, color: 'var(--green)' }, '수강생');
+    box(card, 'abs', 112, 60, 420 - (i % 3) * 70, 18, { background: i % 2 ? 'var(--paper)' : 'var(--mint)', borderRadius: '9px' });
+    box(card, 'abs', 112, 86, 260 - (i % 2) * 60, 14, { background: i % 2 ? 'var(--paper)' : 'var(--mint)', borderRadius: '7px', opacity: 0.7 });
+    pop(tl, card, sc.L[0] + 0.3 + i * 0.45, { y: 60 });
+  }
+};
+B.trio = (s, sc) => {
+  const t = lines(s, sc.title, 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  sc.items.forEach(([ik, name, sub], i) => {
+    const x = 140 + i * 556;
+    const c = box(s, 'card', x, 300, 520, 480);
+    const ic = icon(c, ik, 150, 40, 220);
+    el(c, 'abs', { left: '0', right: '0', top: '286px', textAlign: 'center', fontSize: '54px', fontWeight: 800 }, name);
+    el(c, 'abs', { left: '0', right: '0', top: '372px', textAlign: 'center', fontSize: '30px', fontWeight: 600, color: 'var(--green)' }, sub);
+    pop(tl, c, sc.L[sc.beats[i]]);
+    float(tl, ic, sc.L[sc.beats[i]] + 0.6, sc.t1 - sc.L[sc.beats[i]], 10, 3);
+  });
+  const end = box(s, 'pill', 0, 0, 'auto', 84, { left: '50%', top: '815px', transform: 'translateX(-50%)', padding: '0 46px', background: 'var(--green)', color: 'var(--paper)', fontSize: '36px' }, '직접 해보고, 고치는 부트캠프');
+  pop(tl, end, sc.L[8], { y: 20 });
+};
+B.versus = (s, sc) => {
+  const t = lines(s, sc.title, 140, 110, 'h2');
+  revealLines(tl, t, sc.L[0] + 0.1);
+  const L = box(s, 'card line', 140, 380, 760, 400);
+  el(L, 'abs', { left: '60px', top: '60px', fontSize: '64px', fontWeight: 800 }, sc.left[0]);
+  const ls = el(L, 'abs', { left: '60px', top: '160px', fontSize: '32px', fontWeight: 600, color: 'var(--green)' }, sc.left[1]);
+  const words = ['“주말엔 뭐 하세요?”', '“저도요!”', '“취미가…”', '“혹시…”', '“재밌네요 ㅎㅎ”', '“그럼…”'];
+  const bubbles = words.map((w, i) => {
+    const b = box(L, 'pill', 60 + (i % 3) * 225, 240 + Math.floor(i / 3) * 74, 'auto', 56, { padding: '0 24px', background: 'var(--mint)', fontSize: '24px', fontWeight: 600 }, w);
+    pop(tl, b, sc.L[3] + i * 0.12, { y: 20 });
+    return b;
+  });
+  tl.to(bubbles, { autoAlpha: 0, y: 60, rotation: () => gsap.utils.random(-14, 14), duration: 0.9, ease: 'power2.in', stagger: 0.07 }, sc.L[4] + 0.4);
+  pop(tl, L, sc.L[1]);
+  fadeUp(tl, ls, sc.L[4] + 0.5);
+  const lt = el(s, 'abs', { left: '930px', top: '520px', fontSize: '80px', fontWeight: 800, color: 'var(--green)' }, '&lt;');
+  fadeUp(tl, lt, sc.L[5]);
+  const R = box(s, 'card strong', 1020, 380, 760, 400);
+  el(R, 'abs', { left: '60px', top: '60px', fontSize: '64px', fontWeight: 800 }, sc.right[0]);
+  el(R, 'abs', { left: '60px', top: '160px', fontSize: '32px', fontWeight: 600, color: 'var(--mint)' }, sc.right[1]);
+  const an = box(R, 'abs', 470, 150, 240, 240, { background: 'var(--paper)', borderRadius: '50%' });
+  icon(an, 'i108', 30, 30, 180);
+  pop(tl, R, sc.L[5]);
+  float(tl, an, sc.L[5] + 0.6, sc.t1 - sc.L[5], 8);
+};
+B.crossList = (s, sc) => {
+  const { f, p } = frame(s, sc.img, 120, 150, 700, 640, 32);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.02, 1.12);
+  pop(tl, f, sc.t0 + 0.1, { y: 60, scale: 1 });
+  const t = lines(s, sc.title, 920, 150, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  sc.items.forEach(([name, sub], i) => {
+    const row = box(s, 'card line', 920, 410 + i * 140, 880, 116);
+    const x = box(row, 'abs', 30, 24, 66, 66);
+    x.innerHTML = svgCross();
+    el(row, 'abs', { left: '124px', top: '30px', fontSize: '44px', fontWeight: 800 }, name);
+    el(row, 'abs', { right: '40px', top: '38px', fontSize: '30px', fontWeight: 600, color: 'var(--green)' }, sub);
+    pop(tl, row, sc.L[sc.beats[i]], { x: 40, y: 0 });
+    draw(tl, x, sc.L[sc.beats[i]] + 0.4);
+  });
+  const end = box(s, 'pill', 920, 830, 'auto', 80, { padding: '0 40px', background: 'var(--green)', color: 'var(--paper)', fontSize: '34px' }, '남는 건 단 하나, 무너지지 않는 <b style="color:var(--mint);margin-left:.3em">내 태도</b>');
+  pop(tl, end, sc.L[6] + 0.2, { y: 20 });
+};
+B.split = (s, sc) => {
+  const half = (side, i) => {
+    const [img, name, desc] = side;
+    const f = box(s, 'frame', i * 960, 0, 960, 1080, { borderRadius: '0' });
+    const p = photo(f, img);
+    kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.06, 1.16, i ? -3 : 3);
+    gradient(f, { background: 'linear-gradient(0deg,rgba(14,22,18,.85) 0%,rgba(14,22,18,.0) 60%)' });
+    const n = el(f, 'abs', { left: '90px', top: '560px', fontSize: '96px', fontWeight: 800, color: 'var(--paper)' }, name);
+    const d = el(f, 'abs', { left: '94px', top: '690px', fontSize: '40px', fontWeight: 600, color: 'var(--mint)' }, desc);
+    return { f, n, d };
+  };
+  const a = half(sc.left, 0), b = half(sc.right, 1);
+  tl.from(a.f, { xPercent: -100, duration: 1, ease: 'power4.out' }, sc.t0 + 0.1);
+  tl.from(b.f, { xPercent: 100, duration: 1, ease: 'power4.out' }, sc.t0 + 0.1);
+  fadeUp(tl, [a.n, a.d], sc.L[sc.beats[0]], { stagger: 0.12 });
+  fadeUp(tl, [b.n, b.d], sc.L[sc.beats[1]], { stagger: 0.12 });
+  tl.to(b.f, { filter: 'grayscale(1) brightness(.55)', duration: 0.6 }, sc.L[sc.beats[0]]);
+  tl.to(b.f, { filter: 'grayscale(0) brightness(1)', duration: 0.6 }, sc.L[sc.beats[1]]);
+  tl.to(a.f, { filter: 'grayscale(1) brightness(.55)', duration: 0.6 }, sc.L[sc.beats[1]]);
+  const mid = box(s, 'pill', 0, 150, 'auto', 100, { left: '50%', transform: 'translateX(-50%)', padding: '0 54px', background: 'var(--paper)', color: 'var(--ink)', fontSize: '42px' }, '만남은 <b style="color:var(--green);margin:0 .3em">심사받는 자리</b>가 아닙니다');
+  fadeUp(tl, mid, sc.L[6] + 0.2);
+};
+B.quad = (s, sc) => {
+  const t = lines(s, sc.title, 140, 110, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  sc.items.forEach(([name, quote], i) => {
+    const x = 140 + i * 418;
+    const c = box(s, 'card', x, 380, 390, 380);
+    el(c, 'abs', { left: '40px', top: '44px', fontSize: '46px', fontWeight: 800, color: 'var(--green)' }, name);
+    const bub = box(c, 'abs', 40, 150, 310, 'auto', { background: 'var(--paper)', borderRadius: '24px 24px 24px 6px', padding: '26px 28px', fontSize: '31px', fontWeight: 600, lineHeight: '1.3' }, quote);
+    pop(tl, c, sc.L[sc.beats[i]]);
+    pop(tl, bub, sc.L[sc.beats[i]] + 0.35, { y: 20 });
+  });
+  const tag = box(s, 'pill', 0, 0, 'auto', 84, { left: '50%', top: '800px', transform: 'translateX(-50%)', padding: '0 46px', background: 'var(--green)', color: 'var(--paper)', fontSize: '36px' }, '모두 점수를 따려는 <b style="color:var(--mint);margin-left:.3em">하이에나의 반응</b>');
+  fadeUp(tl, tag, sc.L[5]);
+};
+B.twelve = (s, sc) => {
+  const t = lines(s, sc.title, 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0] + 0.2);
+  sc.groups.forEach(([g, items], i) => {
+    const x = 140 + i * 556, strong = i === 2;
+    const c = box(s, strong ? 'card strong' : 'card line', x, 290, 520, 500);
+    el(c, 'abs', { left: '48px', top: '46px', fontSize: '44px', fontWeight: 800, color: strong ? 'var(--paper)' : 'var(--green)' }, g);
+    pop(tl, c, sc.L[sc.beats[i]]);
+    items.forEach((it, j) => {
+      const pl = box(c, 'pill', 48 + (j % 2) * 216, 160 + Math.floor(j / 2) * 128, 200, 100, { background: strong ? 'var(--deep)' : 'var(--mint)', color: strong ? 'var(--paper)' : 'var(--ink)', fontSize: '34px' }, it);
+      pop(tl, pl, sc.L[sc.beats[i]] + 0.5 + j * 0.28, { y: 20, scale: 0.8 });
+    });
+  });
+};
+B.roadmap = (s, sc) => {
+  const t = lines(s, sc.title, 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const names = ['진단', '나를 세운다', '흔들리지\n않는다', '끌려다니지\n않는다', '끌어당긴다', '연락·소개팅\n호감 표현', '연애 안에서\n나를 지킨다'];
+  const tags = ['90분', '1~2주', '3~4주', '5~6주', '7~8주', '9~10주', '11~12주'];
+  const x0 = 200, gap = 253, y = 470;
+  const track = box(s, 'abs', x0, y - 3, 0, 6, { background: 'var(--green)', borderRadius: '3px' });
+  tl.to(track, { width: gap * 6, duration: 2.6, ease: 'power2.inOut' }, sc.L[0] + 0.4);
+  names.forEach((n, i) => {
+    const cx = x0 + i * gap;
+    const dot = box(s, 'abs', cx - 30, y - 30, 60, 60, { borderRadius: '50%', background: i >= 5 ? 'var(--green)' : 'var(--mint)', border: '6px solid var(--paper)' });
+    const tg = el(s, 'abs', { left: px(cx - 100), width: '200px', top: px(y - 100), textAlign: 'center', fontSize: '28px', fontWeight: 700, color: 'var(--green)' }, tags[i]);
+    const nm = el(s, 'abs', { left: px(cx - 120), width: '240px', top: px(y + 58), textAlign: 'center', fontSize: '32px', fontWeight: 800, lineHeight: '1.25', whiteSpace: 'pre-line' }, n);
+    const at = sc.L[0] + 0.5 + i * 0.36;
+    pop(tl, dot, at, { scale: 0.2, y: 0 });
+    fadeUp(tl, [tg, nm], at + 0.1, { y: 16 });
+  });
+  const br = (i0, i1, label, t, strong) => {
+    const x = x0 + i0 * gap - 100, w = (i1 - i0) * gap + 200;
+    const b = box(s, 'pill', x, 720, w, 84, { background: strong ? 'var(--green)' : 'var(--mint)', color: strong ? 'var(--paper)' : 'var(--green)', fontSize: '36px' }, label);
+    pop(tl, b, t, { y: 30 });
+  };
+  br(1, 4, '태도를 만든다', sc.L[2], false);
+  br(5, 6, '실전에 쓴다', sc.L[3], true);
+};
+B.diagnosis = (s, sc) => {
+  const { f, p } = frame(s, sc.img, 960, 150, 840, 640, 32);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.03, 1.12);
+  pop(tl, f, sc.t0 + 0.1, { y: 60, scale: 1 });
+  const e = el(s, 'abs eyebrow', { left: '140px', top: '150px' }, '시작 전');
+  const h = lines(s, '진단 90분', 140, 190, 'h1');
+  fadeUp(tl, e, sc.L[0]);
+  revealLines(tl, h, sc.L[0] + 0.1);
+  const sw = icon(s, 'i111', 640, 150, 170);
+  pop(tl, sw, sc.L[0] + 0.4, { scale: 0.6 });
+  sc.steps.forEach(([ik, label], i) => {
+    const row = box(s, 'card', 140, 380 + i * 140, 740, 116);
+    icon(row, ik, 24, 8, 100);
+    el(row, 'abs', { left: '150px', top: '30px', fontSize: '42px', fontWeight: 800 }, label);
+    pop(tl, row, sc.L[sc.beats[i]], { x: -40, y: 0 });
+  });
+};
+B.phase = (s, sc) => {
+  // progress segments
+  for (let i = 0; i < 6; i++) {
+    const seg = box(s, 'abs', 140 + i * 278, 70, 262, 10, { borderRadius: '5px', background: i < sc.n ? 'var(--green)' : 'var(--mint)' });
+    if (i === sc.n - 1) tl.from(seg, { scaleX: 0, transformOrigin: 'left', duration: 0.8, ease: 'power3.out' }, sc.t0 + 0.2);
+  }
+  const big = el(s, 'abs', { left: '126px', top: '96px', fontSize: '210px', fontWeight: 800, color: 'var(--mint)', letterSpacing: '-0.06em', lineHeight: '1' }, String(sc.n).padStart(2, '0'));
+  fadeUp(tl, big, sc.t0 + 0.1, { x: -40, y: 0 });
+  const tag = box(s, 'pill', 140, 345, 'auto', 64, { padding: '0 32px', background: 'var(--green)', color: 'var(--paper)', fontSize: '30px' }, `${sc.n}단계 · ${sc.weeks}`);
+  pop(tl, tag, sc.L[0] + 0.1, { y: 20 });
+  const name = el(s, 'abs', { left: '140px', top: '432px', fontSize: sc.name.length > 9 ? '64px' : '80px', fontWeight: 800, letterSpacing: '-0.035em', whiteSpace: 'nowrap' }, sc.name);
+  fadeUp(tl, name, sc.L[0] + 0.25);
+  sc.rows.forEach(([k, v], i) => {
+    const row = box(s, 'card', 140, 560 + i * 104, 980, 88);
+    el(row, 'abs', { left: '34px', top: '24px', fontSize: '30px', fontWeight: 800, color: 'var(--green)' }, k);
+    el(row, 'abs', { left: '220px', top: '24px', fontSize: '32px', fontWeight: 600, whiteSpace: 'nowrap' }, v);
+    pop(tl, row, sc.L[sc.beats[i]], { x: -30, y: 0 });
+  });
+  const { f, p } = frame(s, sc.img, 1200, 150, 600, 640, 32);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.04, 1.14, sc.n % 2 ? -2 : 2);
+  pop(tl, f, sc.t0 + 0.2, { y: 60, scale: 1 });
+};
+B.loop = (s, sc) => {
+  const t = lines(s, sc.title, 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const xs = [140, 474, 808, 1142, 1476];
+  sc.items.forEach(([ik, label], i) => {
+    const last = i === 4;
+    const c = box(s, last ? 'card strong' : 'card', xs[i], 330, 304, 340);
+    const ic = box(c, 'abs', 62, 40, 180, 180, { background: last ? 'var(--paper)' : 'var(--paper)', borderRadius: '50%' });
+    icon(ic, ik, 20, 20, 140);
+    el(c, 'abs', { left: '0', right: '0', top: '250px', textAlign: 'center', fontSize: '38px', fontWeight: 800 }, label);
+    pop(tl, c, sc.L[sc.beats[i]] + (i === 1 ? 0.8 : 0) + 0.1);
+    if (i < 4) {
+      const ar = el(s, 'abs', { left: px(xs[i] + 304), top: '470px', width: '30px', textAlign: 'center', fontSize: '40px', fontWeight: 800, color: 'var(--green)' }, '›');
+      fadeUp(tl, ar, sc.L[sc.beats[i + 1]], { y: 0, x: -10 });
+    }
+  });
+  const back = box(s, 'abs', 290, 700, 1340, 70, { borderLeft: '5px solid var(--green)', borderRight: '5px solid var(--green)', borderBottom: '5px solid var(--green)', borderRadius: '0 0 40px 40px' });
+  tl.from(back, { clipPath: 'inset(0 0 0 100%)', duration: 1.2, ease: 'power2.inOut' }, sc.L[4] + 0.3);
+  const ch = box(s, 'pill', 0, 800, 'auto', 80, { left: '50%', transform: 'translateX(-50%)', padding: '0 44px', background: 'var(--mint)', color: 'var(--green)', fontSize: '36px' }, '주당 1~2시간');
+  pop(tl, ch, sc.L[5]);
+};
+B.timeline = (s, sc) => {
+  const t = lines(s, sc.title, 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const { f, p } = frame(s, sc.img, 1180, 90, 620, 360, 28);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.04, 1.14);
+  pop(tl, f, sc.t0 + 0.2);
+  const x0 = 220, gap = 296, y = 600;
+  const track = box(s, 'abs', x0, y - 3, 0, 6, { background: 'var(--mint)', borderRadius: '3px' });
+  tl.to(track, { width: gap * 5, duration: 2.4, ease: 'power2.inOut' }, sc.L[0] + 0.3);
+  sc.points.forEach(([w, label], i) => {
+    const cx = x0 + i * gap;
+    const dot = box(s, 'abs', cx - 22, y - 22, 44, 44, { borderRadius: '50%', background: i === 5 ? 'var(--green)' : 'var(--paper)', border: '6px solid var(--green)' });
+    const a = el(s, 'abs', { left: px(cx - 100), width: '200px', top: px(y - 96), textAlign: 'center', fontSize: '40px', fontWeight: 800, color: 'var(--green)' }, w);
+    const b = el(s, 'abs', { left: px(cx - 140), width: '280px', top: px(y + 46), textAlign: 'center', fontSize: '30px', fontWeight: 600 }, label);
+    const at = sc.L[0] + 0.4 + i * 0.4;
+    pop(tl, dot, at, { scale: 0.3, y: 0 });
+    fadeUp(tl, [a, b], at + 0.1, { y: 14 });
+  });
+  ['역할극', '피드백', '다시 해보기', '녹화본 제공'].forEach((c, i) => {
+    const pl = box(s, 'pill', 220 + i * 300, 770, 270, 76, { background: i === 3 ? 'var(--green)' : 'var(--mint)', color: i === 3 ? 'var(--paper)' : 'var(--ink)', fontSize: '32px' }, c);
+    pop(tl, pl, sc.L[Math.min(1 + Math.floor(i * 0.8), 3)] + (i % 2) * 0.4, { y: 20 });
+  });
+};
+B.compare = (s, sc) => {
+  const t = lines(s, sc.title, 140, 110, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  ['0주', '6주', '12주'].forEach((w, i) => {
+    const x = 140 + i * 556;
+    const { f, p } = frame(s, sc.img, x, 400, 520, 320, 24);
+    p.style.backgroundPosition = ['30% 50%', '35% 50%', '40% 50%'][i];
+    if (i < 2) p.style.filter = `saturate(${0.4 + i * 0.3}) brightness(${0.85 + i * 0.07})`;
+    gradient(f, { background: 'rgba(14,22,18,.25)' });
+    const pb = box(f, 'abs', 220, 120, 80, 80, { borderRadius: '50%', background: 'rgba(246,244,238,.92)' });
+    el(pb, 'abs', { left: '31px', top: '22px', width: '0', height: '0', borderTop: '18px solid transparent', borderBottom: '18px solid transparent', borderLeft: '28px solid var(--green)' });
+    const lb = el(s, 'abs', { left: px(x), width: '520px', top: '745px', textAlign: 'center', fontSize: '48px', fontWeight: 800, color: i === 2 ? 'var(--green)' : 'var(--ink)' }, w);
+    pop(tl, f, sc.L[1] + i * 0.45);
+    fadeUp(tl, lb, sc.L[1] + i * 0.45 + 0.2);
+  });
+  const ch = box(s, 'pill', 140, 290, 'auto', 70, { padding: '0 36px', background: 'var(--mint)', color: 'var(--green)', fontSize: '32px' }, '같은 질문 · 같은 조건 · 2분 자기소개');
+  pop(tl, ch, sc.L[2], { y: 20 });
+};
+B.three = (s, sc) => {
+  const f = box(s, 'frame', 0, 0, 900, 1080, { borderRadius: '0' });
+  const p = photo(f, sc.img);
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.04, 1.14, -2);
+  tl.from(f, { xPercent: -100, duration: 1, ease: 'power4.out' }, sc.t0);
+  const t = lines(s, sc.title, 1000, 140, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  sc.items.forEach((it, i) => {
+    const row = box(s, i === 2 ? 'card strong' : 'card', 1000, 400 + i * 150, 800, 124);
+    el(row, 'abs', { left: '40px', top: '30px', fontSize: '46px', fontWeight: 800, color: i === 2 ? 'var(--mint)' : 'var(--green)' }, '0' + (i + 1));
+    el(row, 'abs', { left: '140px', top: '32px', fontSize: '44px', fontWeight: 800 }, it);
+    pop(tl, row, sc.L[sc.beats[i]], { x: 40, y: 0 });
+  });
+};
+B.oneOnOne = (s, sc) => {
+  const t = lines(s, '무조건 1:1로만', 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const col = (side, x, strong, t0) => {
+    const c = box(s, strong ? 'card strong' : 'card line', x, 300, 790, 500);
+    el(c, 'abs', { left: '56px', top: '50px', fontSize: '60px', fontWeight: 800 }, side[0]);
+    side[1].forEach((it, i) => {
+      const r = box(c, 'abs', 56, 170 + i * 96, 680, 80);
+      const m = box(r, 'abs', 0, 8, 60, 60);
+      m.innerHTML = strong ? svgCheck('#D7E8D5') : svgCross();
+      el(r, 'abs', { left: '84px', top: '14px', fontSize: '38px', fontWeight: 700 }, it);
+      fadeUp(tl, r, t0 + 0.5 + i * 0.35, { x: -20, y: 0 });
+      draw(tl, m, t0 + 0.6 + i * 0.35, 0.4);
+    });
+    pop(tl, c, t0);
+  };
+  col(sc.left, 140, false, sc.L[sc.beats[0]]);
+  col(sc.right, 990, true, sc.L[sc.beats[1]]);
+};
+B.twoPhase = (s, sc) => {
+  const t = lines(s, '진짜 연애는\n12주 뒤에 시작됩니다', 140, 100, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const a = box(s, 'card strong', 140, 420, 640, 170);
+  el(a, 'abs', { left: '44px', top: '28px', fontSize: '28px', fontWeight: 700, color: 'var(--mint)' }, '1구간 · 12주');
+  el(a, 'abs', { left: '44px', top: '72px', fontSize: '54px', fontWeight: 800 }, '집중 부트캠프');
+  tl.from(a, { clipPath: 'inset(0 100% 0 0)', duration: 1, ease: 'power3.inOut' }, sc.L[1]);
+  const b = box(s, 'card', 800, 420, 980, 170);
+  el(b, 'abs', { left: '44px', top: '28px', fontSize: '28px', fontWeight: 700, color: 'var(--green)' }, '2구간 · 졸업 후');
+  el(b, 'abs', { left: '44px', top: '72px', fontSize: '54px', fontWeight: 800 }, '평생 회원');
+  const inf = icon(b, 'i114', 790, 15, 140);
+  tl.from(b, { clipPath: 'inset(0 100% 0 0)', duration: 1.2, ease: 'power3.inOut' }, sc.L[2]);
+  float(tl, inf, sc.L[2] + 1, sc.t1 - sc.L[2], 8);
+  const sit = box(s, 'abs', 800, 250, 980, 150, { display: 'flex', flexWrap: 'wrap', gap: '14px 16px', alignContent: 'flex-end' });
+  ['썸이 생겼을 때', '연애가 시작됐을 때', '다툴 때', '결혼을 고민할 때'].forEach((c, i) => {
+    const pl = el(sit, 'pill', { position: 'static', height: '64px', padding: '0 30px', background: 'var(--paper)', border: '3px solid var(--mint)', fontSize: '30px', color: 'var(--green)' }, c);
+    pop(tl, pl, sc.L[4 + Math.floor(i / 2)] + (i % 2) * 0.45, { y: 20 });
+  });
+  ['매달 사례 라이브', '게시판 주 1회 답변', '6개월 영상 점검', '1년 안 1:1 점검'].forEach((c, i) => {
+    const r = box(s, 'abs', 800 + (i % 2) * 490, 640 + Math.floor(i / 2) * 90, 470, 72, { display: 'flex', alignItems: 'center', gap: '18px', fontSize: '34px', fontWeight: 700 });
+    const m = el(r, '', { width: '50px', height: '50px', flex: '0 0 50px' });
+    m.innerHTML = svgCheck();
+    el(r, '', {}, c);
+    fadeUp(tl, r, sc.L[7 + Math.floor(i / 2)] + (i % 2) * 0.4, { y: 16 });
+    draw(tl, m, sc.L[7 + Math.floor(i / 2)] + (i % 2) * 0.4 + 0.2, 0.4);
+  });
+};
+B.price = (s, sc) => {
+  const t = lines(s, '두 가지 중 하나', 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const card = (x, name, val, strong, at) => {
+    const c = box(s, strong ? 'card strong' : 'card line', x, 300, 790, 470);
+    el(c, 'abs', { left: '60px', top: '56px', fontSize: '42px', fontWeight: 800 }, name);
+    if (strong) box(c, 'pill', 600, 50, 140, 62, { background: 'var(--mint)', color: 'var(--green)', fontSize: '28px' }, '추천');
+    const n = box(c, 'abs', 54, 150, 700, 190, { fontSize: '170px', fontWeight: 800, letterSpacing: '-0.05em', color: strong ? 'var(--paper)' : 'var(--green)', display: 'flex', alignItems: 'baseline' });
+    const num = el(n, '', {}, '0');
+    el(n, '', { fontSize: '74px', marginLeft: '10px' }, '만 원');
+    el(c, 'abs', { left: '60px', top: '370px', fontSize: '30px', fontWeight: 600, color: strong ? 'var(--mint)' : 'var(--green)' }, strong ? '12개월 할부 시 월 약 12.4만 원' : '12개월 할부 시 월 약 9.8만 원');
+    pop(tl, c, at);
+    counter(tl, num, at + 0.2, 0, val, 1.4, (v) => Math.round(v));
+  };
+  card(140, '12주 부트캠프', 117, false, sc.L[1]);
+  card(990, '부트캠프 + 평생 회원', 149, true, sc.L[2]);
+  const v = el(s, 'abs', { left: '140px', top: '800px', fontSize: '30px', fontWeight: 600 }, 'VAT 별도');
+  fadeUp(tl, v, sc.L[3]);
+};
+B.bars = (s, sc) => {
+  const t = lines(s, '1년 상담의 5분의 1', 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const f = box(s, 'pill', 140, 260, 'auto', 70, { padding: '0 34px', background: 'var(--mint)', color: 'var(--green)', fontSize: '32px' }, '회당 15만 원 × 월 4회 × 12개월');
+  pop(tl, f, sc.L[0] + 0.3, { y: 20 });
+  const row = (y, label, val, strong, at) => {
+    el(s, 'abs', { left: '140px', top: px(y + 40), fontSize: '36px', fontWeight: 700 }, label);
+    const w = (val / 720) * 900;
+    const bar = box(s, 'abs', 600, y, w, 150, { background: strong ? 'var(--green)' : 'var(--mint)', borderRadius: '22px' });
+    tl.from(bar, { width: 0, duration: 1.4, ease: 'power3.out' }, at);
+    const n = el(s, 'abs', { left: px(630 + w), top: px(y + 34), fontSize: '64px', fontWeight: 800, color: 'var(--green)', whiteSpace: 'nowrap' }, '0');
+    counter(tl, n, at, 0, val, 1.4, (v) => Math.round(v) + '만 원');
+    fadeUp(tl, n, at, { y: 10, duration: 0.3 });
+  };
+  row(400, '1년 1:1 상담 (가정)', 720, false, sc.L[1]);
+  row(620, '부트캠프 + 평생 회원', 149, true, sc.L[2]);
+  const big = box(s, 'pill', 1220, 640, 'auto', 110, { padding: '0 50px', background: 'var(--green)', color: 'var(--paper)', fontSize: '52px' }, '그 5분의 1');
+  pop(tl, big, sc.L[2] + 1.2);
+};
+B.monthly = (s, sc) => {
+  const eq = box(s, 'abs', 140, 170, 1640, 120, { display: 'flex', alignItems: 'center', gap: '30px', fontSize: '64px', fontWeight: 800 });
+  const parts = ['117만 원', '÷', '12개월', '='].map((x, i) => {
+    const d = el(eq, i % 2 ? '' : 'pill', { position: 'static', padding: i % 2 ? '0' : '18px 44px', background: i % 2 ? 'none' : 'var(--mint)', color: i % 2 ? 'var(--green)' : 'var(--ink)', fontSize: i % 2 ? '72px' : '56px' }, x);
+    fadeUp(tl, d, sc.L[0] + 0.15 * i, { y: 20 });
+    return d;
+  });
+  const big = box(s, 'abs', 130, 330, 1600, 300, { fontSize: '260px', fontWeight: 800, color: 'var(--green)', letterSpacing: '-0.05em', display: 'flex', alignItems: 'baseline', whiteSpace: 'nowrap' });
+  el(big, '', { fontSize: '120px', marginRight: '30px' }, '월');
+  const n = el(big, '', {}, '0');
+  el(big, '', { fontSize: '120px', marginLeft: '20px' }, '만 원');
+  fadeUp(tl, big, sc.L[1]);
+  counter(tl, n, sc.L[1], 0, 9.8, 1.6, (v) => v.toFixed(1));
+  const c = box(s, 'pill', 140, 680, 'auto', 84, { padding: '0 40px', background: 'var(--mint)', color: 'var(--green)', fontSize: '36px' }, '1:1 상담 한 번 비용보다 적습니다');
+  pop(tl, c, sc.L[2], { y: 20 });
+  const co = box(s, 'abs', 1300, 600, 420, 220, { display: 'flex', alignItems: 'center', gap: '20px' });
+  const ci = el(co, '', { width: '200px', height: '200px', flex: '0 0 200px', borderRadius: '50%', background: 'var(--green)', position: 'relative' });
+  icon(ci, 'i116', 25, 25, 150);
+  el(co, '', { fontSize: '40px', fontWeight: 800, lineHeight: '1.25' }, '내 연애<br>코치 고용');
+  pop(tl, co, sc.L[4], { scale: 0.8 });
+  const v = el(s, 'abs', { left: '140px', top: '800px', fontSize: '28px', fontWeight: 600 }, '12주 부트캠프 · 12개월 할부 기준 · VAT 별도');
+  fadeUp(tl, v, sc.L[5]);
+};
+B.dont = (s, sc) => {
+  const t = lines(s, sc.title, 140, 100, 'h2');
+  revealLines(tl, t, sc.L[1]);
+  sc.items.forEach((it, i) => {
+    const x = 140 + i * 556;
+    const c = box(s, 'card line', x, 360, 520, 370);
+    const m = box(c, 'abs', 50, 50, 110, 110);
+    m.innerHTML = svgBan();
+    el(c, 'abs', { left: '50px', top: '200px', fontSize: '50px', fontWeight: 800, lineHeight: '1.22', whiteSpace: 'pre-line' }, it);
+    pop(tl, c, sc.L[sc.beats[i]]);
+    draw(tl, m, sc.L[sc.beats[i]] + 0.3, 0.6);
+  });
+  const ok = box(s, 'pill', 0, 0, 'auto', 90, { left: '50%', top: '776px', transform: 'translateX(-50%)', padding: '0 50px', background: 'var(--green)', color: 'var(--paper)', fontSize: '38px' }, '바꿔보고 싶은 분이라면, 끝까지 함께합니다');
+  fadeUp(tl, ok, sc.L[5]);
+};
+B.worries = (s, sc) => {
+  const t = lines(s, '걱정하지 마세요', 140, 110, 'h2');
+  revealLines(tl, t, sc.t0 + 0.2);
+  sc.items.forEach(([q, a], i) => {
+    const x = 140 + (i % 2) * 830, y = 290 + Math.floor(i / 2) * 260;
+    const qb = box(s, 'abs', x, y, 'auto', 100, { padding: '0 40px', background: 'var(--mint)', borderRadius: '32px 32px 32px 8px', display: 'flex', alignItems: 'center', fontSize: '42px', fontWeight: 800, whiteSpace: 'nowrap' }, `“${q}”`);
+    const ab = box(s, 'abs', x + 40, y + 120, 'auto', 70, { display: 'flex', alignItems: 'center', gap: '16px', fontSize: '34px', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap' });
+    const m = el(ab, '', { width: '48px', height: '48px', flex: '0 0 48px' });
+    m.innerHTML = svgCheck();
+    el(ab, '', {}, a);
+    pop(tl, qb, sc.L[i * 2], { y: 30 });
+    fadeUp(tl, ab, sc.L[i * 2 + 1], { x: -20, y: 0 });
+    draw(tl, m, sc.L[i * 2 + 1] + 0.2, 0.4);
+  });
+};
+B.cta = (s, sc) => {
+  const t = lines(s, '90분 진단부터', 140, 120, 'h2');
+  revealLines(tl, t, sc.L[0]);
+  const st = [['i101', '진단', '5만 원 · 90분'], ['i103', '12주 계획', '나에게 맞는 순서'], ['i113', '합류 결정', '서로 맞을 때만 안내']];
+  const ats = [sc.L[1], sc.L[3], sc.L[4]];
+  st.forEach(([ik, name, sub], i) => {
+    const x = 140 + i * 556, strong = i === 0;
+    const c = box(s, strong ? 'card strong' : 'card', x, 280, 520, 460);
+    el(c, 'abs', { left: '50px', top: '44px', fontSize: '44px', fontWeight: 800, color: strong ? 'var(--mint)' : 'var(--green)' }, '0' + (i + 1));
+    const ib = box(c, 'abs', 300, 40, 180, 180, { background: 'var(--paper)', borderRadius: '50%' });
+    icon(ib, ik, 20, 20, 140);
+    el(c, 'abs', { left: '50px', top: '270px', fontSize: '60px', fontWeight: 800 }, name);
+    el(c, 'abs', { left: '50px', top: '360px', fontSize: '34px', fontWeight: 700, color: strong ? 'var(--mint)' : 'var(--green)' }, sub);
+    pop(tl, c, ats[i]);
+  });
+  const ch = box(s, 'pill', 0, 0, 'auto', 84, { left: '50%', top: '780px', transform: 'translateX(-50%)', padding: '0 46px', background: 'var(--mint)', color: 'var(--green)', fontSize: '36px' }, '외운 멘트 없이, 평소의 나로');
+  pop(tl, ch, sc.L[5], { y: 20 });
+};
+B.closing = (s, sc) => {
+  s.classList.add('green');
+  const p = photo(s, sc.img, { opacity: 0.22, filter: 'grayscale(.3)' });
+  kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.04, 1.12);
+  gradient(s, { background: 'radial-gradient(ellipse at center,rgba(31,90,67,.55) 0%,rgba(31,90,67,.92) 70%)' });
+  const t = lines(s, '멘트 검색은\n이제 그만하셔도 됩니다', 0, 250, 'h1', { left: '0', right: '0', textAlign: 'center', color: 'var(--paper)', fontSize: '100px' });
+  revealLines(tl, t, sc.L[0] + 0.2, 0.18);
+  const b = box(s, 'pill', 0, 0, 640, 120, { left: '640px', top: '620px', background: 'var(--mint)', color: 'var(--green)', fontSize: '46px', boxShadow: '0 30px 60px rgba(0,0,0,.25)' }, '90분 진단 신청하기');
+  pop(tl, b, sc.L[3]);
+  tl.to(b, { scale: 1.04, duration: 0.6, yoyo: true, repeat: 3, ease: 'sine.inOut' }, sc.L[4]);
+};
+
+// ---------------------------------------------------------------- assemble
+SCENES.forEach((sc, i) => {
+  const s = el(stage, 'scene');
+  s.style.zIndex = 1 + i;
+  (B[sc.kind] || (() => {}))(s, sc);
+  const a = sc.t0 - XF / 2, b = sc.t1 + XF / 2;
+  tl.set(s, { visibility: 'visible' }, Math.max(0, a - 0.01));
+  if (i > 0) tl.from(s, { opacity: 0, duration: XF, ease: 'power1.inOut' }, a);
+  tl.set(s, { visibility: 'hidden' }, b + XF + 0.02);
+});
+// final fade to green
+const fin = el(stage, 'scene green', { zIndex: 40 });
+tl.set(fin, { visibility: 'visible' }, TOTAL - 0.7);
+tl.from(fin, { opacity: 0, duration: 0.6 }, TOTAL - 0.7);
+
+// captions
+const sub = document.getElementById('sub'), subtext = document.getElementById('subtext');
+function fitSub(s) {
+  subtext.style.fontSize = '46px';
+  subtext.textContent = s;
+  let fs = 46;
+  while (subtext.offsetWidth > 1760 && fs > 34) { fs -= 1; subtext.style.fontSize = fs + 'px'; }
+}
+let curCap = -1;
+function updateCap(t) {
+  let k = -1;
+  for (let i = 0; i < CAPS.length; i++) if (t >= CAPS[i].st && t < CAPS[i].en) { k = i; break; }
+  if (k !== curCap) {
+    curCap = k;
+    if (k < 0) sub.style.visibility = 'hidden';
+    else { sub.style.visibility = 'visible'; fitSub(CAPS[k].s); }
+  }
+}
+// film grain
+(() => {
+  const c = document.getElementById('grain'), g = c.getContext('2d');
+  const im = g.createImageData(c.width, c.height);
+  for (let i = 0; i < im.data.length; i += 4) { const v = 110 + Math.random() * 145; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  g.putImageData(im, 0, 0);
+  c.style.width = '1920px'; c.style.height = '1080px';
+})();
+
+window.DURATION = TOTAL;
+window.CAPTIONS = CAPS;
+window.seek = (t) => { tl.seek(t, false); updateCap(t); };
+window.READY = false;
+Promise.all([
+  document.fonts.ready,
+  ...['p1','p2','p3','p4','p5','p6','p7','p8','p9','p10','p11','p12','p13','p14','p15','p16'].map((k) => new Promise((r) => { const i = new Image(); i.onload = i.onerror = r; i.src = A(k); })),
+  ...['i101','i102','i103','i104','i105','i106','i107','i108','i111','i112','i113','i114','i115','i116','i118','i119'].map((k) => new Promise((r) => { const i = new Image(); i.onload = i.onerror = r; i.src = A(k); })),
+]).then(() => { window.seek(0); window.READY = true; });
+// interactive preview when opened directly
+if (!/render/.test(location.search)) {
+  let t0 = null;
+  const loop = (ts) => { if (window.READY) { if (t0 === null) t0 = ts; const t = ((ts - t0) / 1000) % TOTAL; window.seek(t); } requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
