@@ -292,7 +292,7 @@ B.split = (s, sc) => {
   const half = (side, i) => {
     const [img, name, desc] = side;
     const f = box(s, 'frame', i * 960, 0, 960, 1080, { borderRadius: '0' });
-    const p = photo(f, img);
+    const p = photo(f, img, { backgroundPosition: '74% 50%' });
     kenburns(tl, p, sc.t0 - XF, sc.t1 - sc.t0 + XF * 2, 1.06, 1.16, i ? -3 : 3);
     gradient(f, { background: 'linear-gradient(0deg,rgba(14,22,18,.85) 0%,rgba(14,22,18,.0) 60%)' });
     const n = el(f, 'abs', { left: '90px', top: '560px', fontSize: '96px', fontWeight: 800, color: 'var(--paper)' }, name);
