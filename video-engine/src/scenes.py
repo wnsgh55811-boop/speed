@@ -478,7 +478,9 @@ def c_stairs(c, title, steps, down=False):
         hgt = 130 + (k if not down else n - 1 - k) * rise
         h.append(f'<div class="stp" style="left:{k * w}px;width:{w - 12}px;height:{hgt}px" {c.a(at, "grow")}>'
                  f'<span>{esc(lab)}</span></div>')
-        pts.append((c.t(at), k * w + (w - 12) / 2 - 22, -hgt - 6))   # sits ON the step
+        # the mover glides over the 0.8s before a point's time: +0.8 makes the hop
+        # start on the step's cue instead of landing there ahead of the narration
+        pts.append((c.t(at) + 0.8, k * w + (w - 12) / 2 - 22, -hgt - 6))   # sits ON the step
     pts = [(c.t0, pts[0][1], pts[0][2])] + pts
     h.append(f'<i class="st-dot" {_path(pts)} {c.a(steps[0][1], "fade")}></i>')
     h.append('</div></div>')

@@ -424,7 +424,8 @@
 .tline-w{position:relative;width:1400px;height:260px;margin-top:60px}
 .tl-svg{position:absolute;left:0;top:0;overflow:visible}
 .tl-path{stroke:var(--cyan);stroke-width:6;fill:none;stroke-linecap:round}
-.tl-n{position:absolute;top:20px;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+/* fixed width: near the right edge a shrink-to-fit box would narrow and pull the node off its x */
+.tl-n{position:absolute;top:20px;width:520px;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
 .tl-n i{display:block;width:40px;height:40px;margin-top:-20px;border-radius:50%;background:#0B1418;border:6px solid var(--cyan)}
 .tl-n span{margin-top:26px;font-weight:800;font-size:52px;color:#fff;white-space:nowrap}
 .tl-dot{position:absolute;left:0;top:20px;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:var(--amber);
@@ -432,6 +433,7 @@
 
 /* icon + bubble */
 .ib-l{display:flex;flex-direction:column;align-items:center;gap:6px}
+.row-stage>.msg{align-self:center}
 
 /* lamps */
 .lamps{display:flex;gap:110px;margin-top:60px}
