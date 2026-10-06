@@ -275,6 +275,8 @@
 /* secondary lines stay white, never a grey that reads as "disabled" */
 .sub,.sub.dimmed,.kicker,.tog-lead,.bar-axis,.meter .bar-axis{color:#FFFFFF}
 .kicker{opacity:1}
+/* static text paints under the absolute .scrim; lift labels above it so they stay pure white */
+.kicker,.tog-lead{position:relative}
 
 /* ring gauge */
 .ring-wrap{position:relative;margin-top:24px}
