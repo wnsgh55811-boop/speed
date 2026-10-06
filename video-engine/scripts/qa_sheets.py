@@ -14,6 +14,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -40,18 +41,20 @@ else:
 
 out = os.path.join(proj, "snapshots")
 os.makedirs(out, exist_ok=True)
-for f in glob.glob(os.path.join(out, "*")):
-    if os.path.isfile(f):
+for f in glob.glob(os.path.join(out, "*")):          # stale frames from an earlier pass
+    if os.path.isdir(f) and os.path.basename(f).startswith("p"):
+        shutil.rmtree(f)
+    elif os.path.isfile(f):
         os.remove(f)
 shots = []
 for m in man:
-    sel = [(t, lab) for t, lab in want if m["t0"] <= t < m["t1"]]
+    sel = sorted((t, lab) for t, lab in want if m["t0"] <= t < m["t1"])
     if not sel:
         continue
     d = os.path.join(out, m["file"])
     ats = ",".join(f"{t - m['t0']:.2f}" for t, _ in sel)
     subprocess.run(["npx", "hyperframes", "snapshot", os.path.join(proj, "parts", m["file"]), "--at", ats,
-                    "--no-end", "-o", d, "--no-browser-gpu", "--timeout", "20000", "--describe", "false"],
+                    "--no-end", "-o", d, "--no-browser-gpu", "--timeout", "120000", "--describe", "false"],
                    cwd=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."),
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     fs = sorted(glob.glob(os.path.join(d, "*.png")),

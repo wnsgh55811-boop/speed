@@ -54,13 +54,16 @@ class Ctx:
             return max(self.t0, self.st[at[0]] + at[1])
         return self.t0 + at
 
-    def a(self, at, fx="up"):
-        """Attribute string for a timed element."""
+    def a(self, at, fx="up", off=0.0):
+        """Attribute string for a timed element. `off` delays it after its
+        cue, so a dependent piece (a leaf after its branch, B after the arrow
+        pointing at it) lands once the thing leading to it has arrived."""
         self.n += 1
-        if not (self.t0 - 0.01 <= self.t(at) < self.t1 - 0.2):
-            print(f"  ! {self.sid} beat {self.n} at={at!r} -> {self.t(at):.2f}s "
+        t = min(self.t(at) + off, max(self.t(at), self.t1 - 0.25))
+        if not (self.t0 - 0.01 <= t < self.t1 - 0.2):
+            print(f"  ! {self.sid} beat {self.n} at={at!r} -> {t:.2f}s "
                   f"outside scene [{self.t0:.2f}, {self.t1:.2f})", file=sys.stderr)
-        return f'id="{self.sid}-b{self.n}" data-at="{self.t(at):.2f}" data-fx="{fx}"'
+        return f'id="{self.sid}-b{self.n}" data-at="{t:.2f}" data-fx="{fx}"'
 
 
 def img(key, cls="", style=""):
@@ -241,7 +244,7 @@ def c_cards(c, cards, title=None, vs=False):
         ph = (f'<div class="card-ph">{img(cd["photo"])}</div>' if cd.get("photo") else "")
         num = f'<span class="card-n">{esc(cd["n"])}</span>' if cd.get("n") else ""
         body = f'<div class="card-b">{esc(cd["body"])}</div>' if cd.get("body") else ""
-        h.append(f'<div class="card {cd.get("tone", "")}" {c.a(cd.get("at"), "up")}>{ph}'
+        h.append(f'<div class="card {cd.get("tone", "")}" {c.a(cd.get("at"), "up", 0.15 if (vs and k) else 0.0)}>{ph}'
                  f'<div class="card-t">{num}<div class="card-h">{esc(cd["head"])}</div>{body}</div></div>')
     h.append("</div></div>")
     return "".join(h)
@@ -263,7 +266,7 @@ def c_morph(c, x, y, at_y, title=None, op="→", note=None, at_note=None):
         '<div class="morph">',
         f'<span class="mchip from" {c.a(None, "pop")}>{esc(x)}</span>',
         f'<span class="mop" {c.a(at_y, "fade")}>{esc(op)}</span>',
-        f'<span class="mchip to" {c.a(at_y, "pop")}>{esc(y)}</span>',
+        f'<span class="mchip to" {c.a(at_y, "pop", 0.2)}>{esc(y)}</span>',
         '</div>',
         (f'<div class="sub" {c.a(at_note)}>{esc(note)}</div>' if note else ""),
         '</div>'])
@@ -282,7 +285,7 @@ def c_tree(c, root, branches, root_at=None):
          f'<div class="troot" {c.a(root_at, "pop")}>{esc(root)}</div>']
     for x, (lab, ph, at) in zip(xs, branches):
         inner = (f'<div class="tph">{img(ph)}</div>' if ph else "")
-        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(at, "up")}>{inner}'
+        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(at, "up", 0.55)}>{inner}'
                  f'<div class="tlab">{esc(lab)}</div></div>')
     h.append("</div>")
     return "".join(h)
@@ -327,7 +330,7 @@ def c_flow(c, items, title=None, foot=None, at_foot=None, loop=False):
     for k, (txt, at, tone) in enumerate(items):
         if k:
             h.append(f'<span class="farrow" {c.a(at, "fade")}>›</span>')
-        h.append(f'<span class="fchip {tone}" {c.a(at, "pop")}>{esc(txt)}</span>')
+        h.append(f'<span class="fchip {tone}" {c.a(at, "pop", 0.18 if k else 0.0)}>{esc(txt)}</span>')
     if loop:
         h.append(f'<span class="farrow loop" {c.a(items[-1][1], "fade")}>↻</span>')
     h.append("</div>")
@@ -506,7 +509,7 @@ def c_radial(c, key, items, title=None, foot=None, at_foot=None):
         h.append(f'<div class="kicker rad-title" {c.a(None, "fade")}>{esc(title)}</div>')
     h.append(f'<div class="rad-ic" {c.a(None, "pop")}>{img(key, "icon3d floaty", "width:300px")}</div>')
     for (x, y), (txt, at) in zip(pts, items):
-        h.append(f'<div class="rad-chip" style="left:{x:.0f}px;top:{y:.0f}px" {c.a(at, "pop")}>{esc(txt)}</div>')
+        h.append(f'<div class="rad-chip" style="left:{x:.0f}px;top:{y:.0f}px" {c.a(at, "pop", 0.55)}>{esc(txt)}</div>')
     if foot:
         h.append(f'<div class="rad-foot sub" {c.a(at_foot, "fade")}>{esc(foot)}</div>')
     h.append("</div>")
@@ -580,7 +583,8 @@ def caption_cards(tl, mute):
 
 # ── main ────────────────────────────────────────────────────────────────────
 FPS = 30
-PART_MAX = 46.0   # seconds per render part: keeps each capture light and short
+PART_MAX = float(os.environ.get("PART_MAX", 46.0))   # seconds per render part
+XF = 0.4          # scene-to-scene crossfade: the outgoing scene holds this long under the incoming one
 
 
 def frame(t):
@@ -602,14 +606,16 @@ def emit_doc(plan, tl, k0, k1, T0, T1, audio):
         body = COMP[sc["kind"]](c, **args)
         cls, inner, tag = background(k, sc.get("bg"), plan._bgprev[:k])
         d = t1 - t0
+        dc = d + (min(XF, (T1 - T0) - t1) if k < k1 - 1 else 0.0)   # clip runs on under the next scene
         bg_html.append(
-            f'<div class="clip" id="bg{sid}" data-start="{t0:.3f}" data-duration="{d:.3f}" '
+            f'<div class="clip" id="bg{sid}" data-start="{t0:.3f}" data-duration="{dc:.3f}" '
             f'data-track-index="0"><div class="layer"><div class="bgmove {cls}" id="bm{sid}" '
             f'data-layout-allow-overflow>{inner}</div></div></div>')
         fg_html.append(
-            f'<div class="clip" id="{sid}" data-start="{t0:.3f}" data-duration="{d:.3f}" '
+            f'<div class="clip" id="{sid}" data-start="{t0:.3f}" data-duration="{dc:.3f}" '
             f'data-track-index="1"><div class="fgin" id="fi{sid}">{body}</div></div>')
         sc_meta.append({"id": sid, "t": round(t0, 3), "d": round(d, 3), "ph": tag == "photo",
+                        "x": round(min(XF, (T1 - T0) - t1), 3) if k < k1 - 1 else 0.0,
                         "first": k == 0, "last": k == len(scenes) - 1})
     n = 0
     for s, e, txt in plan._caps:

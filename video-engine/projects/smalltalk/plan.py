@@ -14,8 +14,8 @@ S = []
 add = lambda **k: S.append(k)  # noqa: E731
 
 # ── 0  hook: the promise, then the habit that breaks it ────────────────────
-add(a=0, kind="hook", bg="photo:br_date_pause", kicker="낯가림이 심해도",
-    quote="스몰토크가|쉬워지는 방법", at_quote=0.35)
+# the cold open is the photo and the voice; only the caption carries words
+add(a=0, kind="photo", bg="photo:br_date_pause")
 add(a=2, kind="flow", bg="bg-ink", title="대부분의 사람들은",
     items=[("어색할까 봐", 3, ""), ("질문부터", 4, "q")])
 add(a=5, kind="chat", bg="soft:br_interview_date", title="흔한 첫 질문",

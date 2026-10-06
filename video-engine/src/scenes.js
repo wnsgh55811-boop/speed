@@ -2,33 +2,40 @@
 var tl = gsap.timeline({ paused: true });
 function pad(n) { return String(n).padStart(3, "0"); }
 
-// plates drift so no frame is ever dead still
+// plates drift so no frame is ever dead still; scenes hand over with a
+// crossfade — the outgoing clip runs on `x` seconds under the incoming one
 SC.forEach(function (s, i) {
-  var dir = (i % 2) ? 1 : -1;
+  var dir = (i % 2) ? 1 : -1, span = s.d + s.x;
   tl.fromTo("#bm" + s.id, { scale: s.ph ? 1.06 : 1.0, xPercent: 0 },
-    { scale: s.ph ? 1.0 : 1.045, xPercent: dir * 0.9, duration: s.d, ease: "sine.inOut" }, s.t);
-  // content breathes a touch over the scene, then clears just before the cut
-  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: s.d, ease: "none" }, s.t);
-  if (!s.last && s.d > 0.8)
-    tl.to("#fi" + s.id, { opacity: 0, duration: 0.16, ease: "power1.in" }, s.t + s.d - 0.16);
+    { scale: s.ph ? 1.0 : 1.045, xPercent: dir * 0.9, duration: span, ease: "sine.inOut" }, s.t);
+  // content breathes a touch over the scene
+  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: span, ease: "sine.inOut" }, s.t);
+  if (!s.first && i > 0) {
+    var xin = SC[i - 1].x || 0.4;
+    tl.fromTo("#bg" + s.id, { opacity: 0 }, { opacity: 1, duration: xin, ease: "sine.inOut" }, s.t);
+    tl.fromTo("#fi" + s.id, { opacity: 0 }, { opacity: 1, duration: xin, ease: "sine.inOut" }, s.t);
+  }
+  if (s.x > 0)
+    tl.to("#fi" + s.id, { opacity: 0, duration: s.x * 0.9, ease: "sine.inOut" }, s.t + s.d);
 });
 
-// the cold open hits on frame 0: no fade from black, a fast push-in instead
-if (SC.length && SC[0].first) tl.fromTo("#bm" + SC[0].id, { scale: 1.16 }, { scale: 1.04, duration: 1.2, ease: "expo.out" }, 0);
+// the cold open is live on frame 0: a slow push-in, no fade from black
+if (SC.length && SC[0].first) tl.fromTo("#bm" + SC[0].id, { scale: 1.12 }, { scale: 1.03, duration: 2.6, ease: "power2.out" }, 0);
 
+// entrances: soft ease-outs, no overshoot, long enough to read as motion
 var FX = {
-  up:    [{ opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }],
-  rise:  [{ opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 0.55, ease: "power3.out" }],
-  left:  [{ opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }],
-  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }],
-  pop:   [{ opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.6)" }],
-  msg:   [{ opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }],
-  slam:  [{ opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power4.out" }],
-  stamp: [{ opacity: 0, scale: 2.2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.38, ease: "power4.in" }],
-  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }],
-  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }],
-  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }],
-  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 0.75, ease: "power3.out" }],
+  up:    [{ opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.75, ease: "power2.out" }],
+  rise:  [{ opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }],
+  left:  [{ opacity: 0, x: -34 }, { opacity: 1, x: 0, duration: 0.7, ease: "power2.out" }],
+  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }],
+  pop:   [{ opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.75, ease: "power3.out" }],
+  msg:   [{ opacity: 0, y: 22, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }],
+  slam:  [{ opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }],
+  stamp: [{ opacity: 0, scale: 1.8, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.5, ease: "power3.in" }],
+  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }],
+  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" }],
+  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }],
+  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "power3.out" }],
   type:  [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.0, ease: "steps(14)" }]
 };
 
@@ -56,7 +63,7 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     tl.to(sel, { opacity: 0.0, duration: 0.8, ease: "power2.inOut" }, t + 0.9);
   } else if (fx === "knob") {
     var p = parseFloat(el.getAttribute("data-pos"));
-    tl.fromTo(sel, { x: 0 }, { x: (p - 0.5) * 640, duration: 0.9, ease: "power3.inOut" }, t);
+    tl.fromTo(sel, { x: 0 }, { x: (p - 0.5) * 640, duration: 1.1, ease: "power2.inOut" }, t);
   } else if (fx === "gap") {
     var g0 = parseFloat(el.getAttribute("data-from")), g1 = parseFloat(el.getAttribute("data-to"));
     var dx = (g0 - g1) / 2;
@@ -97,7 +104,7 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     maxR = Math.max(maxR, st.r);
     var dx = (W - maxR) / 2;
     if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
-    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.5, ease: "power3.inOut" }, st.t - 0.05);
+    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.8, ease: "power2.inOut" }, st.t - 0.75);
     last = dx;
   });
 });
@@ -164,8 +171,8 @@ document.querySelectorAll(".chat-dot").forEach(function (el, i) {
 for (var c = 0; c < CAPN; c++) {
   var cel = document.getElementById("cap" + pad(c));
   if (cel.getAttribute("data-cont")) continue;   // carried over a part cut: already showing
-  tl.fromTo("#cap" + pad(c) + " .cap", { opacity: 0, yPercent: 22 },
-    { opacity: 1, yPercent: 0, duration: 0.18, ease: "power2.out" }, parseFloat(cel.getAttribute("data-start")));
+  tl.fromTo("#cap" + pad(c) + " .cap", { opacity: 0, yPercent: 16 },
+    { opacity: 1, yPercent: 0, duration: 0.24, ease: "power2.out" }, parseFloat(cel.getAttribute("data-start")));
 }
 
 window.__timelines = window.__timelines || {};
