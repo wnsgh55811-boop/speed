@@ -72,17 +72,20 @@ def cut(key, cls="", style=""):
 
 
 # ── components ─────────────────────────────────────────────────────────────
-def c_hook(c, quote, at_quote, kicker=None):
+def c_hook(c, quote=None, at_quote=None, kicker=None):
     """Cold open: the plate is already live on frame 0, a thought bubble types,
     then the line the voice is about to say lands big."""
     # frame 0 is already composed: shade, bubble and dots are on screen, no fade-in
-    h = ['<div class="hook-shade"></div><div class="stage hook">']
+    # without a quote the plate stays clean — only the bottom caption carries words
+    h = [('<div class="hook-shade"></div>' if quote else '') + '<div class="stage hook">']
     if kicker:
         h.append(f'<div class="kicker hook-k">{esc(kicker)}</div>')
-    h.append('<div class="think-bub">'
-             '<i class="tdot"></i><i class="tdot"></i><i class="tdot"></i></div>')
-    rows = "".join(f'<span class="hq">{esc(x)}</span>' for x in quote.split("|"))
-    h.append(f'<div class="hook-q" {c.a(at_quote, "slam")}>{rows}</div>')
+    if quote:   # the typing bubble only belongs with a quote above the caption
+        h.append('<div class="think-bub">'
+                 '<i class="tdot"></i><i class="tdot"></i><i class="tdot"></i></div>')
+    if quote:
+        rows = "".join(f'<span class="hq">{esc(x)}</span>' for x in quote.split("|"))
+        h.append(f'<div class="hook-q" {c.a(at_quote, "slam")}>{rows}</div>')
     h.append("</div>")
     return "".join(h)
 
