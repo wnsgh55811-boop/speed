@@ -32,9 +32,12 @@ npx hyperframes browser ensure >/dev/null 2>&1 || true
 mkdir -p /home/user/out
 for part in $PARTS; do
   echo "=== $part START $(date -u +%T)"
-  npx hyperframes render "$P/parts/$part" -o "/home/user/out/$part.mp4" -q "${QUALITY:-delivery}" -f 30 \
+  # The sandbox closes the launching call's stdio after ~60s; hyperframes reads
+  # that as its parent exiting and cancels. Detach it into its own session.
+  setsid npx hyperframes render "$P/parts/$part" -o "/home/user/out/$part.mp4" -q "${QUALITY:-delivery}" -f 30 \
     -w "${WORKERS:-4}" --no-low-memory-mode --no-browser-gpu --browser-timeout 180 \
-    --protocol-timeout 900000 --player-ready-timeout 180000 --quiet || exit 18
+    --protocol-timeout 900000 --player-ready-timeout 180000 --quiet < /dev/null > "/home/user/out/$part.log" 2>&1 &
+  wait $! || { tail -5 "/home/user/out/$part.log"; exit 18; }
   ffprobe -v error -count_frames -select_streams v -show_entries stream=nb_read_frames,width,height \
     -of csv=p=0 "/home/user/out/$part.mp4"
   url_var="PUT_$part"
