@@ -7,6 +7,7 @@
 #   PUT_p00=<presigned put url> PUT_p01=<...> QUALITY=delivery \
 #   bash render_parts.sh
 set -o pipefail
+: "${BRANCH:?set BRANCH}" "${PROJ:?set PROJ}"   # empty BRANCH would reset to the default branch
 cd /home/user
 REPO=${REPO:-https://github.com/wnsgh55811-boop/speed}
 if [ ! -d speed/.git ]; then git clone -q --depth 1 -b "$BRANCH" "$REPO" speed || exit 11; fi
