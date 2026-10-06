@@ -263,3 +263,88 @@
 
 /* reveal rows measure their children from their own box (see scenes.js) */
 .flow,.cards,.morph{position:relative}
+
+/* ── 스몰토크 additions ────────────────────────────────────────────────── */
+.p-head{margin-bottom:6px;align-self:flex-start}
+.chat-icon{align-self:center;margin-bottom:-8px}
+.chat-icon img{width:170px}
+.chat{position:relative}
+.chat-x{width:300px;height:300px}
+.shaky{transform-origin:50% 12%}
+.whiteout{position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 45%,#fff 0%,rgba(255,255,255,.92) 55%,rgba(255,255,255,.75) 100%);
+  opacity:0;pointer-events:none}
+
+/* photo plate + one spoken line */
+.photo-stage{justify-content:flex-end;padding-bottom:250px}
+.photo-stage.high{justify-content:flex-start;padding-top:150px;padding-bottom:0}
+.ph-msg{max-width:1200px}
+.ph-msg .bubble{font-size:56px;box-shadow:0 18px 50px rgba(0,0,0,.55)}
+.ph-chip{padding:18px 46px;border-radius:999px;background:rgba(10,14,20,.78);border:2px solid rgba(90,216,247,.65);
+  color:var(--ink);font-weight:800;font-size:56px;letter-spacing:-.01em;box-shadow:0 14px 40px rgba(0,0,0,.5);white-space:nowrap}
+
+/* timer ring */
+.timer{position:relative;width:360px;height:360px;margin-top:30px}
+.timer svg{width:100%;height:100%;overflow:visible;transform:rotate(-90deg)}
+.t-bg{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.14);stroke-width:14}
+.t-ring{fill:none;stroke-width:14;stroke-linecap:round;stroke-dasharray:1}
+.timer.amber .t-ring{stroke:var(--amber);filter:drop-shadow(0 0 14px rgba(216,179,104,.6))}
+.timer.cyan .t-ring{stroke:var(--cyan);filter:drop-shadow(0 0 14px rgba(90,216,247,.6))}
+.t-tick{stroke:rgba(255,255,255,.35);stroke-width:4}
+.t-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;
+  font-size:110px;color:var(--ink);letter-spacing:-.03em;text-shadow:0 4px 20px rgba(0,0,0,.6)}
+.t-num small{font-size:44px;margin:34px 0 0 6px;color:var(--ink-2)}
+
+/* search */
+.search{display:flex;align-items:center;gap:26px;width:1180px;padding:30px 44px;border-radius:999px;
+  background:rgba(250,250,248,.96);box-shadow:0 20px 60px rgba(0,0,0,.5);margin-top:10px}
+.s-ic{width:52px;height:52px;flex:0 0 auto;fill:none;stroke:#3A3A40;stroke-width:4;stroke-linecap:round}
+.s-q{font-weight:700;font-size:56px;color:#1E1C1A;white-space:nowrap}
+.s-caret{display:block;width:4px;height:58px;background:#1E7C96;margin-left:-14px}
+.s-res{display:flex;flex-direction:column;gap:22px;width:1100px;margin-top:40px}
+.s-row{display:flex;align-items:center;gap:26px;padding:22px 36px;border-radius:22px;background:rgba(22,26,34,.86);
+  border:1.5px solid rgba(255,255,255,.12);font-weight:700;font-size:50px;color:var(--ink)}
+.s-dot{display:block;width:16px;height:16px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px rgba(90,216,247,.7)}
+
+/* vertical bars on a 5-step scale */
+.vbars{position:relative;display:flex;align-items:stretch;gap:26px;height:470px;margin-top:40px}
+.vb-axis{position:relative;width:40px}
+.vb-axis span{position:absolute;right:0;transform:translateY(50%)}
+.vb-axis b{font-weight:600;font-size:30px;color:var(--dim)}
+.vb-plot{position:relative;display:flex;align-items:flex-end;gap:64px;padding:0 40px;border-left:4px solid rgba(255,255,255,.6);
+  border-bottom:4px solid rgba(255,255,255,.6)}
+.vb-grid{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.12)}
+.vb{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;width:150px;height:100%}
+.vb-fill{display:block;width:100%;border-radius:14px 14px 4px 4px;transform-origin:50% 100%}
+.vb-fill.cyan{background:linear-gradient(180deg,var(--cyan),var(--cyan-deep));box-shadow:0 0 26px rgba(90,216,247,.35)}
+.vb-fill.cyan.hot{background:linear-gradient(180deg,#E0566F,#8E2F45);box-shadow:0 0 26px rgba(224,86,111,.45)}
+.vb-fill.amber{background:linear-gradient(180deg,var(--amber),#8C6A32)}
+.vb-lab{position:absolute;bottom:-62px;font-weight:700;font-size:36px;color:var(--ink-2);white-space:nowrap}
+.vb-unit{display:flex;flex-direction:column;justify-content:space-between;font-weight:600;font-size:32px;color:var(--dim);padding:0 0 0 6px}
+
+/* radial: what there is to notice */
+.radial{display:block}
+.rad-title{position:absolute;left:0;right:0;top:96px;text-align:center}
+.rad-ic{position:absolute;left:960px;top:500px;transform:translate(-50%,-50%)}
+.rad-chip{position:absolute;transform:translate(-50%,-50%);padding:18px 40px;border-radius:999px;white-space:nowrap;
+  background:rgba(14,18,26,.9);border:2px solid rgba(90,216,247,.6);font-weight:800;font-size:50px;color:var(--ink);
+  box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.spoke{fill:none;stroke:rgba(90,216,247,.55);stroke-width:4;stroke-dasharray:1}
+.rad-foot{position:absolute;left:0;right:0;top:820px;text-align:center}
+
+/* stamp over a photo */
+.stamp.big{position:relative;right:auto;top:auto;margin-top:36px;font-size:120px;transform:rotate(-8deg)}
+
+/* wording sits above its own scrim: the scrim is absolutely positioned, so
+   without a stacking context it painted over every in-flow title and dimmed it */
+.stage{z-index:0}
+.stage > .scrim{z-index:-1}
+/* small labels stay readable on a phone */
+.kicker{font-size:40px;letter-spacing:.12em;color:#BDBAB3}
+.hook-k{font-size:48px;color:#ECE9E2;letter-spacing:.06em}
+.btag{font-size:34px}
+.mtick b{font-size:32px}
+/* a photo's spoken line sits centred, clear of the caption band */
+.photo-stage{padding-bottom:300px}
+.photo-stage .drift{display:flex;justify-content:center;width:100%}
+.photo-stage .msg{align-self:center;align-items:center}
+.tree-stage.nophoto{transform:translateY(150px)}

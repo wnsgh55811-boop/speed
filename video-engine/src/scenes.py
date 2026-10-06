@@ -87,7 +87,7 @@ def c_hook(c, quote, at_quote, kicker=None):
     return "".join(h)
 
 
-def c_checklist(c, title, items, empty_at=None):
+def c_checklist(c, title, items, empty_at=None, empty_text="…다음은?"):
     h = ['<div class="stage"><div class="scrim wide"></div>']
     if title:
         h.append(f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>')
@@ -98,13 +98,13 @@ def c_checklist(c, title, items, empty_at=None):
                  f'd="M9 21l8 8 15-17"/></svg></i><span>{esc(txt)}</span></div>')
     h.append("</div>")
     if empty_at is not None:
-        h.append(f'<div class="sub dimmed" {c.a(empty_at, "fade")}>…다음은?</div>')
+        h.append(f'<div class="sub dimmed" {c.a(empty_at, "fade")}>{esc(empty_text)}</div>')
     h.append("</div>")
     return "".join(h)
 
 
 def c_meter(c, title, start, end, at, left="적음", right="많음", tone="cyan",
-            label=None, steps=5, at_label=None):
+            label=None, steps=5, at_label=None, then=None):
     """A horizontal gauge whose fill moves from `start` to `end` on cue."""
     ticks = "".join(f'<span class="mtick" style="left:{q}%"><b>{k + 1}</b></span>'
                     for k, q in enumerate(range(0, 101, 100 // (steps - 1))))
@@ -115,16 +115,21 @@ def c_meter(c, title, start, end, at, left="적음", right="많음", tone="cyan"
         f'<div class="m-ticks">{ticks}</div>',
         f'<div class="m-track">'
         f'<i class="m-fill {tone}" data-from="{start}" data-to="{end}" '
-        f'{c.a(at, "meter")}></i></div>',
+        + (f'data-then="{then[0]}" data-then-at="{c.t(then[1]):.2f}" ' if then else "")
+        + f'{c.a(at, "meter")}></i></div>',
         f'<div class="bar-axis"><span>{esc(left)}</span><span>{esc(right)}</span></div>',
         '</div>',
         (f'<div class="sub" {c.a(at if at_label is None else at_label, "fade")}>{esc(label)}</div>' if label else ""),
         '</div>'])
 
 
-def c_chat(c, msgs, title=None):
-    """Spoken lines as a chat thread. m = 남자 (right, yellow), w = 여자 (left)."""
+def c_chat(c, msgs, title=None, icon=None, xout=None):
+    """Spoken lines as a chat thread. m = 남자 (right, yellow), w = 여자 (left).
+    icon = a 3D icon key shown beside the title; xout = at which an X lands
+    over the whole thread (questions you would never ask a friend)."""
     h = ['<div class="stage"><div class="chat">']
+    if icon:
+        h.append(f'<div class="chat-icon" {c.a(None, "pop")}>{img(icon, "icon3d floaty")}</div>')
     if title:
         h.append(f'<div class="chat-title" {c.a(None, "fade")}>{esc(title)}</div>')
     for m in msgs:
@@ -135,6 +140,9 @@ def c_chat(c, msgs, title=None):
         tg = f'<span class="btag">{esc(tag)}</span>' if tag else ""
         h.append(f'<div class="msg {cls}" {c.a(at, "msg")}>'
                  f'<div class="bubble">{lines}</div>{tg}</div>')
+    if xout is not None:
+        h.append(f'<svg class="xmark chat-x" {c.a(xout, "pop")} viewBox="0 0 100 100"><line x1="16" y1="16" '
+                 'x2="84" y2="84"/><line x1="16" y1="84" x2="84" y2="16"/></svg>')
     h.append("</div></div>")
     return "".join(h)
 
@@ -154,14 +162,19 @@ def c_lines(c, title, series, xlab, ylab):
          '<text class="axl" x="-24" y="125" text-anchor="end">높음</text></g>']
     for lab, d, tone, at, lx, ly in series:
         h.append(f'<path class="sline {tone}" pathLength="1" d="{d}" {c.a(at, "draw")}/>')
-        h.append(f'<text class="slab {tone}" x="{lx}" y="{ly}" {c.a(at + 0.9 if isinstance(at, float) else at, "fade")}>{esc(lab)}</text>')
+        anc = "end" if lx > 900 else "start"
+        h.append(f'<text class="slab {tone}" x="{lx}" y="{ly}" text-anchor="{anc}" {c.a(at + 0.9 if isinstance(at, float) else at, "fade")}>{esc(lab)}</text>')
     h.append("</svg></div>")
     return "".join(h)
 
 
 def c_icon(c, key, title, sub=None, at_sub=None, orbit=False, size=560, xmark=False,
-           at_x=None, side=None, waterline=30):
-    cls = "icon3d" + (" floaty" if not orbit else "")
+           at_x=None, side=None, waterline=30, shake=None, flash=None, at_title=None):
+    """shake = at which the icon starts ringing; flash = at which a white wash
+    blanks the frame (a mind going blank)."""
+    cls = "icon3d" + (" floaty" if not orbit and shake is None else "") + (" shaky" if shake is not None else "")
+    fl = (f'<i class="whiteout" {c.a(flash, "flash")}></i>' if flash is not None else "")
+    sk = (f' data-shake-at="{c.t(shake):.2f}"' if shake is not None else "")
     o = (f'<svg class="orbit" style="--wl:{waterline}%" viewBox="0 0 600 220"><ellipse cx="300" cy="110" rx="290" ry="70"/>'
          '<circle class="orb" r="12" cx="590" cy="110"/></svg>') if orbit else ""
     x = (f'<svg class="xmark" {c.a(at_x, "pop")} viewBox="0 0 100 100"><line x1="16" y1="16" '
@@ -169,26 +182,30 @@ def c_icon(c, key, title, sub=None, at_sub=None, orbit=False, size=560, xmark=Fa
     if side:
         return "".join([
             '<div class="stage row-stage"><div class="scrim wide"></div>',
-            f'<div class="icon-wrap" {c.a(None, "pop")}>{img(key, cls, f"width:{size}px")}{o}{x}</div>',
+            f'<div class="icon-wrap"{sk} {c.a(None, "pop")}>{img(key, cls, f"width:{size}px")}{o}{x}</div>',
             '<div class="side-txt">',
-            f'<div class="hl lg left" {c.a(0.25)}>{esc(title)}</div>',
+            f'<div class="hl lg left" {c.a(0.25 if at_title is None else at_title)}>{esc(title)}</div>',
             (f'<div class="sub left" {c.a(at_sub)}>{esc(sub)}</div>' if sub else ""),
-            '</div></div>'])
+            '</div></div>', fl])
     return "".join([
         '<div class="stage"><div class="scrim tight"></div>',
-        f'<div class="icon-wrap" {c.a(None, "pop")}>{img(key, cls, f"width:{size}px")}{o}{x}</div>',
-        f'<div class="hl md" style="margin-top:6px" {c.a(0.3)}>{esc(title)}</div>',
+        f'<div class="icon-wrap"{sk} {c.a(None, "pop")}>{img(key, cls, f"width:{size}px")}{o}{x}</div>',
+        f'<div class="hl md" style="margin-top:6px" {c.a(0.3 if at_title is None else at_title)}>{esc(title)}</div>',
         (f'<div class="sub" {c.a(at_sub)}>{esc(sub)}</div>' if sub else ""),
-        '</div>'])
+        '</div>', fl])
 
 
-def c_typo(c, rows, strike=None):
-    """rows = [(text, at, cls)]; strike = (row index, at) puts a line through it."""
+def c_typo(c, rows, strike=None, kicker=None):
+    """rows = [(text, at, cls)]; strike = (row, at) or [(row, at), ...] puts a
+    line through those rows; kicker = (text, at) sits small above them."""
+    strikes = dict([strike] if isinstance(strike, tuple) else (strike or []))
     h = ['<div class="stage"><div class="scrim wide"></div>']
+    if kicker:
+        h.append(f'<div class="kicker" {c.a(kicker[1], "fade")}>{esc(kicker[0])}</div>')
     for k, (txt, at, cls) in enumerate(rows):
         s = ""
-        if strike and strike[0] == k:
-            s = f'<i class="strike-line" {c.a(strike[1], "strike")}></i>'
+        if k in strikes:
+            s = f'<i class="strike-line" {c.a(strikes[k], "strike")}></i>'
         h.append(f'<div class="hl {cls} tline" {c.a(at, "rise")}><span class="tl-in">{esc(txt)}{s}</span></div>')
     h.append("</div>")
     return "".join(h)
@@ -259,7 +276,8 @@ def c_tree(c, root, branches, root_at=None):
     paths = "".join(
         f'<path class="tedge" pathLength="1" d="M960 210 C960 300 {x+240:.0f} 260 {x+240:.0f} 360" '
         f'{c.a(at, "draw")}/>' for x, (_, _, at) in zip(xs, branches))
-    h = ['<div class="stage tree-stage"><div class="scrim wide"></div>',
+    nophoto = all(ph is None for _, ph, _ in branches)
+    h = [f'<div class="stage tree-stage{" nophoto" if nophoto else ""}"><div class="scrim wide"></div>',
          f'<svg class="tree-svg" viewBox="0 0 1920 1080">{paths}</svg>',
          f'<div class="troot" {c.a(root_at, "pop")}>{esc(root)}</div>']
     for x, (lab, ph, at) in zip(xs, branches):
@@ -284,11 +302,14 @@ def c_sliders(c, title, rows):
     return "".join(h)
 
 
-def c_person(c, key, bubbles, side="left", think=False):
-    """Torn-paper cutout with spoken bubbles beside it. bubbles = [(text, at)]."""
+def c_person(c, key, bubbles, side="left", think=False, head=None):
+    """Torn-paper cutout with spoken bubbles beside it. bubbles = [(text, at)].
+    head = (text, at) — a small kicker above the bubbles."""
     h = [f'<div class="person {side}">',
          f'<div class="p-fig" {c.a(None, "rise")}>{cut(key, "paper")}</div>',
          '<div class="p-bubs">']
+    if head:
+        h.append(f'<div class="kicker p-head" {c.a(head[1], "fade")}>{esc(head[0])}</div>')
     for txt, at in bubbles:
         cls = "pb think" if think else "pb"
         lines = "".join(f'<span class="bl">{esc(x)}</span>' for x in txt.split("|"))
@@ -397,6 +418,106 @@ def c_cta(c, head, sub, at_sub, foot=None, at_foot=None):
         '</div>',
         (f'<div class="cta-foot" {c.a(at_foot, "up")}><span class="cta-arrow">↓</span>{esc(foot)}</div>'
          if foot else ""),
+        '</div>'])
+
+
+# ── components added for 스몰토크 ───────────────────────────────────────────
+def c_photo(c, quote=None, at_quote=None, who="m", chip=None, at_chip=None, pos="low"):
+    """The photo is the plate (bg="photo:key"); on top, either a spoken line as
+    a bubble or a short label chip. pos = low | high (keep faces clear)."""
+    h = [f'<div class="stage photo-stage {pos}">']
+    if chip:
+        h.append(f'<div class="ph-chip" {c.a(at_chip, "pop")}>{esc(chip)}</div>')
+    if quote:
+        lines = "".join(f'<span class="bl">{esc(x)}</span>' for x in quote.split("|"))
+        h.append(f'<div class="msg {"me" if who == "m" else "her"} ph-msg" {c.a(at_quote, "msg")}>'
+                 f'<div class="bubble">{lines}</div></div>')
+    h.append("</div>")
+    return "".join(h)
+
+
+def c_timer(c, title, secs, at, label=None, at_label=None, tone="amber"):
+    """A countdown ring that really runs `secs` seconds while the digit counts."""
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+        f'<div class="timer {tone}" data-secs="{secs}" {c.a(at, "timer")}>',
+        '<svg viewBox="0 0 300 300"><circle class="t-bg" cx="150" cy="150" r="126"/>',
+        '<circle class="t-ring" cx="150" cy="150" r="126" pathLength="1"/>',
+        ''.join(f'<line class="t-tick" x1="150" y1="14" x2="150" y2="34" transform="rotate({k*30} 150 150)"/>' for k in range(12)),
+        '</svg><div class="t-num">0.0<small>초</small></div></div>',
+        (f'<div class="sub" {c.a(at_label, "fade")}>{esc(label)}</div>' if label else ""),
+        '</div>'])
+
+
+def c_search(c, query, at_query, results, title=None):
+    """A search bar typing the query, then results dropping in one by one."""
+    h = ['<div class="stage"><div class="scrim wide"></div>']
+    if title:
+        h.append(f'<div class="kicker" {c.a(None, "fade")}>{esc(title)}</div>')
+    h.append(f'<div class="search" {c.a(None, "up")}><svg class="s-ic" viewBox="0 0 40 40">'
+             '<circle cx="17" cy="17" r="11"/><path d="M25 25l9 9"/></svg>'
+             f'<span class="s-q" {c.a(at_query, "type")}>{esc(query)}</span><i class="s-caret"></i></div>')
+    h.append('<div class="s-res">')
+    for txt, at in results:
+        h.append(f'<div class="s-row" {c.a(at, "left")}><i class="s-dot"></i><span>{esc(txt)}</span></div>')
+    h.append("</div></div>")
+    return "".join(h)
+
+
+def c_bars(c, title, bars, at, axis=("짧음", "김"), note=None, at_note=None, tone="cyan", step=0.28):
+    """Vertical bars that grow from zero to their value, one after another,
+    on a 5-step scale. bars = [(label, value 0..1)]."""
+    n = len(bars)
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+         f'<div class="vbars" {c.a(0.1, "fade")}>',
+         '<div class="vb-axis">' + "".join(f'<span style="bottom:{k*25}%"><b>{k+1}</b></span>' for k in range(5)) + '</div>',
+         '<div class="vb-plot">',
+         "".join(f'<i class="vb-grid" style="bottom:{k*25}%"></i>' for k in range(5))]
+    t0 = c.t(at)
+    for k, (lab, v) in enumerate(bars):
+        hot = " hot" if k == n - 1 else ""
+        h.append(f'<div class="vb"><i class="vb-fill {tone}{hot}" style="height:{v*100:.0f}%" '
+                 f'id="{c.sid}-vb{k}" data-at="{t0 + k*step:.2f}" data-fx="grow"></i>'
+                 f'<span class="vb-lab">{esc(lab)}</span></div>')
+    h.append('</div>')
+    h.append(f'<div class="vb-unit"><span>{esc(axis[1])}</span><span>{esc(axis[0])}</span></div>')
+    h.append('</div>')
+    if note:
+        h.append(f'<div class="sub" {c.a(at_note, "fade")}>{esc(note)}</div>')
+    h.append('</div>')
+    return "".join(h)
+
+
+def c_radial(c, key, items, title=None, foot=None, at_foot=None):
+    """A 3D icon in the middle and what it notices placed around it; each
+    spoke draws out as its item is named. items = [(text, at)]."""
+    import math
+    n = len(items)
+    cx, cy, rx, ry = 960, 500, 600, 250
+    pts = [(cx + rx * math.cos(-math.pi / 2 + 2 * math.pi * k / n),
+            cy + ry * math.sin(-math.pi / 2 + 2 * math.pi * k / n)) for k in range(n)]
+    sp = "".join(f'<path class="spoke" pathLength="1" d="M{cx} {cy} L{x:.0f} {y:.0f}" {c.a(at, "draw")}/>'
+                 for (x, y), (_, at) in zip(pts, items))
+    h = ['<div class="stage radial"><div class="scrim wide"></div>',
+         f'<svg class="tree-svg" viewBox="0 0 1920 1080">{sp}</svg>']
+    if title:
+        h.append(f'<div class="kicker rad-title" {c.a(None, "fade")}>{esc(title)}</div>')
+    h.append(f'<div class="rad-ic" {c.a(None, "pop")}>{img(key, "icon3d floaty", "width:300px")}</div>')
+    for (x, y), (txt, at) in zip(pts, items):
+        h.append(f'<div class="rad-chip" style="left:{x:.0f}px;top:{y:.0f}px" {c.a(at, "pop")}>{esc(txt)}</div>')
+    if foot:
+        h.append(f'<div class="rad-foot sub" {c.a(at_foot, "fade")}>{esc(foot)}</div>')
+    h.append("</div>")
+    return "".join(h)
+
+
+def c_stamp(c, title, stamp, at_stamp, at_title=None):
+    return "".join([
+        '<div class="stage"><div class="scrim"></div>',
+        f'<div class="hl lg" {c.a(at_title)}>{esc(title)}</div>',
+        f'<div class="stamp big" {c.a(at_stamp, "stamp")}>{esc(stamp)}</div>',
         '</div>'])
 
 

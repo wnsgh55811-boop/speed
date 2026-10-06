@@ -4,3 +4,4 @@ parts/
 index.html
 node_modules/
 __pycache__/
+audio/*.wav

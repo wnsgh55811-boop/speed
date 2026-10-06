@@ -27,7 +27,9 @@ var FX = {
   stamp: [{ opacity: 0, scale: 2.2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.38, ease: "power4.in" }],
   strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }],
   draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }],
-  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }]
+  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }],
+  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 0.75, ease: "power3.out" }],
+  type:  [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.0, ease: "steps(14)" }]
 };
 
 document.querySelectorAll("[data-at]").forEach(function (el) {
@@ -37,6 +39,21 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
   if (fx === "meter") {
     var a = parseFloat(el.getAttribute("data-from")), b = parseFloat(el.getAttribute("data-to"));
     tl.fromTo(sel, { xPercent: (a - 1) * 100 }, { xPercent: (b - 1) * 100, duration: 1.3, ease: "power2.inOut" }, t);
+    var th = el.getAttribute("data-then");
+    if (th !== null) tl.to(sel, { xPercent: (parseFloat(th) - 1) * 100, duration: 0.9, ease: "power3.inOut" },
+      parseFloat(el.getAttribute("data-then-at")));
+  } else if (fx === "timer") {
+    // the ring empties over the real number of seconds while the digit counts up
+    var secs = parseFloat(el.getAttribute("data-secs")), num = el.querySelector(".t-num"), oc = { v: 0 };
+    tl.fromTo(el, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, t - 0.35);
+    tl.fromTo(sel + " .t-ring", { strokeDashoffset: 0 }, { strokeDashoffset: 1, duration: secs, ease: "none" }, t);
+    tl.fromTo(oc, { v: 0 }, { v: secs, duration: secs, ease: "none",
+      onUpdate: function () { num.innerHTML = oc.v.toFixed(1) + "<small>초</small>"; } }, t);
+    tl.fromTo(sel + " svg", { scale: 1 }, { scale: 1.04, duration: 0.5, ease: "sine.inOut", yoyo: true,
+      repeat: Math.max(1, Math.round(secs * 2) - 1) }, t);
+  } else if (fx === "flash") {
+    tl.fromTo(sel, { opacity: 0 }, { opacity: 0.94, duration: 0.3, ease: "power2.in" }, t);
+    tl.to(sel, { opacity: 0.0, duration: 0.8, ease: "power2.inOut" }, t + 0.9);
   } else if (fx === "knob") {
     var p = parseFloat(el.getAttribute("data-pos"));
     tl.fromTo(sel, { x: 0 }, { x: (p - 0.5) * 640, duration: 0.9, ease: "power3.inOut" }, t);
@@ -83,6 +100,33 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.5, ease: "power3.inOut" }, st.t - 0.05);
     last = dx;
   });
+});
+
+// a ringing alarm: a short, damped rattle that repeats while the scene holds
+document.querySelectorAll("[data-shake-at]").forEach(function (el, i) {
+  var clip = el.closest(".clip"), s = parseFloat(clip.getAttribute("data-start")),
+      d = parseFloat(clip.getAttribute("data-duration")), t = parseFloat(el.getAttribute("data-shake-at"));
+  var img = el.querySelector("img"); img.id = img.id || "sk" + i;
+  for (var k = 0; t + k * 1.1 < s + d - 0.4; k++)
+    tl.fromTo("#" + img.id, { rotation: 0 }, { keyframes: [{ rotation: -9, duration: 0.07 }, { rotation: 8, duration: 0.08 },
+      { rotation: -6, duration: 0.08 }, { rotation: 4, duration: 0.09 }, { rotation: 0, duration: 0.12 }],
+      ease: "sine.inOut", transformOrigin: "50% 12%" }, t + k * 1.1);
+});
+// paper cutouts lean in a few pixels over the scene, never fully still
+document.querySelectorAll(".p-fig").forEach(function (el, i) {
+  var clip = el.closest(".clip"), s = parseFloat(clip.getAttribute("data-start")),
+      d = parseFloat(clip.getAttribute("data-duration"));
+  var img = el.querySelector("img"); img.id = img.id || "pf" + i;
+  tl.fromTo("#" + img.id, { x: 0, rotation: 0 }, { x: (i % 2 ? -18 : 18), rotation: (i % 2 ? -0.8 : 0.8), duration: d, ease: "sine.inOut" }, s);
+});
+// photo-quote bubbles and chips drift up a touch while they hold
+document.querySelectorAll(".ph-msg, .ph-chip, .rad-chip").forEach(function (el, i) {
+  var clip = el.closest(".clip"), s = parseFloat(clip.getAttribute("data-start")),
+      d = parseFloat(clip.getAttribute("data-duration"));
+  var w = document.createElement("div"); w.className = "drift"; w.id = "dr" + i;
+  el.parentNode.insertBefore(w, el); w.appendChild(el);
+  if (el.classList.contains("rad-chip")) { w.style.position = "absolute"; w.style.inset = "0"; }
+  tl.fromTo("#" + w.id, { y: 0 }, { y: -12, duration: d, ease: "sine.inOut" }, s);
 });
 
 // micro-motion that keeps long holds alive
