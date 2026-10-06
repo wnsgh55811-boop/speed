@@ -264,7 +264,9 @@ def c_tree(c, root, branches, root_at=None):
          f'<div class="troot" {c.a(root_at, "pop")}>{esc(root)}</div>']
     for x, (lab, ph, at) in zip(xs, branches):
         inner = (f'<div class="tph">{img(ph)}</div>' if ph else "")
-        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(at, "up")}>{inner}'
+        # the leaf rises as its branch line reaches it, not before
+        later = (at, 0.55) if isinstance(at, int) else at + 0.55
+        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(later, "up")}>{inner}'
                  f'<div class="tlab">{esc(lab)}</div></div>')
     h.append("</div>")
     return "".join(h)
@@ -454,11 +456,20 @@ def caption_cards(tl, mute):
     for a, b in zip(out, out[1:]):
         if 0 < b[0] - a[1] < 0.45:
             a[1] = b[0]
+    # back-to-back cards cross-fade: the old one lingers 0.12s and fades out
+    # while the new one fades up, instead of swapping on a single frame
+    for a in out:
+        a.append(None)
+    for a, b in zip(out, out[1:]):
+        if abs(b[0] - a[1]) < 0.01:
+            a[3] = a[1]
+            a[1] += 0.12
     return out
 
 
 # ── main ────────────────────────────────────────────────────────────────────
 FPS = 30
+XF = 0.4          # scene-to-scene dissolve: each clip lingers this long under the next
 PART_MAX = 46.0   # seconds per render part: keeps each capture light and short
 
 
@@ -481,29 +492,35 @@ def emit_doc(plan, tl, k0, k1, T0, T1, audio):
         body = COMP[sc["kind"]](c, **args)
         cls, inner, tag = background(k, sc.get("bg"), plan._bgprev[:k])
         d = t1 - t0
+        # every clip but the film's last lingers XF under the next one, which
+        # fades in on top of it — a dissolve instead of a hard cut
+        dc = d + (XF if k < len(scenes) - 1 else 0.0)
         bg_html.append(
-            f'<div class="clip" id="bg{sid}" data-start="{t0:.3f}" data-duration="{d:.3f}" '
+            f'<div class="clip" id="bg{sid}" data-start="{t0:.3f}" data-duration="{dc:.3f}" '
             f'data-track-index="0"><div class="layer"><div class="bgmove {cls}" id="bm{sid}" '
             f'data-layout-allow-overflow>{inner}</div></div></div>')
         fg_html.append(
-            f'<div class="clip" id="{sid}" data-start="{t0:.3f}" data-duration="{d:.3f}" '
+            f'<div class="clip" id="{sid}" data-start="{t0:.3f}" data-duration="{dc:.3f}" '
             f'data-track-index="1"><div class="fgin" id="fi{sid}">{body}</div></div>')
         sc_meta.append({"id": sid, "t": round(t0, 3), "d": round(d, 3), "ph": tag == "photo",
-                        "first": k == 0, "last": k == len(scenes) - 1})
+                        "first": k == 0, "last": k == len(scenes) - 1,
+                        "fin": k != k0})   # a part's opening scene is dissolved in post
     n = 0
-    for s, e, txt in plan._caps:
+    tail = XF if k1 < len(scenes) else 0.0      # parts carry an XF tail for the post dissolve
+    for s, e, txt, fo in plan._caps:
         if s >= T1 or e <= T0:
             continue
+        out = f' data-out="{fo - T0:.3f}"' if fo is not None and T0 <= fo < T1 + tail else ""
         cont = ' data-cont="1"' if s < T0 - 1e-6 else ""
-        s, e = max(s, T0) - T0, min(e, T1) - T0
+        s, e = max(s, T0) - T0, min(e, T1 + tail) - T0
         if e - s < 0.05:
             continue
         cap_html.append(
-            f'<div class="clip" id="cap{n:03d}"{cont} data-start="{s:.3f}" data-duration="{e - s:.3f}" '
+            f'<div class="clip" id="cap{n:03d}"{cont}{out} data-start="{s:.3f}" data-duration="{e - s:.3f}" '
             f'data-track-index="3"><div class="cap-wrap"><div class="cap-scrim" '
             f'data-layout-allow-overflow></div><div class="cap">{esc(txt)}</div></div></div>')
         n += 1
-    dur = T1 - T0
+    dur = T1 - T0 + tail
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
     css += open(os.path.join(HERE, "scenes.css"), encoding="utf-8").read()
     js = open(os.path.join(HERE, "scenes.js"), encoding="utf-8").read()
@@ -585,7 +602,8 @@ def main(proj):
         for ln in ("assets", "vendor"):   # each part is its own one-root project
             if not os.path.lexists(os.path.join(d, ln)):
                 os.symlink(os.path.join("..", "..", ln), os.path.join(d, ln))
-        manifest.append({"file": name, "t0": T0, "t1": T1, "frames": round((T1 - T0) * FPS)})
+        manifest.append({"file": name, "t0": T0, "t1": T1, "frames": round((T1 - T0) * FPS),
+                         "tail": round((XF if b < len(scenes) else 0) * FPS)})
     json.dump(manifest, open(os.path.join(pdir, "manifest.json"), "w"), indent=1)
 
     print(f"wrote index.html: {total:.2f}s · {len(scenes)} scenes · {len(plan._caps)} caption cards")

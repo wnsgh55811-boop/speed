@@ -1,5 +1,6 @@
 // Timeline for scenes.py compositions. Expects SC (scene meta) and CAPN.
 var tl = gsap.timeline({ paused: true });
+var XF = 0.4;   // must match scenes.py XF
 function pad(n) { return String(n).padStart(3, "0"); }
 
 // plates drift so no frame is ever dead still
@@ -7,27 +8,31 @@ SC.forEach(function (s, i) {
   var dir = (i % 2) ? 1 : -1;
   tl.fromTo("#bm" + s.id, { scale: s.ph ? 1.06 : 1.0, xPercent: 0 },
     { scale: s.ph ? 1.0 : 1.045, xPercent: dir * 0.9, duration: s.d, ease: "sine.inOut" }, s.t);
-  // content breathes a touch over the scene, then clears just before the cut
-  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: s.d, ease: "none" }, s.t);
-  if (!s.last && s.d > 0.8)
-    tl.to("#fi" + s.id, { opacity: 0, duration: 0.16, ease: "power1.in" }, s.t + s.d - 0.16);
+  // content breathes a touch over the scene
+  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: s.d + XF, ease: "none" }, s.t);
+  // dissolve in over the previous scene, which lingers XF underneath
+  if (s.fin) {
+    tl.fromTo("#bg" + s.id + " > .layer", { opacity: 0 }, { opacity: 1, duration: XF, ease: "sine.inOut" }, s.t);
+    tl.fromTo("#" + s.id + " > .fgin", { opacity: 0 }, { opacity: 1, duration: XF, ease: "sine.inOut" }, s.t);
+  }
 });
 
 // the cold open hits on frame 0: no fade from black, a fast push-in instead
 if (SC.length && SC[0].first) tl.fromTo("#bm" + SC[0].id, { scale: 1.16 }, { scale: 1.04, duration: 1.2, ease: "expo.out" }, 0);
 
+// Long, soft-landing entrances: nothing snaps, nothing bounces past its mark.
 var FX = {
-  up:    [{ opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }],
-  rise:  [{ opacity: 0, yPercent: 40 }, { opacity: 1, yPercent: 0, duration: 0.55, ease: "power3.out" }],
-  left:  [{ opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }],
-  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }],
-  pop:   [{ opacity: 0, scale: 0.82 }, { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.6)" }],
-  msg:   [{ opacity: 0, y: 26, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "back.out(1.5)" }],
-  slam:  [{ opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.42, ease: "power4.out" }],
-  stamp: [{ opacity: 0, scale: 2.2, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.38, ease: "power4.in" }],
-  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }],
-  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }],
-  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }]
+  up:    [{ opacity: 0, y: 46, scale: 0.985 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }],
+  rise:  [{ opacity: 0, yPercent: 32 }, { opacity: 1, yPercent: 0, duration: 0.9, ease: "power3.out" }],
+  left:  [{ opacity: 0, x: -48 }, { opacity: 1, x: 0, duration: 0.85, ease: "power3.out" }],
+  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.7, ease: "sine.inOut" }],
+  pop:   [{ opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.85, ease: "power3.out" }],
+  msg:   [{ opacity: 0, y: 30, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "power3.out" }],
+  slam:  [{ opacity: 0, scale: 1.12, y: 18 }, { opacity: 1, scale: 1, y: 0, duration: 0.85, ease: "expo.out" }],
+  stamp: [{ opacity: 0, scale: 1.6, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.6, ease: "power3.out" }],
+  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }],
+  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "sine.inOut" }],
+  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.7, ease: "sine.inOut" }]
 };
 
 document.querySelectorAll("[data-at]").forEach(function (el) {
@@ -36,10 +41,10 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
   var sel = "#" + el.id;
   if (fx === "meter") {
     var a = parseFloat(el.getAttribute("data-from")), b = parseFloat(el.getAttribute("data-to"));
-    tl.fromTo(sel, { xPercent: (a - 1) * 100 }, { xPercent: (b - 1) * 100, duration: 1.3, ease: "power2.inOut" }, t);
+    tl.fromTo(sel, { xPercent: (a - 1) * 100 }, { xPercent: (b - 1) * 100, duration: 1.7, ease: "power2.inOut" }, t);
   } else if (fx === "knob") {
     var p = parseFloat(el.getAttribute("data-pos"));
-    tl.fromTo(sel, { x: 0 }, { x: (p - 0.5) * 640, duration: 0.9, ease: "power3.inOut" }, t);
+    tl.fromTo(sel, { x: 0 }, { x: (p - 0.5) * 640, duration: 1.3, ease: "power2.inOut" }, t);
   } else if (fx === "gap") {
     var g0 = parseFloat(el.getAttribute("data-from")), g1 = parseFloat(el.getAttribute("data-to"));
     var dx = (g0 - g1) / 2;
@@ -47,12 +52,12 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     tl.fromTo(sel + " .dp.her", { x: 0 }, { x: -dx, duration: 1.6, ease: "power2.inOut" }, t);
     tl.fromTo(sel + " .dline", { scaleX: 1 }, { scaleX: Math.max(0.02, g1 / g0), duration: 1.6, ease: "power2.inOut" }, t);
   } else if (fx === "tilt") {
-    tl.fromTo(sel + " .beam", { rotation: 0 }, { rotation: -9, duration: 1.0, ease: "power2.inOut" }, t);
+    tl.fromTo(sel + " .beam", { rotation: 0 }, { rotation: -9, duration: 1.5, ease: "sine.inOut" }, t);
     var lv = el.getAttribute("data-level-at");
-    if (lv) tl.to(sel + " .beam", { rotation: 0, duration: 1.0, ease: "power2.inOut" }, parseFloat(lv));
+    if (lv) tl.to(sel + " .beam", { rotation: 0, duration: 1.5, ease: "sine.inOut" }, parseFloat(lv));
   } else if (fx === "count") {
     var o = { v: 0 }, n = parseInt(el.getAttribute("data-count"), 10);
-    tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2 }, t);
+    tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, t);
     tl.to(o, { v: n, duration: 1.1, ease: "power1.out",
       onUpdate: function () { el.textContent = Math.round(o.v) + "개"; } }, t);
   } else if (FX[fx]) {
@@ -60,7 +65,7 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
   }
   // checklist rows tick their box a beat after they land
   if (el.classList.contains("chk"))
-    tl.fromTo(sel + " .tickpath", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out" }, t + 0.25);
+    tl.fromTo(sel + " .tickpath", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, t + 0.3);
 });
 
 // Rows that reveal left → right (chips, cards, A → B): the row slides so the
@@ -81,7 +86,8 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     var dx = (W - maxR) / 2;
     if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
     // finish the slide before the new item lands, so nothing pokes past the frame
-    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.42, ease: "power3.inOut" }, Math.max(0, st.t - 0.45));
+    // glide while the new item eases in, so the row and the reveal move as one
+    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.95, ease: "power2.inOut" }, Math.max(0, st.t - 0.35));
     last = dx;
   });
 });
@@ -121,9 +127,13 @@ document.querySelectorAll(".chat-dot").forEach(function (el, i) {
 for (var c = 0; c < CAPN; c++) {
   var cel = document.getElementById("cap" + pad(c));
   if (cel.getAttribute("data-cont")) continue;   // carried over a part cut: already showing
-  tl.fromTo("#cap" + pad(c) + " .cap", { opacity: 0, yPercent: 22 },
-    { opacity: 1, yPercent: 0, duration: 0.18, ease: "power2.out" }, parseFloat(cel.getAttribute("data-start")));
+  tl.fromTo("#cap" + pad(c) + " .cap", { opacity: 0, yPercent: 14 },
+    { opacity: 1, yPercent: 0, duration: 0.28, ease: "power1.in" }, parseFloat(cel.getAttribute("data-start")));
 }
+// back-to-back cards: the outgoing one fades as the next fades up
+document.querySelectorAll(".clip[data-out]").forEach(function (el) {
+  tl.to("#" + el.id + " .cap", { opacity: 0, duration: 0.12, ease: "power1.out" }, parseFloat(el.getAttribute("data-out")));
+});
 
 window.__timelines = window.__timelines || {};
 window.__timelines["main"] = tl;
