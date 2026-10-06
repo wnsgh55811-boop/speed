@@ -22,27 +22,57 @@ SC.forEach(function (s, i) {
 // the cold open is live on frame 0: a slow push-in, no fade from black
 if (SC.length && SC[0].first) tl.fromTo("#bm" + SC[0].id, { scale: 1.12 }, { scale: 1.03, duration: 2.6, ease: "power2.out" }, 0);
 
-// entrances: soft ease-outs, no overshoot, long enough to read as motion
+// entrances: long, soft glides (move + fade + a touch of blur), no overshoot
+var B0 = "blur(7px)", B1 = "blur(0px)";
 var FX = {
-  up:    [{ opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.75, ease: "power2.out" }],
-  rise:  [{ opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }],
-  left:  [{ opacity: 0, x: -34 }, { opacity: 1, x: 0, duration: 0.7, ease: "power2.out" }],
-  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }],
-  pop:   [{ opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.75, ease: "power3.out" }],
-  msg:   [{ opacity: 0, y: 22, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }],
-  slam:  [{ opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }],
-  stamp: [{ opacity: 0, scale: 1.8, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.5, ease: "power3.in" }],
-  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }],
-  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" }],
-  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.6, ease: "sine.inOut" }],
-  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "power3.out" }],
+  up:    [{ opacity: 0, y: 40, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 1.0, ease: "power2.out" }],
+  rise:  [{ opacity: 0, y: 44, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 1.05, ease: "power2.out" }],
+  left:  [{ opacity: 0, x: -44, filter: B0 }, { opacity: 1, x: 0, filter: B1, duration: 0.95, ease: "power2.out" }],
+  fade:  [{ opacity: 0, filter: B0 }, { opacity: 1, filter: B1, duration: 0.9, ease: "sine.inOut" }],
+  pop:   [{ opacity: 0, scale: 0.94, filter: B0 }, { opacity: 1, scale: 1, filter: B1, duration: 1.0, ease: "power2.out" }],
+  msg:   [{ opacity: 0, y: 30, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 0.9, ease: "power2.out" }],
+  slam:  [{ opacity: 0, scale: 1.15, filter: B0 }, { opacity: 1, scale: 1, filter: B1, duration: 0.9, ease: "power2.out" }],
+  stamp: [{ opacity: 0, scale: 1.6, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.55, ease: "power3.in" }],
+  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.75, ease: "power2.inOut" }],
+  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.8, ease: "sine.inOut" }],
+  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 1.0, ease: "power2.inOut" }],
   type:  [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.0, ease: "steps(14)" }]
 };
+
+// Strokes draw with their real length. pathLength="1" + dashoffset tweens
+// rendered as nothing-then-everything in the capture, so measure each path
+// once and drive the dash in user units instead.
+var MEAS = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+MEAS.setAttribute("style", "position:fixed;left:-9999px;top:0;width:10px;height:10px");
+document.body.appendChild(MEAS);
+document.querySelectorAll("[pathLength]").forEach(function (el) {
+  var L;
+  if (el.tagName.toLowerCase() === "circle") L = 2 * Math.PI * parseFloat(el.getAttribute("r"));
+  else {
+    var m = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    m.setAttribute("d", el.getAttribute("d")); MEAS.appendChild(m);
+    L = m.getTotalLength(); MEAS.removeChild(m);
+  }
+  L = Math.max(1, L);
+  el.removeAttribute("pathLength");
+  el.setAttribute("data-len", L);
+  el.style.strokeDasharray = L + " " + L;
+  el.style.strokeDashoffset = el.classList.contains("t-ring") ? 0 : L;
+});
+function LEN(el) { return parseFloat(el.getAttribute("data-len")) || 1; }
+var ROW = ".flow, .cards, .morph";
 
 document.querySelectorAll("[data-at]").forEach(function (el) {
   var t = parseFloat(el.getAttribute("data-at"));
   var fx = el.getAttribute("data-fx");
   var sel = "#" + el.id;
+  var dur = parseFloat(el.getAttribute("data-dur")) || 0;
+  if (el.parentNode && el.parentNode.matches && el.parentNode.matches(ROW)) return;   // rows glide as a unit, below
+  if (fx === "draw") {
+    var L = LEN(el);
+    tl.fromTo(sel, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: dur || 1.3, ease: "power2.inOut" }, t);
+    return;
+  }
   if (fx === "meter") {
     var a = parseFloat(el.getAttribute("data-from")), b = parseFloat(el.getAttribute("data-to"));
     tl.fromTo(sel, { xPercent: (a - 1) * 100 }, { xPercent: (b - 1) * 100, duration: 1.3, ease: "power2.inOut" }, t);
@@ -53,7 +83,8 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     // the ring empties over the real number of seconds while the digit counts up
     var secs = parseFloat(el.getAttribute("data-secs")), num = el.querySelector(".t-num"), oc = { v: 0 };
     tl.fromTo(el, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power3.out" }, t - 0.35);
-    tl.fromTo(sel + " .t-ring", { strokeDashoffset: 0 }, { strokeDashoffset: 1, duration: secs, ease: "none" }, t);
+    var ring = el.querySelector(".t-ring");
+    tl.fromTo(sel + " .t-ring", { strokeDashoffset: 0 }, { strokeDashoffset: LEN(ring), duration: secs, ease: "none" }, t);
     tl.fromTo(oc, { v: 0 }, { v: secs, duration: secs, ease: "none",
       onUpdate: function () { num.innerHTML = oc.v.toFixed(1) + "<small>초</small>"; } }, t);
     tl.fromTo(sel + " svg", { scale: 1 }, { scale: 1.04, duration: 0.5, ease: "sine.inOut", yoyo: true,
@@ -80,31 +111,38 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     tl.to(o, { v: n, duration: 1.1, ease: "power1.out",
       onUpdate: function () { el.textContent = Math.round(o.v) + "개"; } }, t);
   } else if (FX[fx]) {
-    tl.fromTo(sel, FX[fx][0], FX[fx][1], t);
+    var to = Object.assign({}, FX[fx][1]);
+    if (dur) to.duration = dur;
+    tl.fromTo(sel, FX[fx][0], to, t);
   }
   // checklist rows tick their box a beat after they land
   if (el.classList.contains("chk"))
-    tl.fromTo(sel + " .tickpath", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out" }, t + 0.25);
+    tl.fromTo(sel + " .tickpath", { strokeDashoffset: LEN(el.querySelector(".tickpath")) }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut" }, t + 0.35);
 });
 
 // Rows that reveal left → right (chips, cards, A → B): the row slides so the
 // part already on screen stays optically centred, instead of hugging the left
 // while the later items are still invisible.
-document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
+document.querySelectorAll(ROW).forEach(function (row, i) {
   var kids = Array.prototype.filter.call(row.children, function (el) { return el.hasAttribute("data-at"); });
-  if (kids.length < 2) return;
+  if (!kids.length) return;
   row.id = row.id || "rw" + i;
   var W = row.offsetWidth, steps = [];
   kids.forEach(function (el) {
-    steps.push({ t: parseFloat(el.getAttribute("data-at")), r: el.offsetLeft + el.offsetWidth });
+    steps.push({ el: el, t: parseFloat(el.getAttribute("data-at")), r: el.offsetLeft + el.offsetWidth });
   });
   steps.sort(function (a, b) { return a.t - b.t; });
-  var maxR = 0, last = null;
+  var maxR = 0, last = null, LEAD = 0.4, GLIDE = 1.0;
   steps.forEach(function (st, n) {
     maxR = Math.max(maxR, st.r);
-    var dx = (W - maxR) / 2;
-    if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
-    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.8, ease: "power2.inOut" }, st.t - 0.75);
+    var dx = (W - maxR) / 2, sel = "#" + st.el.id;
+    if (n === 0) {
+      tl.set("#" + row.id, { x: dx }, 0);
+      tl.fromTo(sel, { opacity: 0, y: 30, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 1.0, ease: "power2.out" }, st.t);
+    } else {
+      if (dx !== last) tl.to("#" + row.id, { x: dx, duration: GLIDE, ease: "power2.inOut" }, st.t - LEAD);
+      tl.fromTo(sel, { opacity: 0, x: 70, filter: B0 }, { opacity: 1, x: 0, filter: B1, duration: GLIDE, ease: "power2.inOut" }, st.t - LEAD);
+    }
     last = dx;
   });
 });

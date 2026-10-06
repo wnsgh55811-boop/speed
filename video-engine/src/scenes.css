@@ -348,3 +348,4 @@
 .photo-stage .drift{display:flex;justify-content:center;width:100%}
 .photo-stage .msg{align-self:center;align-items:center}
 .tree-stage.nophoto{transform:translateY(150px)}
+.photo-stage.mid{justify-content:center;padding:0}

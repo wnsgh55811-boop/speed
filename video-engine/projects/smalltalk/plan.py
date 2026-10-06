@@ -51,7 +51,7 @@ add(a=38, kind="chat", bg="bg-canvas", title="다시 조용해지고, 또",
 add(a=43, kind="flow", bg="bg-teal", title="그리고 또 침묵",
     items=[("질문", 43, "q"), ("짧은 대답", (43, 0.35), "a"), ("침묵", (43, 0.7), "dim")], loop=True)
 add(a=45, kind="photo", bg="photo:br_walk_home", quote="여자랑 스몰토크하는 게|왜 이렇게 재미가 없지?",
-    at_quote=46, who="m", mute=[46])
+    at_quote=46, who="m", pos="mid", mute=[46])
 add(a=47, kind="search", bg="soft:br_phone_list", title="다음 소개팅 전에", query="소개팅 질문 리스트",
     at_query=48, results=[("여자와 대화 소재 100가지", 49), ("첫 만남에서 하면 좋은 질문", 50),
                           ("MBTI별 대화법", 51)], mute=[49, 50, 51])
@@ -203,7 +203,7 @@ add(a=248, kind="cards", bg="bg-canvas", vs=True,
 
 # ── 5b  the travel example ──────────────────────────────────────────────────
 add(a=254, kind="photo", bg="photo:br_planner", quote="저는 여행 가면|계획을 엄청 많이 세워요.",
-    at_quote=257, who="w", mute=[257])
+    at_quote=257, who="w", pos="mid", mute=[257])
 add(a=258, kind="chat", bg="bg-ember", title="하이에나는", icon="ico_hyena",
     msgs=[("m", "여행 좋아하세요?", 260), ("m", "어디 가봤어요?", 261),
           ("m", "가장 좋았던 곳이 어디예요?", 262, "새 정보만 요청")], mute=[260, 261, 262])
@@ -271,7 +271,7 @@ add(a=350, kind="morph", bg="bg-canvas", title="먼저 바뀌어야 하는 것",
 add(a=353, kind="typo", bg="bg-ink", kicker=("다음에 스몰토크가 끊겼다면", 354),
     rows=[("새 질문부터 찾지 말 것", 356, "lg am")])
 add(a=357, kind="radial", bg="bg-teal", key="ico_eye", title="눈앞에 있는 것들",
-    items=[("방금 한 말", 357), ("표정", 358), ("행동", 359), ("들고 있는 물건", 360), ("둘이 있는 장소", 361)],
+    items=[("방금 한 말", (357, 0.55)), ("표정", 358), ("행동", 359), ("들고 있는 물건", 360), ("둘이 있는 장소", 361)],
     mute=[358, 359])
 add(a=363, kind="meter", bg="bg-canvas", title="대화할 거리", start=0.1, end=0.9, at=364,
     left="없다", right="이미 많다", tone="cyan")

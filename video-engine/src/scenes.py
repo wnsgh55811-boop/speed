@@ -54,16 +54,17 @@ class Ctx:
             return max(self.t0, self.st[at[0]] + at[1])
         return self.t0 + at
 
-    def a(self, at, fx="up", off=0.0):
+    def a(self, at, fx="up", off=0.0, dur=None):
         """Attribute string for a timed element. `off` delays it after its
         cue, so a dependent piece (a leaf after its branch, B after the arrow
         pointing at it) lands once the thing leading to it has arrived."""
         self.n += 1
-        t = min(self.t(at) + off, max(self.t(at), self.t1 - 0.25))
+        t = max(self.t0, min(self.t(at) + off, max(self.t(at), self.t1 - 0.25)))
         if not (self.t0 - 0.01 <= t < self.t1 - 0.2):
             print(f"  ! {self.sid} beat {self.n} at={at!r} -> {t:.2f}s "
                   f"outside scene [{self.t0:.2f}, {self.t1:.2f})", file=sys.stderr)
-        return f'id="{self.sid}-b{self.n}" data-at="{t:.2f}" data-fx="{fx}"'
+        d = f' data-dur="{dur}"' if dur else ""
+        return f'id="{self.sid}-b{self.n}" data-at="{t:.2f}" data-fx="{fx}"{d}'
 
 
 def img(key, cls="", style=""):
@@ -278,14 +279,14 @@ def c_tree(c, root, branches, root_at=None):
     xs = [960 + (k - (n - 1) / 2) * 560 - 240 for k in range(n)]   # leaf left edges
     paths = "".join(
         f'<path class="tedge" pathLength="1" d="M960 210 C960 300 {x+240:.0f} 260 {x+240:.0f} 360" '
-        f'{c.a(at, "draw")}/>' for x, (_, _, at) in zip(xs, branches))
+        f'{c.a(at, "draw", 0.0, 1.0)}/>' for x, (_, _, at) in zip(xs, branches))
     nophoto = all(ph is None for _, ph, _ in branches)
     h = [f'<div class="stage tree-stage{" nophoto" if nophoto else ""}"><div class="scrim wide"></div>',
          f'<svg class="tree-svg" viewBox="0 0 1920 1080">{paths}</svg>',
          f'<div class="troot" {c.a(root_at, "pop")}>{esc(root)}</div>']
     for x, (lab, ph, at) in zip(xs, branches):
         inner = (f'<div class="tph">{img(ph)}</div>' if ph else "")
-        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(at, "up", 0.55)}>{inner}'
+        h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(at, "up", 0.75)}>{inner}'
                  f'<div class="tlab">{esc(lab)}</div></div>')
     h.append("</div>")
     return "".join(h)
@@ -501,7 +502,7 @@ def c_radial(c, key, items, title=None, foot=None, at_foot=None):
     cx, cy, rx, ry = 960, 500, 600, 250
     pts = [(cx + rx * math.cos(-math.pi / 2 + 2 * math.pi * k / n),
             cy + ry * math.sin(-math.pi / 2 + 2 * math.pi * k / n)) for k in range(n)]
-    sp = "".join(f'<path class="spoke" pathLength="1" d="M{cx} {cy} L{x:.0f} {y:.0f}" {c.a(at, "draw")}/>'
+    sp = "".join(f'<path class="spoke" pathLength="1" d="M{cx} {cy} L{x:.0f} {y:.0f}" {c.a(at, "draw", -0.55, 0.6)}/>'
                  for (x, y), (_, at) in zip(pts, items))
     h = ['<div class="stage radial"><div class="scrim wide"></div>',
          f'<svg class="tree-svg" viewBox="0 0 1920 1080">{sp}</svg>']
@@ -509,7 +510,7 @@ def c_radial(c, key, items, title=None, foot=None, at_foot=None):
         h.append(f'<div class="kicker rad-title" {c.a(None, "fade")}>{esc(title)}</div>')
     h.append(f'<div class="rad-ic" {c.a(None, "pop")}>{img(key, "icon3d floaty", "width:300px")}</div>')
     for (x, y), (txt, at) in zip(pts, items):
-        h.append(f'<div class="rad-chip" style="left:{x:.0f}px;top:{y:.0f}px" {c.a(at, "pop", 0.55)}>{esc(txt)}</div>')
+        h.append(f'<div class="rad-chip" style="left:{x:.0f}px;top:{y:.0f}px" {c.a(at, "pop", 0.0, 0.7)}>{esc(txt)}</div>')
     if foot:
         h.append(f'<div class="rad-foot sub" {c.a(at_foot, "fade")}>{esc(foot)}</div>')
     h.append("</div>")
