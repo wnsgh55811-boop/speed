@@ -132,18 +132,30 @@ document.querySelectorAll(ROW).forEach(function (row, i) {
     steps.push({ el: el, t: parseFloat(el.getAttribute("data-at")), r: el.offsetLeft + el.offsetWidth });
   });
   steps.sort(function (a, b) { return a.t - b.t; });
-  var maxR = 0, last = null, LEAD = 0.4, GLIDE = 1.0;
-  steps.forEach(function (st, n) {
-    maxR = Math.max(maxR, st.r);
-    var dx = (W - maxR) / 2, sel = "#" + st.el.id;
-    if (n === 0) {
-      tl.set("#" + row.id, { x: dx }, 0);
-      tl.fromTo(sel, { opacity: 0, y: 30, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 1.0, ease: "power2.out" }, st.t);
-    } else {
-      if (dx !== last) tl.to("#" + row.id, { x: dx, duration: GLIDE, ease: "power2.inOut" }, st.t - LEAD);
-      tl.fromTo(sel, { opacity: 0, x: 70, filter: B0 }, { opacity: 1, x: 0, filter: B1, duration: GLIDE, ease: "power2.inOut" }, st.t - LEAD);
-    }
+  // pieces that arrive within half a second of each other (an arrow and the
+  // chip it points at) share ONE glide — two overlapping glides on the same
+  // row fought each other and the row only moved once the first one ended
+  var LEAD = 0.4, GLIDE = 1.0, groups = [];
+  steps.forEach(function (st) {
+    var g = groups[groups.length - 1];
+    if (g && st.t - g.t < 0.5) g.items.push(st);
+    else groups.push({ t: st.t, items: [st] });
+  });
+  var maxR = 0, last = null;
+  groups.forEach(function (g, n) {
+    g.items.forEach(function (st) { maxR = Math.max(maxR, st.r); });
+    var dx = (W - maxR) / 2;
+    if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
+    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: GLIDE, ease: "power2.inOut" }, g.t - LEAD);
     last = dx;
+    g.items.forEach(function (st) {
+      var sel = "#" + st.el.id;
+      if (n === 0)
+        tl.fromTo(sel, { opacity: 0, y: 30, filter: B0 }, { opacity: 1, y: 0, filter: B1, duration: 1.0, ease: "power2.out" }, st.t);
+      else   // follows the glide in once the row has mostly made room: never clipped at the edge
+        tl.fromTo(sel, { opacity: 0, x: 40, filter: B0 }, { opacity: 1, x: 0, filter: B1, duration: 0.85, ease: "power2.out" },
+                  g.t - LEAD + 0.55 + (st.t - g.t));
+    });
   });
 });
 
