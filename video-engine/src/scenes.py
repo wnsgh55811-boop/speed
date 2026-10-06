@@ -261,14 +261,14 @@ def c_tree(c, root, branches, root_at=None):
     xs = [960 + (k - (n - 1) / 2) * 560 - 240 for k in range(n)]   # leaf left edges
     paths = "".join(
         f'<path class="tedge" pathLength="1" d="M960 210 C960 300 {x+240:.0f} 260 {x+240:.0f} 360" '
-        f'{c.a(at, "draw")}/>' for x, (_, _, at) in zip(xs, branches))
+        f'{c.a(at, "draw")} data-dur="1.1"/>' for x, (_, _, at) in zip(xs, branches))
     h = ['<div class="stage tree-stage"><div class="scrim wide"></div>',
          f'<svg class="tree-svg" viewBox="0 0 1920 1080">{paths}</svg>',
          f'<div class="troot" {c.a(root_at, "pop")}>{esc(root)}</div>']
     for x, (lab, ph, at) in zip(xs, branches):
         inner = (f'<div class="tph">{img(ph)}</div>' if ph else "")
         # the leaf rises as its branch line reaches it, not before
-        later = (at, 0.55) if isinstance(at, int) else at + 0.55
+        later = (at, 0.75) if isinstance(at, int) else at + 0.75
         h.append(f'<div class="tleaf" style="left:{x:.0f}px" {c.a(later, "up")}>{inner}'
                  f'<div class="tlab">{esc(lab)}</div></div>')
     h.append("</div>")
@@ -405,6 +405,311 @@ def c_cta(c, head, sub, at_sub, foot=None, at_foot=None):
         '</div>'])
 
 
+# ── more forms (so no layout carries more than two moments) ─────────────────
+def _path(points):
+    """data-path for the generic mover: [[t, x, y], ...] — first sets, rest glide."""
+    return "data-path='" + json.dumps([[round(t, 3), x, y] for t, x, y in points]) + "'"
+
+
+def c_ring(c, title, start, end, at, label=None, at_label=None, low="", high=""):
+    """Circular gauge: an arc that drains or fills on cue."""
+    R = 170
+    C = 2 * 3.14159265 * R
+    return "".join([
+        '<div class="stage"><div class="scrim"></div>',
+        f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+        '<div class="ring-wrap">',
+        f'<svg class="ring" width="440" height="440" viewBox="0 0 440 440" {c.a(None, "fade")}>',
+        f'<circle class="ring-track" cx="220" cy="220" r="{R}"/>',
+        f'<circle class="ring-arc" cx="220" cy="220" r="{R}" stroke-dasharray="{C:.1f}" '
+        f'stroke-dashoffset="{C * (1 - start):.1f}" data-c="{C:.1f}" data-from="{start}" '
+        f'data-to="{end}" {c.a(at, "ring")}/></svg>',
+        f'<div class="ring-ends"><span>{esc(low)}</span><span>{esc(high)}</span></div>',
+        '</div>',
+        (f'<div class="sub" {c.a(at_label if at_label is not None else at, "fade")}>{esc(label)}</div>'
+         if label else ""),
+        '</div>'])
+
+
+def c_phone(c, msgs, title=None):
+    """Lines as they would sit in a messenger, inside a phone."""
+    h = ['<div class="stage"><div class="phone" ' + c.a(None, "up") + '>',
+         '<div class="ph-top"><i></i></div>',
+         f'<div class="ph-head">{esc(title or "")}</div><div class="ph-body">']
+    for who, txt, at in msgs:
+        cls = "me" if who == "m" else "her"
+        h.append(f'<div class="pmsg {cls}" {c.a(at, "msg")}><span>{esc(txt)}</span></div>')
+    h.append('</div></div></div>')
+    return "".join(h)
+
+
+def c_split(c, left, right):
+    """Two full-height photo panels; the second slides in on its cue."""
+    def panel(p, side, fx):
+        return (f'<div class="sp {side}" {c.a(p.get("at"), fx)}>{img(p["photo"])}'
+                f'<div class="sp-txt"><span class="sp-n">{esc(p.get("n", ""))}</span>'
+                f'<span class="sp-h">{esc(p["head"])}</span></div></div>')
+    return ('<div class="split">' + panel(left, "l", "slideL") + panel(right, "r", "slideR")
+            + '<i class="sp-seam"></i></div>')
+
+
+def c_bars(c, title, bars, low="적음", high="많음"):
+    """Vertical bars that grow from the baseline. bars = [(label, frac, at, tone)]."""
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+         '<div class="vbars">',
+         f'<div class="vb-axis" {c.a(None, "fade")}><span>{esc(high)}</span><span>{esc(low)}</span></div>']
+    for lab, frac, at, tone in bars:
+        h.append(f'<div class="vb"><div class="vb-col"><i class="vb-fill {tone}" '
+                 f'style="height:{int(frac * 100)}%" {c.a(at, "grow")}></i></div>'
+                 f'<span class="vb-lab" {c.a(at, "fade")}>{esc(lab)}</span></div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_stairs(c, title, steps, down=False):
+    """A staircase; a marker hops onto each step as it is named."""
+    n, w, rise = len(steps), 340, 95
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+         f'<div class="stairs{" down" if down else ""}" style="width:{n * w}px">']
+    pts = []
+    for k, (lab, at) in enumerate(steps):
+        hgt = 130 + (k if not down else n - 1 - k) * rise
+        h.append(f'<div class="stp" style="left:{k * w}px;width:{w - 12}px;height:{hgt}px" {c.a(at, "grow")}>'
+                 f'<span>{esc(lab)}</span></div>')
+        pts.append((c.t(at), k * w + (w - 12) / 2 - 22, -hgt - 6))   # sits ON the step
+    pts = [(c.t0, pts[0][1], pts[0][2])] + pts
+    h.append(f'<i class="st-dot" {_path(pts)} {c.a(steps[0][1], "fade")}></i>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_pbub(c, msgs):
+    """Speech bubbles laid over a live photograph, tails toward the speakers."""
+    h = ['<div class="pbub-wrap">']
+    for k, m in enumerate(msgs):
+        who, txt, at = m[0], m[1], m[2]
+        tag = m[3] if len(m) > 3 else None
+        cls = "me" if who == "m" else "her"
+        lines = "".join(f'<span class="bl">{esc(x)}</span>' for x in txt.split("|"))
+        tg = f'<span class="btag">{esc(tag)}</span>' if tag else ""
+        h.append(f'<div class="pbb {cls}" style="--k:{k}" {c.a(at, "msg")}>'
+                 f'<div class="pbb-b">{lines}</div>{tg}</div>')
+    h.append('</div>')
+    return "".join(h)
+
+
+def c_quote(c, quotes):
+    """Editorial pull quotes. quotes = [(text, at, who)]."""
+    h = ['<div class="stage"><div class="scrim wide"></div><div class="quotes">']
+    for txt, at, who in quotes:
+        lines = "".join(f'<span class="bl">{esc(x)}</span>' for x in txt.split("|"))
+        h.append(f'<div class="qt" {c.a(at, "rise")}><i class="qmk">“</i>'
+                 f'<div class="qt-t">{lines}</div><span class="qt-w">— {esc(who)}</span></div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_lens(c, sentence, at_lens, dim, bright, at_bright):
+    """A loupe passes over a sentence and the bigger meaning comes up under it."""
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        f'<div class="lens-s" {c.a(None, "fade")}>{esc(sentence)}</div>',
+        f'<i class="lens" {_path([(c.t0, -420, 0), (c.t(at_lens) + 0.9, 0, 0), (c.t(at_bright) + 0.9, 380, 0)])} '
+        f'{c.a(at_lens, "fade")}></i>',
+        '<div class="lens-out">',
+        f'<span class="lo dim" {c.a(at_lens, "up")}>{esc(dim)}</span>',
+        f'<span class="lo-gt" {c.a(at_bright, "fade")}>&lt;</span>',
+        f'<span class="lo hot" {c.a(at_bright, "pop")}>{esc(bright)}</span>',
+        '</div></div>'])
+
+
+def c_highlight(c, pre, key, post, at_key, size="lg"):
+    """One sentence; a marker sweeps under the word that matters."""
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        f'<div class="hl {size} hlt" {c.a(None, "rise")}>{esc(pre)}'
+        f'<span class="mark-w"><i class="mark" {c.a(at_key, "mark")}></i>'
+        f'<span class="mark-t">{esc(key)}</span></span>{esc(post)}</div></div>'])
+
+
+def c_strikelist(c, title, items):
+    """items = [(text, at, strike_at or None, hot)] — wrong answers get a line."""
+    h = ['<div class="stage"><div class="scrim wide"></div>']
+    if title:
+        h.append(f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>')
+    h.append('<div class="slist">')
+    for txt, at, sat, hot in items:
+        s = f'<i class="strike-line" {c.a(sat, "strike")}></i>' if sat is not None else ""
+        h.append(f'<div class="sl-it{" hot" if hot else ""}" {c.a(at, "left")}>'
+                 f'<span class="tl-in">{esc(txt)}{s}</span></div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_cloud(c, center, chips, at_center=None):
+    """One topic in the middle; what it says about the person bursts out of it."""
+    import math
+    h = ['<div class="stage"><div class="scrim wide"></div><div class="cloud">',
+         f'<span class="cl-c" {c.a(at_center, "pop")}>{esc(center)}</span>']
+    n = len(chips)
+    for k, (txt, at) in enumerate(chips):
+        a = -math.pi / 2 + 2 * math.pi * k / n
+        x, y = math.cos(a) * 430, math.sin(a) * 210
+        h.append(f'<i class="cl-l" style="width:{math.hypot(x, y):.0f}px;transform:rotate({math.degrees(a):.1f}deg)" '
+                 f'{c.a(at, "fade")}></i>')
+        h.append(f'<span class="cl-k" style="--x:{x:.0f}px;--y:{y:.0f}px" '
+                 f'{_path([(c.t0, 0, 0), (c.t(at) + 0.7, x, y)])} {c.a(at, "fade")}>{esc(txt)}</span>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_alert(c, head, sub=None, at_sub=None):
+    """A warning mark that draws itself, then the line it warns about."""
+    return "".join([
+        '<div class="stage"><div class="scrim"></div>',
+        '<svg class="alert" width="220" height="200" viewBox="0 0 220 200">',
+        f'<path class="al-tri" d="M110 14 L206 184 H14 Z" {c.a(None, "draw")}/>',
+        f'<path class="al-bang" d="M110 70 V122" {c.a(0.5, "draw")}/>',
+        f'<circle class="al-dot" cx="110" cy="152" r="9" {c.a(0.9, "pop")}/></svg>',
+        f'<div class="hl lg" style="margin-top:30px" {c.a(0.3, "rise")}>{esc(head)}</div>',
+        (f'<div class="sub" {c.a(at_sub)}>{esc(sub)}</div>' if sub else ""),
+        '</div>'])
+
+
+def c_venn(c, left, right, at_b, mid, title=None):
+    """Two circles drift together; the overlap is what the scene is about."""
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        (f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>' if title else ""),
+        '<div class="venn">',
+        f'<div class="vc l" {_path([(c.t0, -40, 0), (c.t(at_b) + 0.9, 60, 0)])} {c.a(None, "pop")}><span>{esc(left)}</span></div>',
+        f'<div class="vc r" {_path([(c.t0, 40, 0), (c.t(at_b) + 0.9, -60, 0)])} {c.a(at_b, "pop")}><span>{esc(right)}</span></div>',
+        f'<span class="vmid" {c.a((at_b, 0.9) if isinstance(at_b, int) else at_b + 0.9, "pop")}>{esc(mid)}</span>',
+        '</div></div>'])
+
+
+def c_pulse(c, title, shape, at, label=None, at_label=None, tone="red"):
+    """A heartbeat line that draws left to right: 'rise' grows, 'spike' jumps."""
+    if shape == "rise":
+        d = "M0 200 " + " ".join(
+            f"L{x} {200 - (14 + x / 11) * (1 if (x // 40) % 2 else -1):.0f}" for x in range(40, 1401, 40))
+    else:
+        d = ("M0 200 H520 L560 186 L600 214 L640 200 H760 L800 30 L840 380 L880 120 L920 260 "
+             "L960 170 L1000 230 L1040 200 H1400")
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+        '<svg class="pulse" width="1400" height="400" viewBox="0 0 1400 400">',
+        '<path class="pl-base" d="M0 200 H1400"/>',
+        f'<path class="pl-line {tone}" d="{d}" {c.a(at, "draw")} data-dur="2.2"/></svg>',
+        (f'<div class="sub" {c.a(at_label)}>{esc(label)}</div>' if label else ""),
+        '</div>'])
+
+
+def c_orbitthink(c, key, thoughts):
+    """The figure in the middle, its worries hanging around it."""
+    pos = [("-640px", "-200px"), ("360px", "-120px"), ("-600px", "150px"), ("380px", "200px")]
+    h = ['<div class="othink">', f'<div class="ot-fig" {c.a(None, "rise")}>{cut(key, "paper")}</div>']
+    for (txt, at), (x, y) in zip(thoughts, pos):
+        h.append(f'<div class="ot-b" style="--x:{x};--y:{y}" {c.a(at, "pop")}>{esc(txt)}</div>')
+    h.append('</div>')
+    return "".join(h)
+
+
+def c_echo(c, key, text, at, copies=4):
+    """One worry repeating: the same bubble stacks up again and again."""
+    h = ['<div class="echo">', f'<div class="ec-fig" {c.a(None, "rise")}>{cut(key, "paper")}</div>',
+         '<div class="ec-stack">']
+    for k in range(copies):
+        at_k = (at, 0.45 * k) if isinstance(at, int) else at + 0.45 * k
+        h.append(f'<div class="ec-b" style="--k:{k}" {c.a(at_k, "msg")}>{esc(text)}</div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_timeline(c, title, nodes):
+    """A line that draws across, a marker travelling to each step."""
+    n = len(nodes)
+    xs = [140 + k * (1120 / (n - 1)) for k in range(n)]
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div>',
+         '<div class="tline-w">',
+         f'<svg class="tl-svg" width="1400" height="40" viewBox="0 0 1400 40"><path class="tl-path" '
+         f'd="M140 20 H1260" {c.a(nodes[0][1], "draw")} data-dur="{max(1.2, c.t(nodes[-1][1]) - c.t(nodes[0][1]) + 0.6):.2f}"/></svg>']
+    for x, (lab, at) in zip(xs, nodes):
+        h.append(f'<div class="tl-n" style="left:{x:.0f}px" {c.a(at, "pop")}><i></i><span>{esc(lab)}</span></div>')
+    pts = [(c.t0, xs[0], 0)] + [(c.t(at) + 0.5, x, 0) for x, (lab, at) in zip(xs, nodes)]
+    h.append(f'<i class="tl-dot" {_path(pts)} {c.a(nodes[0][1], "fade")}></i></div></div>')
+    return "".join(h)
+
+
+def c_iconbub(c, key, title, bubble, at_bub, size=420):
+    """An object on the left, the line it stands for on the right."""
+    lines = "".join(f'<span class="bl">{esc(x)}</span>' for x in bubble.split("|"))
+    return "".join([
+        '<div class="stage row-stage"><div class="scrim wide"></div>',
+        f'<div class="ib-l"><div class="icon-wrap floaty-w" {c.a(None, "pop")}>{img(key, "icon3d floaty", f"width:{size}px")}</div>',
+        f'<div class="hl md" {c.a(0.3)}>{esc(title)}</div></div>',
+        f'<div class="msg me" {c.a(at_bub, "msg")}><div class="bubble">{lines}</div></div>',
+        '</div>'])
+
+
+def c_lamps(c, title, items):
+    """Signals that switch on one by one."""
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div><div class="lamps">']
+    for txt, at in items:
+        h.append(f'<div class="lamp"><i class="lp-off"></i><i class="lp-on" {c.a(at, "pop")}></i>'
+                 f'<span {c.a(at, "up")}>{esc(txt)}</span></div>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_duo(c, key, title, left, right, at_l, at_r, size=360):
+    """An emblem with two qualities sliding in from either side."""
+    return "".join([
+        '<div class="stage"><div class="scrim wide"></div>',
+        f'<div class="icon-wrap" {c.a(None, "pop")}>{img(key, "icon3d floaty", f"width:{size}px")}</div>',
+        f'<div class="hl md" {c.a(0.25)}>{esc(title)}</div>',
+        '<div class="duo">',
+        f'<span class="duo-p l" {c.a(at_l, "inL")}>{esc(left)}</span>',
+        f'<span class="duo-p r" {c.a(at_r, "inR")}>{esc(right)}</span>',
+        '</div></div>'])
+
+
+def c_converge(c, title, chips, at_chips, center, at_center):
+    """Many topics scattered — then they collapse, and one point is left."""
+    import math
+    h = ['<div class="stage"><div class="scrim wide"></div>',
+         f'<div class="hl md gtitle" {c.a(None)}>{esc(title)}</div><div class="conv">']
+    n = len(chips)
+    for k, txt in enumerate(chips):
+        a = 2 * math.pi * k / n + 0.3
+        x, y = math.cos(a) * 520, math.sin(a) * 170
+        h.append(f'<span class="cv-k" {_path([(c.t0, x, y), (c.t(at_center) + 0.8, 0, 0)])} '
+                 f'{c.a(at_chips, "pop")} data-out-at="{c.t(at_center) + 0.5:.2f}">{esc(txt)}</span>')
+    h.append(f'<span class="cv-c" {c.a((at_center, 0.6) if isinstance(at_center, int) else at_center + 0.6, "pop")}>{esc(center)}</span>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_kinetic(c, words, shrink=None):
+    """Words rise out of a mask. shrink = (index, at) recedes an earlier word."""
+    h = ['<div class="stage"><div class="scrim wide"></div><div class="kin">']
+    for k, (txt, at, cls) in enumerate(words):
+        sh = (f' data-shrink-at="{c.t(shrink[1]):.2f}"' if shrink and shrink[0] == k else "")
+        h.append(f'<span class="kn-m"><span class="kn {cls}" {c.a(at, "mask")}{sh}>{esc(txt)}</span></span>')
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def c_iconside(c, key, title, **kw):
+    """The 3D object left, its meaning set large on the right."""
+    return c_icon(c, key, title, side=True, **kw)
+
+
 COMP = {k[2:]: v for k, v in globals().items() if k.startswith("c_")}
 
 
@@ -463,16 +768,13 @@ def caption_cards(tl, mute):
     # while the new one fades up, instead of swapping on a single frame
     for a in out:
         a.append(None)
-    for a, b in zip(out, out[1:]):
-        if abs(b[0] - a[1]) < 0.01:
-            a[3] = a[1]
-            a[1] += 0.12
+    # (no overlap: a card holds until the next one replaces it, no fades)
     return out
 
 
 # ── main ────────────────────────────────────────────────────────────────────
 FPS = 30
-XF = 0.4          # scene-to-scene dissolve: each clip lingers this long under the next
+XF = 0.0          # scenes hand off without overlap (a dissolve read as clutter)
 PART_MAX = 46.0   # seconds per render part: keeps each capture light and short
 
 
@@ -545,7 +847,7 @@ def emit_doc(plan, tl, k0, k1, T0, T1, audio):
 {chr(10).join(bg_html)}
 {chr(10).join(fg_html)}
   <div class="clip" id="ovl" data-start="0" data-duration="{dur:.3f}" data-track-index="2">
-    <div class="ovl"><div class="grain"></div><div class="vig"></div></div>
+    <div class="ovl"><div class="grain"></div><div class="vig"></div><div class="cap-band"></div></div>
   </div>
 {chr(10).join(cap_html)}
   <div class="clip" id="wmclip" data-start="0" data-duration="{dur:.3f}" data-track-index="4">

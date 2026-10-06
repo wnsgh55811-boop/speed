@@ -1,6 +1,6 @@
 // Timeline for scenes.py compositions. Expects SC (scene meta) and CAPN.
 var tl = gsap.timeline({ paused: true });
-var XF = 0.4;   // must match scenes.py XF
+var XF = 0;     // scenes no longer overlap (see scenes.py XF)
 function pad(n) { return String(n).padStart(3, "0"); }
 
 // plates drift so no frame is ever dead still
@@ -9,12 +9,10 @@ SC.forEach(function (s, i) {
   tl.fromTo("#bm" + s.id, { scale: s.ph ? 1.06 : 1.0, xPercent: 0 },
     { scale: s.ph ? 1.0 : 1.045, xPercent: dir * 0.9, duration: s.d, ease: "sine.inOut" }, s.t);
   // content breathes a touch over the scene
-  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: s.d + XF, ease: "none" }, s.t);
-  // dissolve in over the previous scene, which lingers XF underneath
-  if (s.fin) {
-    tl.fromTo("#bg" + s.id + " > .layer", { opacity: 0 }, { opacity: 1, duration: XF, ease: "sine.inOut" }, s.t);
-    tl.fromTo("#" + s.id + " > .fgin", { opacity: 0 }, { opacity: 1, duration: XF, ease: "sine.inOut" }, s.t);
-  }
+  tl.fromTo("#fi" + s.id, { scale: 1 }, { scale: 1.018, duration: s.d, ease: "none" }, s.t);
+  // quick, clean hand-off: the old content clears in 0.12s, the new one is up in 0.2s
+  if (s.fin) tl.fromTo("#fi" + s.id, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power1.out" }, s.t);
+  if (!s.last && s.d > 0.6) tl.to("#fi" + s.id, { opacity: 0, duration: 0.12, ease: "power1.in" }, s.t + s.d - 0.12);
 });
 
 // the cold open hits on frame 0: no fade from black, a fast push-in instead
@@ -22,24 +20,61 @@ if (SC.length && SC[0].first) tl.fromTo("#bm" + SC[0].id, { scale: 1.16 }, { sca
 
 // Long, soft-landing entrances: nothing snaps, nothing bounces past its mark.
 var FX = {
-  up:    [{ opacity: 0, y: 46, scale: 0.985 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }],
-  rise:  [{ opacity: 0, yPercent: 32 }, { opacity: 1, yPercent: 0, duration: 0.9, ease: "power3.out" }],
-  left:  [{ opacity: 0, x: -48 }, { opacity: 1, x: 0, duration: 0.85, ease: "power3.out" }],
-  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.7, ease: "sine.inOut" }],
-  pop:   [{ opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.85, ease: "power3.out" }],
-  msg:   [{ opacity: 0, y: 30, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: "power3.out" }],
-  slam:  [{ opacity: 0, scale: 1.12, y: 18 }, { opacity: 1, scale: 1, y: 0, duration: 0.85, ease: "expo.out" }],
-  stamp: [{ opacity: 0, scale: 1.6, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.6, ease: "power3.out" }],
-  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }],
-  draw:  [{ strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, ease: "sine.inOut" }],
-  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.7, ease: "sine.inOut" }]
+  up:    [{ opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }],
+  rise:  [{ opacity: 0, yPercent: 30 }, { opacity: 1, yPercent: 0, duration: 0.6, ease: "power3.out" }],
+  left:  [{ opacity: 0, x: -48 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }],
+  fade:  [{ opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power1.out" }],
+  pop:   [{ opacity: 0, scale: 0.88 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }],
+  msg:   [{ opacity: 0, y: 28, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }],
+  slam:  [{ opacity: 0, scale: 1.12, y: 18 }, { opacity: 1, scale: 1, y: 0, duration: 0.7, ease: "expo.out" }],
+  stamp: [{ opacity: 0, scale: 1.6, rotation: -14 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.5, ease: "power3.out" }],
+  strike:[{ scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }],
+  dim:   [{ opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }],
+  grow:  [{ scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "power3.out" }],
+  slideL:[{ xPercent: -100 }, { xPercent: 0, duration: 0.8, ease: "power3.out" }],
+  slideR:[{ xPercent: 100 }, { xPercent: 0, duration: 0.8, ease: "power3.out" }],
+  mark:  [{ scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power2.inOut" }],
+  mask:  [{ yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power3.out" }],
+  inL:   [{ opacity: 0, x: -160 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }],
+  inR:   [{ opacity: 0, x: 160 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }]
 };
+
+// Lines draw from their root to their tip. Lengths are measured, not assumed:
+// a pathLength + CSS dash combination silently skipped the animation before,
+// so the strokes just popped in.
+function drawPath(el, t, dur) {
+  el.removeAttribute("pathLength");
+  var L = el.getTotalLength();
+  el.style.strokeDasharray = "";
+  el.setAttribute("stroke-dasharray", L + " " + L);
+  tl.fromTo(el, { attr: { "stroke-dashoffset": L } }, { attr: { "stroke-dashoffset": 0 }, duration: dur, ease: "power1.inOut" }, t);
+  return L;
+}
+
 
 document.querySelectorAll("[data-at]").forEach(function (el) {
   var t = parseFloat(el.getAttribute("data-at"));
   var fx = el.getAttribute("data-fx");
   var sel = "#" + el.id;
-  if (fx === "meter") {
+  if (fx === "draw") {
+    var dur = parseFloat(el.getAttribute("data-dur")) || 1.5;
+    var L = drawPath(el, t, dur);
+    // chart lines carry a glowing tip that rides the end of the stroke
+    if (el.classList.contains("sline")) {
+      var tip = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      tip.setAttribute("r", "11"); tip.setAttribute("class", "stip " + (el.getAttribute("class") || ""));
+      el.parentNode.appendChild(tip);
+      var p0 = el.getPointAtLength(0); tip.setAttribute("cx", p0.x); tip.setAttribute("cy", p0.y);
+      tl.fromTo(tip, { opacity: 0 }, { opacity: 1, duration: 0.2 }, t);
+      var o2 = { u: 0 };
+      tl.to(o2, { u: 1, duration: dur, ease: "power1.inOut", onUpdate: function () {
+        var p = el.getPointAtLength(L * o2.u); tip.setAttribute("cx", p.x); tip.setAttribute("cy", p.y); } }, t);
+    }
+  } else if (fx === "ring") {
+    var C = parseFloat(el.getAttribute("data-c"));
+    var r0 = parseFloat(el.getAttribute("data-from")), r1 = parseFloat(el.getAttribute("data-to"));
+    tl.fromTo(el, { attr: { "stroke-dashoffset": C * (1 - r0) } }, { attr: { "stroke-dashoffset": C * (1 - r1) }, duration: 1.8, ease: "power2.inOut" }, t);
+  } else if (fx === "meter") {
     var a = parseFloat(el.getAttribute("data-from")), b = parseFloat(el.getAttribute("data-to"));
     tl.fromTo(sel, { xPercent: (a - 1) * 100 }, { xPercent: (b - 1) * 100, duration: 1.7, ease: "power2.inOut" }, t);
   } else if (fx === "knob") {
@@ -64,8 +99,11 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     tl.fromTo(sel, FX[fx][0], FX[fx][1], t);
   }
   // checklist rows tick their box a beat after they land
-  if (el.classList.contains("chk"))
-    tl.fromTo(sel + " .tickpath", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, t + 0.3);
+  if (el.classList.contains("chk")) drawPath(el.querySelector(".tickpath"), t + 0.25, 0.45);
+  if (el.hasAttribute("data-out-at"))
+    tl.to(sel, { opacity: 0, scale: 0.6, duration: 0.4, ease: "power2.in" }, parseFloat(el.getAttribute("data-out-at")));
+  if (el.hasAttribute("data-shrink-at"))
+    tl.to(sel, { scale: 0.72, opacity: 0.4, duration: 0.6, ease: "power2.inOut" }, parseFloat(el.getAttribute("data-shrink-at")));
 });
 
 // Rows that reveal left → right (chips, cards, A → B): the row slides so the
@@ -100,6 +138,15 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
   });
 });
 
+// generic mover: data-path = [[t, x, y], ...]; first entry sets, the rest glide in
+document.querySelectorAll("[data-path]").forEach(function (el, i) {
+  var pts = JSON.parse(el.getAttribute("data-path"));
+  el.id = el.id || "mv" + i;
+  tl.set("#" + el.id, { x: pts[0][1], y: pts[0][2] }, 0);
+  for (var k = 1; k < pts.length; k++)
+    tl.to("#" + el.id, { x: pts[k][1], y: pts[k][2], duration: 0.8, ease: "power2.inOut" }, Math.max(pts[0][0], pts[k][0] - 0.8));
+});
+
 // micro-motion that keeps long holds alive
 document.querySelectorAll(".floaty").forEach(function (el, i) {
   var clip = el.closest(".clip"), s = parseFloat(clip.getAttribute("data-start")),
@@ -131,17 +178,7 @@ document.querySelectorAll(".chat-dot").forEach(function (el, i) {
     repeat: reps, yoyo: true }, s + 0.4 + (i % 5) * 0.22);
 });
 
-// captions: one line, fading up at each card's start
-for (var c = 0; c < CAPN; c++) {
-  var cel = document.getElementById("cap" + pad(c));
-  if (cel.getAttribute("data-cont")) continue;   // carried over a part cut: already showing
-  tl.fromTo("#cap" + pad(c) + " .cap", { opacity: 0, yPercent: 14 },
-    { opacity: 1, yPercent: 0, duration: 0.28, ease: "power1.in" }, parseFloat(cel.getAttribute("data-start")));
-}
-// back-to-back cards: the outgoing one fades as the next fades up
-document.querySelectorAll(".clip[data-out]").forEach(function (el) {
-  tl.to("#" + el.id + " .cap", { opacity: 0, duration: 0.12, ease: "power1.out" }, parseFloat(el.getAttribute("data-out")));
-});
+// captions: no entrance, no exit — the text simply changes on its cue
 
 window.__timelines = window.__timelines || {};
 window.__timelines["main"] = tl;
