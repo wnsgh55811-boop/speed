@@ -248,7 +248,7 @@
 /* ── ten cards + stamp ─────────────────────────────────────────────────── */
 .c10{position:relative;display:flex;align-items:center;gap:60px;margin-top:30px}
 .c10-n{font-weight:800;font-size:150px;color:var(--ink);text-shadow:0 6px 30px rgba(0,0,0,.7);min-width:330px}
-.stamp{position:absolute;right:-90px;top:20px;padding:16px 46px;border:7px solid #E0566F;border-radius:18px;
+.stamp{position:absolute;right:-200px;top:-70px;padding:16px 46px;border:7px solid #E0566F;border-radius:18px;
   font-weight:800;font-size:92px;color:#E0566F;background:rgba(20,8,10,.35);letter-spacing:.06em}
 
 /* ── CTA card ──────────────────────────────────────────────────────────── */

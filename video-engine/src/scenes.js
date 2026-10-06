@@ -80,6 +80,14 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     steps.push({ t: parseFloat(el.getAttribute("data-at")), r: el.offsetLeft + el.offsetWidth });
   });
   steps.sort(function (a, b) { return a.t - b.t; });
+  // items that arrive together (a card and its "vs") make ONE glide — two
+  // overlapping tweens on the same x fight each other and the row stalls
+  var merged = [];
+  steps.forEach(function (st) {
+    var m = merged[merged.length - 1];
+    if (m && st.t - m.t < 0.05) m.r = Math.max(m.r, st.r); else merged.push({ t: st.t, r: st.r });
+  });
+  steps = merged;
   var maxR = 0, last = null;
   steps.forEach(function (st, n) {
     maxR = Math.max(maxR, st.r);
@@ -87,7 +95,7 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
     // finish the slide before the new item lands, so nothing pokes past the frame
     // glide while the new item eases in, so the row and the reveal move as one
-    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.95, ease: "power2.inOut" }, Math.max(0, st.t - 0.35));
+    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.9, ease: "power2.inOut" }, Math.max(0, st.t - 0.65));
     last = dx;
   });
 });
