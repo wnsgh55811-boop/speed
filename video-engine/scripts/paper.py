@@ -19,10 +19,9 @@ import os
 
 import numpy as np
 from PIL import Image, ImageFilter
-from rembg import new_session, remove
 
 PAPER = (240, 238, 232)
-SESS = new_session("u2net")
+_SESS = None   # rembg is only loaded when a still really needs keying
 
 
 def _octave(shape, blur, seed):
@@ -60,7 +59,10 @@ def key(im):
         a = im.convert("RGBA").getchannel("A")
         if np.asarray(a).min() == 0:
             return im.convert("RGBA")
-    return remove(im.convert("RGB"), session=SESS).convert("RGBA")
+    global _SESS
+    from rembg import new_session, remove
+    _SESS = _SESS or new_session("u2net")
+    return remove(im.convert("RGB"), session=_SESS).convert("RGBA")
 
 
 def trim(im):
@@ -94,7 +96,19 @@ def paper_card(im, seed, height=1500):
     return out
 
 
-if __name__ == "__main__":
+def project(proj):
+    """Scene-build projects: assets/raw/cut_*.png -> assets/cut/cut_*.png."""
+    os.makedirs(os.path.join(proj, "assets", "cut"), exist_ok=True)
+    keys = sorted(k for k in json.load(open(os.path.join(proj, "assets.json"))) if k.startswith("cut_"))
+    for n, k in enumerate(keys):
+        im = key(Image.open(os.path.join(proj, "assets", "raw", f"{k}.png")))
+        paper_card(im, seed=n * 37 + 11, height=1400).save(os.path.join(proj, "assets", "cut", f"{k}.png"))
+        print(f"{k:16s} paper card", flush=True)
+
+
+if __name__ == "__main__" and len(__import__("sys").argv) > 2 and __import__("sys").argv[1] == "--project":
+    project(__import__("sys").argv[2])
+elif __name__ == "__main__":
     urls = json.load(open("urls.json"))
     os.makedirs("out", exist_ok=True)
     for n, k in enumerate(sorted(urls)):

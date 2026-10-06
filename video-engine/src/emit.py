@@ -13,7 +13,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from build import (W, H, CDN, IMG, ALIAS, NEON_FIG, FAMILIES,   # noqa: E402
                    esc, caption_cards, motes)
-from plan import PLAN                                            # noqa: E402
+try:  # the 공백의 태도 plan; scene-based projects import pieces only
+    from plan import PLAN                                        # noqa: E402
+except ImportError:
+    PLAN = None
 
 OUT = os.path.join(HERE, "..", "index.html")
 

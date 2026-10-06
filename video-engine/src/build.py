@@ -20,7 +20,10 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from plan import PLAN                                    # noqa: E402
+try:  # the 공백의 태도 plan; scene-based projects import pieces only
+    from plan import PLAN                                        # noqa: E402
+except ImportError:
+    PLAN = None
 from PIL import ImageFont, ImageDraw, Image              # noqa: E402
 
 W, H, FPS = 1920, 1080, 30
