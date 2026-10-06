@@ -45,9 +45,10 @@ var FX = {
 function drawPath(el, t, dur) {
   el.removeAttribute("pathLength");
   var L = el.getTotalLength();
-  el.style.strokeDasharray = "";
-  el.setAttribute("stroke-dasharray", L + " " + L);
-  tl.fromTo(el, { attr: { "stroke-dashoffset": L } }, { attr: { "stroke-dashoffset": 0 }, duration: dur, ease: "power1.inOut" }, t);
+  // inline style, not the attribute: the stylesheet's stroke-dasharray would win over an attribute
+  el.style.strokeDasharray = L + "px " + L + "px";
+  el.style.strokeDashoffset = L + "px";
+  tl.fromTo(el, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: dur, ease: "power1.inOut" }, t);
   return L;
 }
 
