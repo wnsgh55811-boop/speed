@@ -116,9 +116,9 @@ projects/<name>/
 
 ### 이번에 잡은 버그
 
-- **렌더가 1분쯤에 render_cancelled_parent_exited** — Higgsfield 샌드박스에서 `npx`로
-  띄운 렌더는 1분 전후로 부모 프로세스가 사라지며 취소됐다. `node_modules/.bin/hyperframes`
-  를 직접, `setsid` + `</dev/null` 로 띄운다.
+- **렌더가 1분쯤에 render_cancelled_parent_exited** — hyperframes 는 조상 프로세스가
+  하나라도 끝나면 렌더를 취소한다. 샌드박스의 실행 래퍼는 1분 전후로 끝나므로
+  `HYPERFRAMES_RENDER_DETACHED=1` 로 띄운다.
 - **샌드박스 명령은 sh로 실행** — `source` 가 없어 환경 변수가 비고, 빈 BRANCH 로
   `git fetch` 하면 기본 브랜치로 리셋된다. `.` 을 쓰고 변수 비면 즉시 종료.
 - **left/width 트윈** — 프레임 단위 캡처에서 정수 픽셀로 끊긴다. x/scale 로만.
