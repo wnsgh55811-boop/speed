@@ -18,7 +18,7 @@ add(a=0, kind="hook", bg="photo:br_date_stuck", quote="“이제 무슨|얘기�
 add(a=3, kind="checklist", bg="bg-ink", title="처음 만난 그녀에게 물어본 것",
     items=[("직업", 4), ("취미", 5), ("여행", 6), ("좋아하는 음식", 7)])
 add(a=8, kind="meter", bg="bg-canvas", title="남은 대화 소재", start=0.82, end=0.08, at=8,
-    left="바닥", right="충분", tone="amber", label="새로운 주제 찾기 시작")
+    left="바닥", right="충분", tone="amber", label="새로운 주제 찾기 시작", at_label=9)
 add(a=10, kind="chat", bg="soft:br_date_wide", title="새 주제 찾는 중",
     msgs=[("m", "MBTI는 뭐예요?", 10), ("m", "주말에는 뭐 해요?", 11), ("m", "영화 좋아하세요?", 12)],
     mute=[10, 11, 12])
@@ -31,7 +31,7 @@ add(a=15, kind="icon", bg="bg-teal", key="ico_iceberg", title="표면에서만 �
 add(a=17, kind="typo", bg="bg-spot",
     rows=[("왜 그럴까?", 17, "lg"), ("대화 주제가 부족해서", 18, "md dim")], strike=(1, 18))
 add(a=19, kind="depth", bg="bg-ink", title="같은 주제, 다른 깊이",
-    levels=[("같은 주제", 19), ("조금 더", 20), ("훨씬 더 깊게", 20.9)])
+    levels=[("같은 주제", 19), ("조금 더", 20), ("훨씬 더 깊게", (20, 0.9))])
 add(a=21, kind="cards", bg="bg-canvas", title="오늘 이야기할 두 가지",
     cards=[dict(n="처음 만난 사람", head="어색함을 줄이고", at=22, photo="br_date_wide"),
            dict(n="조금 친해진 사람", head="더 가까워지는", at=23, photo="br_couple_close", tone="hot")])
@@ -46,7 +46,7 @@ add(a=36, kind="cards", bg="bg-dust", title="그래서 알게 된 것",
     cards=[dict(n="카페에 대해", head="조용한 곳 · 커피 취향", at=37),
            dict(n="그 사람에 대해", head="거의 없음", at=39, tone="muted")], vs=True)
 add(a=41, kind="morph", bg="bg-teal", title="한 단계만 바꾸면", x="질문 하나 더", y="한 단계 깊게",
-    at_y=41.9)
+    at_y=(41, 0.9))
 add(a=42, kind="chat", bg="soft:br_busy_cafe", title="한 단계 바꾼 대화",
     msgs=[("w", "저 조용한 카페 좋아해요.", 43),
           ("m", "저는 오히려 사람 많은 데도 좋아해요.|가만히 앉아 사람 구경하는 게 재밌더라고요.", 46, "내 이야기"),
@@ -71,10 +71,10 @@ add(a=74, kind="sliders", bg="bg-canvas", title="평소에는 어떤 사람일�
     rows=[("계획적", "즉흥적", 0.16, 74), ("통제 선호", "흐름에 맡김", 0.22, 75),
           ("새로운 것", "익숙한 것", 0.5, 76)])
 add(a=78, kind="morph", bg="bg-spot", x="여행 이야기", y="사람 이야기", at_y=79)
-add(a=80, kind="typo", bg="bg-ink", rows=[("성격 분석", 81, "lg"), ("이 아닙니다", 81.9, "md dim")],
-    strike=(0, 81.6))
-add(a=82, kind="icon", bg="bg-teal", key="ico_iceberg", title="표면적인 사실에서 멈추지 않기",
-    sub="보이는 건 일부일 뿐", at_sub=83, size=450)
+add(a=80, kind="typo", bg="bg-ink", rows=[("성격 분석", 81, "lg"), ("이 아닙니다", (81, 0.9), "md dim")],
+    strike=(0, (81, 0.6)))
+add(a=82, kind="icon", bg="bg-teal", key="ico_iceberg", title="수면 아래까지",
+    sub="보이는 사실은 일부일 뿐", at_sub=83, size=450)
 add(a=84, kind="depth", bg="bg-dust", title="질문을 한 단계씩",
     levels=[("뭘 좋아해요?", 84), ("왜 좋아해요?", 85), ("평소에도 그런 편이에요?", 86)],
     top="사실", bottom="사람")
@@ -95,8 +95,8 @@ add(a=102, kind="flow", bg="bg-teal", title="질문했다면",
 add(a=104, kind="chat", bg="soft:br_couple_close", title="내 이야기 덧붙이기",
     msgs=[("m", "저는 계획 너무 많이 세우면 오히려 피곤하더라고요.|어디 갈지만 정하고 나머지는 가서 정하는 편이에요.",
            104, "내 생각")], mute=[104, 105])
-add(a=106, kind="typo", bg="bg-dust", rows=[("질문에", 106, "md dim"), ("내 이야기 한 스푼", 106.5, "xl am")])
-add(a=107, kind="scale", bg="bg-canvas", title="대화는", left="상대", right="나", tilt_at=107.0,
+add(a=106, kind="typo", bg="bg-dust", rows=[("질문에", 106, "md dim"), ("내 이야기 한 스푼", (106, 0.5), "xl am")])
+add(a=107, kind="scale", bg="bg-canvas", title="대화는", left="상대", right="나", tilt_at=107,
     level_at=109)
 add(a=111, kind="person", bg="photo:br_man_nervous", key="cut_man_tense", side="left", think=True,
     bubbles=[("마음에 드는 사람 앞에서는", 111), ("잘 안 됩니다", 112)])
@@ -145,7 +145,7 @@ add(a=160, kind="chat", bg="soft:br_man_calm", title="예를 들면",
 add(a=163, kind="cards", bg="bg-canvas", title="같은 깊이, 다른 온도",
     cards=[dict(n="그냥 갑자기", head="“이상형이 뭐예요?”", at=165, tone="muted"),
            dict(n="허락을 구하고", head="훨씬 자연스럽게", at=167, tone="hot")], vs=True)
-add(a=169, kind="typo", bg="bg-spot", rows=[("질문 자체를", 170, "lg"), ("외우면 안 됩니다", 170.8, "lg am")])
+add(a=169, kind="typo", bg="bg-spot", rows=[("질문 자체를", 170, "lg"), ("외우면 안 됩니다", (170, 0.8), "lg am")])
 add(a=171, kind="cards10", bg="photo:br_interview", title="소개팅에서 갑자기 꺼낸",
     count=10, at=176, stamp="면접", at_stamp=177, mute=[174])
 add(a=178, kind="meter", bg="bg-ink", title="지금 대화는 얼마나 깊어졌나", start=0.05, end=0.6,
@@ -157,7 +157,7 @@ add(a=184, kind="meter", bg="bg-grid", title="그렇다면", start=0.55, end=0.8
     left="얕음", right="깊음", tone="cyan", label="한 단계 더 깊은 질문으로")
 add(a=185, kind="rows", bg="bg-ember", title="반대로",
     rows=[("기본 대화도 어색한데", "갑자기 개인적인 이야기", 186, 187),
-          ("상대 입장에서는", "부담", 188, 188.6)])
+          ("상대 입장에서는", "부담", 188, (188, 0.6))])
 add(a=189, kind="icon", bg="bg-dust", key="ico_lion", title="사자의 태도",
     sub="밀어붙이지 않고, 존중하며 시도한다", at_sub=191, size=520, side=True)
 

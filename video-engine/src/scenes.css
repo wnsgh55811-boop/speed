@@ -260,3 +260,6 @@
 .cta-s{margin-top:18px;font-weight:600;font-size:44px;color:var(--ink-2)}
 .cta-foot{margin-top:44px;display:flex;align-items:center;gap:20px;font-weight:700;font-size:46px;color:var(--amber)}
 .cta-arrow{display:inline-block;font-size:56px}
+
+/* reveal rows measure their children from their own box (see scenes.js) */
+.flow,.cards,.morph{position:relative}

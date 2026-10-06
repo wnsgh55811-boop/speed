@@ -50,11 +50,16 @@ class Ctx:
             return self.t0 + 0.1
         if isinstance(at, int):
             return max(self.t0, self.st[at] - 0.06)
+        if isinstance(at, tuple):          # (line, seconds after that line starts)
+            return max(self.t0, self.st[at[0]] + at[1])
         return self.t0 + at
 
     def a(self, at, fx="up"):
         """Attribute string for a timed element."""
         self.n += 1
+        if not (self.t0 - 0.01 <= self.t(at) < self.t1 - 0.2):
+            print(f"  ! {self.sid} beat {self.n} at={at!r} -> {self.t(at):.2f}s "
+                  f"outside scene [{self.t0:.2f}, {self.t1:.2f})", file=sys.stderr)
         return f'id="{self.sid}-b{self.n}" data-at="{self.t(at):.2f}" data-fx="{fx}"'
 
 
@@ -99,7 +104,7 @@ def c_checklist(c, title, items, empty_at=None):
 
 
 def c_meter(c, title, start, end, at, left="적음", right="많음", tone="cyan",
-            label=None, steps=5):
+            label=None, steps=5, at_label=None):
     """A horizontal gauge whose fill moves from `start` to `end` on cue."""
     ticks = "".join(f'<span class="mtick" style="left:{q}%"><b>{k + 1}</b></span>'
                     for k, q in enumerate(range(0, 101, 100 // (steps - 1))))
@@ -113,7 +118,7 @@ def c_meter(c, title, start, end, at, left="적음", right="많음", tone="cyan"
         f'{c.a(at, "meter")}></i></div>',
         f'<div class="bar-axis"><span>{esc(left)}</span><span>{esc(right)}</span></div>',
         '</div>',
-        (f'<div class="sub" {c.a(at, "fade")}>{esc(label)}</div>' if label else ""),
+        (f'<div class="sub" {c.a(at if at_label is None else at_label, "fade")}>{esc(label)}</div>' if label else ""),
         '</div>'])
 
 
@@ -250,9 +255,9 @@ def c_morph(c, x, y, at_y, title=None, op="→", note=None, at_note=None):
 def c_tree(c, root, branches, root_at=None):
     """root node with branches [(label, photo|None, at)] fanning out."""
     n = len(branches)
-    xs = [480 + (k - (n - 1) / 2) * 560 for k in range(n)]
+    xs = [960 + (k - (n - 1) / 2) * 560 - 240 for k in range(n)]   # leaf left edges
     paths = "".join(
-        f'<path class="tedge" pathLength="1" d="M960 210 C960 300 {x+480:.0f} 260 {x+480:.0f} 360" '
+        f'<path class="tedge" pathLength="1" d="M960 210 C960 300 {x+240:.0f} 260 {x+240:.0f} 360" '
         f'{c.a(at, "draw")}/>' for x, (_, _, at) in zip(xs, branches))
     h = ['<div class="stage tree-stage"><div class="scrim wide"></div>',
          f'<svg class="tree-svg" viewBox="0 0 1920 1080">{paths}</svg>',
@@ -423,7 +428,8 @@ def caption_cards(tl, mute):
         if not buf:
             return
         s, e = buf[0]["s"], buf[-1]["e"]
-        txt = " ".join(x["t"] for x in buf)
+        # quote marks only make sense on screen when both ends are in one card
+        txt = " ".join(x["t"] for x in buf).replace('"', "")
         parts = build.caption_cards(txt)
         per = (e - s) / len(parts)
         for j, p in enumerate(parts):
