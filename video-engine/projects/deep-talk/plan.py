@@ -60,7 +60,7 @@ add(a=57, kind="tree", bg="bg-ink", root="그녀",
     branches=[("사람을 만나는 방식", "br_friends", 59), ("혼자 있을 때", "br_alone_read", 60),
               ("친한 사람과 있을 때", "br_busy_cafe", 61)])
 add(a=63, kind="cards", bg="bg-grid", title="“여행 좋아하세요?” 다음에",
-    cards=[dict(n="계획형?", head="다 짜놓는 편", at=66, photo="br_travel_plan"),
+    cards=[dict(n="계획형?", head="다 짜놓는 편", at=64, photo="br_travel_plan"),
            dict(n="즉흥형?", head="가서 정하는 편", at=67, photo="br_travel_free")], vs=True,
     mute=[])
 add(a=69, kind="chat", bg="soft:br_travel_plan",
@@ -71,7 +71,7 @@ add(a=74, kind="sliders", bg="bg-canvas", title="평소에는 어떤 사람일�
     rows=[("계획적", "즉흥적", 0.16, 74), ("통제 선호", "흐름에 맡김", 0.22, 75),
           ("새로운 것", "익숙한 것", 0.5, 76)])
 add(a=78, kind="morph", bg="bg-spot", x="여행 이야기", y="사람 이야기", at_y=79)
-add(a=80, kind="typo", bg="bg-ink", rows=[("성격 분석", 81, "lg"), ("이 아닙니다", (81, 0.9), "md dim")],
+add(a=80, kind="typo", bg="bg-ink", rows=[("성격 분석", 80, "lg"), ("이 아닙니다", (81, 0.9), "md dim")],
     strike=(0, (81, 0.6)))
 add(a=82, kind="icon", bg="bg-teal", key="ico_iceberg", title="수면 아래까지",
     sub="보이는 사실은 일부일 뿐", at_sub=83, size=450)
@@ -98,9 +98,9 @@ add(a=104, kind="chat", bg="soft:br_couple_close", title="내 이야기 덧붙�
 add(a=106, kind="typo", bg="bg-dust", rows=[("질문에", 106, "md dim"), ("내 이야기 한 스푼", (106, 0.5), "xl am")])
 add(a=107, kind="scale", bg="bg-canvas", title="대화는", left="상대", right="나", tilt_at=107,
     level_at=109)
-add(a=111, kind="person", bg="photo:br_man_nervous", key="cut_man_tense", side="left", think=True,
+add(a=111, kind="person", bg="bg-dust", key="cut_man_tense", side="left", think=True,
     bubbles=[("마음에 드는 사람 앞에서는", 111), ("잘 안 됩니다", 112)])
-add(a=113, kind="meter", bg="bg-ember", title="대화를 잘해야 한다는 압박", start=0.18, end=0.94,
+add(a=113, kind="meter", bg="soft:br_man_nervous", title="대화를 잘해야 한다는 압박", start=0.18, end=0.94,
     at=114, left="여유", right="압박", tone="red")
 add(a=115, kind="person", bg="bg-ink", key="cut_man_tense", side="right", think=True,
     bubbles=[("침묵이 생기면 안 될 것 같고", 115), ("재미없다고 생각하면 어쩌지", 116),
@@ -180,7 +180,7 @@ add(a=213, kind="rows", bg="bg-ink", title=None,
     rows=[("침묵을 견디지 못하면", "새 질문만 찾게 되고", 213, 214),
           ("잘 보여야 한다는 생각", "내 이야기를 숨기고", 215, 216),
           ("거절이 두려우면", "깊은 질문을 못 한다", 217, 218)])
-add(a=219, kind="person", bg="photo:br_man_calm", key="cut_man_calm", side="left", think=True,
+add(a=219, kind="person", bg="bg-teal", key="cut_man_calm", side="left", think=True,
     bubbles=[("대화 소재보다", 220), ("그녀 앞에서 변하는 내 태도", 221)])
 add(a=223, kind="cta", bg="photo:br_lecture", head="비공개 특강", sub="이 부분을 더 자세하게 정리했습니다",
     at_sub=224, foot="설명란에서 확인", at_foot=227)

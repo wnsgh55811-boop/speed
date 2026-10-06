@@ -80,7 +80,8 @@ document.querySelectorAll(".flow, .cards, .morph").forEach(function (row, i) {
     maxR = Math.max(maxR, st.r);
     var dx = (W - maxR) / 2;
     if (n === 0) tl.set("#" + row.id, { x: dx }, 0);
-    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.5, ease: "power3.inOut" }, st.t - 0.05);
+    // finish the slide before the new item lands, so nothing pokes past the frame
+    else if (dx !== last) tl.to("#" + row.id, { x: dx, duration: 0.42, ease: "power3.inOut" }, Math.max(0, st.t - 0.45));
     last = dx;
   });
 });

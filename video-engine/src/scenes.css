@@ -263,3 +263,5 @@
 
 /* reveal rows measure their children from their own box (see scenes.js) */
 .flow,.cards,.morph{position:relative}
+
+.tog-lead{font-size:44px;letter-spacing:.12em;color:var(--ink-2);margin-bottom:46px}

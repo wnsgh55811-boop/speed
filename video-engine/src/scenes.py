@@ -369,7 +369,7 @@ def c_rows(c, title, rows, arrow=True):
 def c_toggle(c, q1, q2, at_q1, at_q2, lead=None):
     return "".join([
         '<div class="stage"><div class="scrim wide"></div>',
-        (f'<div class="kicker" {c.a(None, "fade")}>{esc(lead)}</div>' if lead else ""),
+        (f'<div class="kicker tog-lead" {c.a(None, "fade")}>{esc(lead)}</div>' if lead else ""),
         '<div class="tog">',
         f'<div class="tq q1" {c.a(at_q1, "left")}><i class="radio"></i><span>{esc(q1)}</span></div>',
         f'<div class="tq q2" {c.a(at_q2, "left")}><i class="radio on"></i><span>{esc(q2)}</span></div>',
