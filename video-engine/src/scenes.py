@@ -70,12 +70,14 @@ def cut(key, cls="", style=""):
 def c_hook(c, quote, at_quote, kicker=None):
     """Cold open: the plate is already live on frame 0, a thought bubble types,
     then the line the voice is about to say lands big."""
-    h = ['<div class="stage hook">']
+    # frame 0 is already composed: shade, bubble and dots are on screen, no fade-in
+    h = ['<div class="hook-shade"></div><div class="stage hook">']
     if kicker:
-        h.append(f'<div class="kicker hook-k" {c.a(0.0, "fade")}>{esc(kicker)}</div>')
-    h.append(f'<div class="think-bub" {c.a(0.0, "pop")}>'
+        h.append(f'<div class="kicker hook-k">{esc(kicker)}</div>')
+    h.append('<div class="think-bub">'
              '<i class="tdot"></i><i class="tdot"></i><i class="tdot"></i></div>')
-    h.append(f'<div class="hook-q" {c.a(at_quote, "slam")}>{esc(quote)}</div>')
+    rows = "".join(f'<span class="hq">{esc(x)}</span>' for x in quote.split("|"))
+    h.append(f'<div class="hook-q" {c.a(at_quote, "slam")}>{rows}</div>')
     h.append("</div>")
     return "".join(h)
 
@@ -153,9 +155,9 @@ def c_lines(c, title, series, xlab, ylab):
 
 
 def c_icon(c, key, title, sub=None, at_sub=None, orbit=False, size=560, xmark=False,
-           at_x=None, side=None):
+           at_x=None, side=None, waterline=30):
     cls = "icon3d" + (" floaty" if not orbit else "")
-    o = ('<svg class="orbit" viewBox="0 0 600 220"><ellipse cx="300" cy="110" rx="290" ry="70"/>'
+    o = (f'<svg class="orbit" style="--wl:{waterline}%" viewBox="0 0 600 220"><ellipse cx="300" cy="110" rx="290" ry="70"/>'
          '<circle class="orb" r="12" cx="590" cy="110"/></svg>') if orbit else ""
     x = (f'<svg class="xmark" {c.a(at_x, "pop")} viewBox="0 0 100 100"><line x1="16" y1="16" '
          'x2="84" y2="84"/><line x1="16" y1="84" x2="84" y2="16"/></svg>') if xmark else ""

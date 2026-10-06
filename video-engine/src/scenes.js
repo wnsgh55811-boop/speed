@@ -63,6 +63,18 @@ document.querySelectorAll("[data-at]").forEach(function (el) {
     tl.fromTo(sel + " .tickpath", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.35, ease: "power2.out" }, t + 0.25);
 });
 
+// A → B chips: the first chip starts optically centred, then slides over as
+// the second one arrives, so the frame is never lopsided while it waits.
+document.querySelectorAll(".morph").forEach(function (m, i) {
+  var from = m.querySelector(".from"), to = m.querySelector(".to");
+  if (!from || !to) return;
+  var dx = (m.offsetWidth - from.offsetWidth) / 2;
+  m.id = m.id || "mo" + i;
+  var at = parseFloat(to.getAttribute("data-at"));
+  tl.set("#" + m.id + " .from", { x: dx }, 0);
+  tl.fromTo("#" + m.id + " .from", { x: dx }, { x: 0, duration: 0.5, ease: "power3.inOut" }, at - 0.12);
+});
+
 // micro-motion that keeps long holds alive
 document.querySelectorAll(".floaty").forEach(function (el, i) {
   var clip = el.closest(".clip"), s = parseFloat(clip.getAttribute("data-start")),

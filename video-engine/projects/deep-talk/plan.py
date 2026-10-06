@@ -13,7 +13,7 @@ S = []
 add = lambda **k: S.append(k)  # noqa: E731
 
 # ── 0  cold open ────────────────────────────────────────────────────────────
-add(a=0, kind="hook", bg="photo:br_date_stuck", quote="“이제 무슨 얘기하지?”", at_quote=2,
+add(a=0, kind="hook", bg="photo:br_date_stuck", quote="“이제 무슨|얘기하지?”", at_quote=2,
     mute=[2])
 add(a=3, kind="checklist", bg="bg-ink", title="처음 만난 그녀에게 물어본 것",
     items=[("직업", 4), ("취미", 5), ("여행", 6), ("좋아하는 음식", 7)])
