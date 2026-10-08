@@ -1,0 +1,43 @@
+@font-face{font-family:P;src:url(fonts/Pretendard-Light.woff2);font-weight:300}
+@font-face{font-family:P;src:url(fonts/Pretendard-Regular.woff2);font-weight:400}
+@font-face{font-family:P;src:url(fonts/Pretendard-Medium.woff2);font-weight:500}
+@font-face{font-family:P;src:url(fonts/Pretendard-SemiBold.woff2);font-weight:600}
+@font-face{font-family:P;src:url(fonts/Pretendard-Bold.woff2);font-weight:700}
+@font-face{font-family:P;src:url(fonts/Pretendard-ExtraBold.woff2);font-weight:800}
+:root{--navy:#14213f;--navy2:#1d2e55;--gold:#c9a24a;--gold2:#e2c27a;--ink:#1b2236;--light:#eef1f7}
+html,body{margin:0;padding:0;background:#000;width:1920px;height:1080px;overflow:hidden}
+body{font-family:P,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-0.02em}
+#stage{position:absolute;inset:0;overflow:hidden;background:#0b1224}
+.scene{position:absolute;inset:0;overflow:hidden;visibility:hidden}
+.cam{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.it{position:absolute;box-sizing:border-box}
+.icon svg{width:100%;height:100%;display:block}
+.full{left:0;top:0;width:1920px;height:1080px;object-fit:cover}
+#sub{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:9999;background:rgba(0,0,0,.6);
+ color:#fff;font:600 44px/1.25 P,sans-serif;padding:14px 34px 16px;border-radius:12px;white-space:nowrap;letter-spacing:-0.01em}
+/* components */
+.navybg{background:radial-gradient(120% 90% at 50% 45%,#22355f 0%,#14213f 55%,#0b1328 100%)}
+.lightbg{background:radial-gradient(90% 60% at 50% 0%,#f6efe0 0%,rgba(246,239,224,0) 60%),linear-gradient(180deg,#f5f6fa,#e7ebf4)}
+.vig{left:0;top:0;width:1920px;height:1080px;background:radial-gradient(120% 100% at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%)}
+.shade-b{left:0;top:0;width:1920px;height:1080px;background:linear-gradient(180deg,rgba(8,14,30,0) 40%,rgba(8,14,30,.75) 100%)}
+.shade-l{left:0;top:0;width:1920px;height:1080px;background:linear-gradient(90deg,rgba(8,14,30,.85) 0%,rgba(8,14,30,.55) 40%,rgba(8,14,30,0) 70%)}
+.shade-r{left:0;top:0;width:1920px;height:1080px;background:linear-gradient(270deg,rgba(8,14,30,.85) 0%,rgba(8,14,30,.55) 40%,rgba(8,14,30,0) 70%)}
+.kt{color:#fff;font-weight:700;font-size:84px;line-height:1.18;text-shadow:0 4px 30px rgba(0,0,0,.45)}
+.kt .g{color:var(--gold2)}
+.kicker{color:var(--gold2);font-weight:600;font-size:30px;letter-spacing:.18em}
+.chip{display:inline-flex;align-items:center;gap:14px;padding:14px 26px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;font-weight:600;font-size:34px;backdrop-filter:blur(8px);white-space:nowrap}
+.chip svg{width:34px;height:34px}
+.chip.gold{background:var(--gold);border-color:var(--gold);color:#14213f}
+.chip.navy{background:var(--navy);border-color:var(--navy);color:#fff}
+.card{background:#fff;border-radius:22px;box-shadow:0 20px 60px rgba(20,33,63,.18)}
+.dcard{background:rgba(20,33,63,.92);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.35);color:#fff}
+.circ{border-radius:50%;display:flex;align-items:center;justify-content:center}
+.circ svg{width:52%;height:52%}
+.bubble{position:absolute;padding:20px 28px;border-radius:26px;font-size:34px;font-weight:500;line-height:1.35;white-space:nowrap}
+.bubble.me{background:#fee500;color:#191919;border-top-right-radius:6px}
+.bubble.you{background:#fff;color:#191919;border-top-left-radius:6px}
+.center{display:flex;align-items:center;justify-content:center;text-align:center}
+.ring{border:5px solid var(--gold);border-radius:24px;box-shadow:0 0 30px rgba(201,162,74,.6)}
+.xmark{color:#e0524a}
+.ic{display:inline-block;width:1em;height:1em;vertical-align:-0.14em}
+.ic svg{width:100%;height:100%;display:block}
