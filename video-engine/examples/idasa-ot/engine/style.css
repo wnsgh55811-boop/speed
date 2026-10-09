@@ -71,3 +71,12 @@ body{font-family:P,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:
 .ibox{display:flex;align-items:center;justify-content:center;border-radius:50%}
 .ibox svg{width:50%;height:50%}
 .dot{position:absolute;border-radius:50%;background:#e2c27a}
+/* ---- v3 fixes ---- */
+#chap{display:none!important}
+.ibox .ic{display:block;width:52%!important;height:52%!important}
+.ibox .ic svg,.ibox svg{width:100%!important;height:100%!important;display:block}
+.ctab{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:34px 92px;border-radius:999px;
+ background:linear-gradient(180deg,#f0d796 0%,#d6b062 45%,#b98d35 100%);color:#14213f;font-weight:800;font-size:54px;letter-spacing:-.02em;
+ box-shadow:0 0 0 2px rgba(255,236,186,.55) inset,0 -6px 14px rgba(120,80,20,.35) inset,0 24px 60px rgba(201,162,74,.45),0 0 90px rgba(226,194,122,.35);overflow:hidden;white-space:nowrap}
+.ctab .shine{position:absolute;top:-20%;left:-30%;width:22%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.65),rgba(255,255,255,0));transform:skewX(-20deg)}
+.ctab:before{content:'';position:absolute;inset:6px;border-radius:999px;border:1.5px solid rgba(255,248,225,.7)}
