@@ -90,13 +90,14 @@ def split_raw(seg):
     global fix
     f=fix; fix=lambda x:x.strip()
     r=split(s2); fix=f; return r
-out=[]
-for s in asr: out+=split(s)
+out=[];segi=[]
+for si,s in enumerate(asr):
+    r=split(s); out+=r; segi+=[si]*len(r)
 # extend end to next start if gap small
 res=[]
 for k,(a,b,t) in enumerate(out):
     nxt=out[k+1][0] if k+1<len(out) else b+0.6
     e=nxt if nxt-b<0.7 else b+0.35
-    res.append([round(a,3),round(e,3),t])
+    res.append([round(a,3),round(e,3),t,segi[k]])
 json.dump(res,open(f'{S}/eng/subs.json','w'),ensure_ascii=False)
 for r in res: print(f'{r[0]:7.2f} {r[1]:7.2f} {len(r[2]):2d} {r[2]}')
