@@ -531,7 +531,7 @@ scene(t0,t1,endpage(t0,False,t1_at=R(ST('이제는 멘트를'),t0),t2_at=R(WT('�
 t0,t1=t1,cut('지금 바로'); _set(t0)
 scene(t0,t1,[ill('a12'),shade('b'),H('있는 그대로의 내 모습으로,<br><span class="g">다음 만남</span>을 잡으러 가시죠',0,640,1920,72,0.15,align='center',st=.02),grain()])
 t0,t1=t1,END; _set(t0)
-cta=html('<div class="ctab"><span class="shine"></span><span style="position:relative">90분 진단 신청하기</span></div>',0,700,1920,None,at=0.2,anim='pop',dur=.8,css='display:flex;justify-content:center',
+cta=html('<div class="ctab"><span class="shine"></span><span style="position:relative">1:1 태도 진단 신청하기</span></div>',0,700,1920,None,at=0.2,anim='pop',dur=.8,css='display:flex;justify-content:center',
          pulse=[R(WT('신청하세요'),t0)],sub=[dict(sel='.shine',p=dict(x=1100),at=0.9,dur=1.4,ease='power2.inOut'),dict(sel='.shine',p=dict(x=0),at=2.4,dur=0.01),dict(sel='.shine',p=dict(x=1100),at=2.5,dur=1.4,ease='power2.inOut')])
 scene(t0,t1,endpage(t0,True)+[cta,grain()],bg=NAVYBG)
 # ---------- subtitles
