@@ -13,10 +13,10 @@ def ts(t):
 ass=["[Script Info]","ScriptType: v4.00+","PlayResX: 1920","PlayResY: 1080","WrapStyle: 2","ScaledBorderAndShadow: yes","",
 "[V4+ Styles]",
 "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-"Style: Sub,Noto Sans CJK KR Medium,46,&H00FFFFFF,&H00FFFFFF,&H66000000,&H66000000,0,0,0,0,100,100,0,0,3,16,0,2,60,60,46,1",
+"Style: Sub,Noto Sans CJK KR Medium,54,&H00FFFFFF,&H00FFFFFF,&H66000000,&H66000000,0,0,0,0,100,100,0,0,3,12,0,2,60,60,46,1",
 "","[Events]","Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
 for s in T["subs"]:
-    ass.append("Dialogue: 0,%s,%s,Sub,,0,0,0,,{\\an2\\pos(960,1034)}%s"%(ts(s["s"]),ts(s["e"]),s["text"]))
+    ass.append("Dialogue: 0,%s,%s,Sub,,0,0,0,,{\\an2\\pos(960,1037)}%s"%(ts(s["s"]),ts(s["e"]),s["text"]))
 open(W+"/subs.ass","w",encoding="utf-8").write("\n".join(ass)+"\n")
 
 # ---- slide stills via concat demuxer

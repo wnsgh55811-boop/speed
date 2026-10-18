@@ -19,6 +19,7 @@ def subs():
         if ln.startswith("#"): cur=int(ln[1:]); out[cur]=[]; continue
         if ln: out[cur].append(ln)
     return out
+EXTRA="이번에는다른반응을보겠습니다"
 norm=lambda t: re.sub(r"\s+","",t)
 if __name__=="__main__":
     sc,sb=script(),subs()
@@ -27,6 +28,8 @@ if __name__=="__main__":
         a=norm(" ".join(sc[k])); b=norm(" ".join(x for x in sb[k] if not x.startswith("@")))
         # the trailing '/' in slide 14 is a script marker, not narration
         a=a.replace("때문이다/","때문이다")
+        # spoken in the FishAudio take (not in the script); placed before the AFTER clip on request
+        b=b.replace(EXTRA,"")
         if a!=b:
             ok=False; i=next(i for i in range(min(len(a),len(b))) if a[i]!=b[i]) if any(a[i]!=b[i] for i in range(min(len(a),len(b)))) else min(len(a),len(b))
             print("MISMATCH slide",k,"\n S:",a[max(0,i-20):i+20],"\n B:",b[max(0,i-20):i+20])
@@ -35,5 +38,6 @@ if __name__=="__main__":
     # whitespace check: space positions should match the script too
     for k in sc:
         a=" ".join(sc[k]).replace("때문이다/","때문이다"); b=" ".join(x for x in sb[k] if not x.startswith("@"))
+        b=b.replace(" 이번에는 다른 반응을 보겠습니다","")
         if re.sub(r"\s+"," ",a)!=re.sub(r"\s+"," ",b): print("SPACE diff slide",k)
     print("TEXT OK" if ok else "TEXT FAIL", sum(len(v) for v in sb.values()),"chunks")
