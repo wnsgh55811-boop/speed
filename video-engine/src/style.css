@@ -318,7 +318,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .anx-title{font-weight:700;font-size:52px;color:var(--ink-2);text-shadow:0 3px 18px rgba(0,0,0,.7)}
 .anx-title b{color:var(--amber);font-weight:800}
 /* chat */
-.phone{width:860px;height:740px;margin-top:-90px;border-radius:44px;background:#14171D;border:2px solid rgba(255,255,255,.12);
+.phone{width:860px;height:700px;border-radius:44px;background:#14171D;border:2px solid rgba(255,255,255,.12);
   box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 10px rgba(255,255,255,.03);overflow:hidden;display:flex;flex-direction:column}
 .ph-head{display:flex;align-items:center;gap:18px;padding:28px 34px;border-bottom:1.5px solid rgba(255,255,255,.08);
   font-weight:700;font-size:34px;color:var(--ink)}
@@ -343,7 +343,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .talk .mb{max-width:780px;font-size:42px;padding:22px 32px}
 .talk .msg.w .mb{background:rgba(250,250,248,.96)}
 /* tracker */
-.trk{width:1040px;display:flex;flex-direction:column;gap:10px;margin-top:-90px}
+.trk{width:1040px;display:flex;flex-direction:column;gap:10px}
 .trk-title{font-weight:800;font-size:50px;color:var(--amber);margin-bottom:8px;letter-spacing:-.01em}
 .trk-row{display:flex;align-items:center;gap:26px;padding:7px 26px;border-radius:18px;color:var(--dim)}
 .trk-n{width:52px;height:52px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
@@ -374,7 +374,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .cx-col.pos .cx-item{color:#fff}
 .cx-vs{align-self:center;font-weight:800;font-size:40px;color:var(--dim)}
 /* checklist */
-.ck{display:flex;flex-direction:column;gap:34px;margin-top:-60px}
+.ck{display:flex;flex-direction:column;align-items:center;gap:34px}
 .ck-title{font-weight:800;font-size:56px;color:var(--amber);margin-bottom:6px}
 .ck-row{display:flex;align-items:center;gap:30px;font-weight:700;font-size:56px;color:#fff;white-space:nowrap;
   text-shadow:0 3px 16px rgba(0,0,0,.7)}
@@ -409,6 +409,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .cx-col{width:700px;padding:40px 46px}
 .cx-head{font-size:50px}
 .cx-item{font-size:50px}
-.stage:has(.bars){padding-bottom:130px}
+
 .gtitle{position:relative}
 .bub-row.center{justify-content:center}
+
+/* revision 2 — one optical centre for every scene: the frame above the caption band */
+.stage,.diag{padding-bottom:170px}
+.rows{align-items:center}
+.row{justify-content:center}
+.trk-title,.ck-title,.fun-title,.anx-title{align-self:center;text-align:center}
+.fun-axis{padding-left:0}
+.talk-wrap{padding:0 120px 170px}
+.hl.bt-show{justify-content:center}

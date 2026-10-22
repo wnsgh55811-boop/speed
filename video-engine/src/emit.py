@@ -513,14 +513,15 @@ def picto(name, size=200):
 def g_rows(title, items, muted=(), mark=None):
     h = ['<div class="stage"><div class="scrim wide"></div>']
     if title:
-        h.append(f'<div class="hl md gtitle">{esc(title)}</div>')
+        h.append(f'<div class="hl md gtitle bt" data-l="0">{esc(title)}</div>')
     h.append('<div class="rows" style="margin-top:46px">')
     for i, it in enumerate(items):
         cls = "row muted" if i in muted else "row"
         extra = ''
         if mark == "q" and i not in muted:
             extra = '<span class="qmark">?</span>'
-        h.append(f'<div class="{cls}"><i class="tick"></i><span>{esc(it)}</span>{extra}</div>')
+        key = f'data-l="0" data-o="{.25 + i * .45:.2f}" data-k="{esc(it)}"'
+        h.append(f'<div class="{cls} bt" {key}><i class="tick"></i><span>{esc(it)}</span>{extra}</div>')
     h.append("</div></div>")
     return "".join(h)
 
@@ -528,10 +529,11 @@ def g_rows(title, items, muted=(), mark=None):
 def g_chips(title, items, hot=()):
     h = ['<div class="stage"><div class="scrim wide"></div>']
     if title:
-        h.append(f'<div class="hl md gtitle">{esc(title)}</div>')
+        h.append(f'<div class="hl md gtitle bt" data-l="0">{esc(title)}</div>')
     h.append('<div class="chips" style="margin-top:50px">')
-    for it in items:
-        h.append(f'<span class="chip{" hot" if it in hot else ""}">{esc(it)}</span>')
+    for i, it in enumerate(items):
+        key = f'data-l="0" data-o="{.2 + i * .45:.2f}" data-k="{esc(it)}"'
+        h.append(f'<span class="chip{" hot" if it in hot else ""} bt" {key}>{esc(it)}</span>')
     h.append("</div></div>")
     return "".join(h)
 
@@ -544,19 +546,20 @@ def g_bars(title, data, axis=("얕음", "깊음")):
     much, not just that there is some.
     """
     h = ['<div class="stage"><div class="scrim wide"></div>',
-         f'<div class="hl md gtitle">{esc(title)}</div>' if title else '',
+         f'<div class="hl md gtitle bt" data-l="0">{esc(title)}</div>' if title else '',
          '<div class="bars" style="margin-top:50px">']
-    for lab, frac, tone in data:
+    for bi, (lab, frac, tone) in enumerate(data):
+        key = f'data-l="0" data-o="{.3 + bi * .6:.2f}" data-k="{esc(lab)}"'
         steps = max(1, min(5, int(round(frac * 5))))
         hot = "hot" if tone in ("hot", "cool-hot") else ""
         dots = "".join(f'<i class="{("on " + hot).strip() if k < steps else ""}"></i>'
                        for k in range(5))
         ticks = "".join(f'<span class="tickline" style="left:{q}%"></span>'
                         for q in (20, 40, 60, 80))
-        h.append(f'<div><div class="bar-head"><span class="bar-lab">{esc(lab)}</span>'
+        h.append(f'<div class="bt" {key}><div class="bar-head"><span class="bar-lab">{esc(lab)}</span>'
                  f'<span class="bar-dots">{dots}</span></div>'
                  f'<div class="bar-track">{ticks}'
-                 f'<i class="bar-fill {tone}" style="width:{int(frac*100)}%"></i></div></div>')
+                 f'<i class="bar-fill {tone} bt-grow" {key} style="width:{int(frac*100)}%"></i></div></div>')
     h.append(f'<div class="bar-axis"><span>{esc(axis[0])}</span>'
              f'<span>{esc(axis[1])}</span></div>')
     h.append("</div></div>")
@@ -693,6 +696,7 @@ def src(key):
 
 _ROT = {}
 _USED = []
+_KEYS = []
 
 
 def pick(alias, i):
@@ -792,7 +796,8 @@ def content(i, kind, arg, line):
              f'<img id="{sid}-ic" class="icon3d" src="{src(pick(key, i))}" alt="" '
              f'style="height:460px;width:auto;filter:drop-shadow(0 26px 40px rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(90,216,247,.18))">']
         if badge:
-            h.append(f'<div class="hl md" style="margin-top:26px">{esc(badge)}</div>')
+            h.append(f'<div class="hl md bt" data-l="0" data-o=".3" data-k="{esc(badge)}" '
+                     f'style="margin-top:26px">{esc(badge)}</div>')
         h.append("</div>")
         return "".join(h)
     if kind == "N":
@@ -802,16 +807,15 @@ def content(i, kind, arg, line):
         mark, _, txt = arg.partition("|")
         words = txt or line
         size = "xl" if len(words) <= 14 else ("lg" if len(words) <= 26 else "md")
-        return (f'<div class="stage"><div class="scrim wide"></div>'
-                f'<div class="pmark">{picto(mark, 252)}</div>'
-                f'<div class="hl {size}" style="margin-top:34px">{esc(words)}</div></div>')
+        return f'<div class="stage"><div class="pmark">{picto(mark, 300)}</div></div>'
     if kind == "T":
         txt = arg if arg else line
         parts = [p for p in txt.split("|") if p.strip()]
         size = "xl" if (len(parts) == 1 and len(parts[0]) <= 14) else "lg"
         h = ['<div class="stage"><div class="scrim wide"></div>']
-        for p in parts:
-            h.append(f'<div class="hl {size}">{esc(p)}</div>')
+        for k, p in enumerate(parts):
+            h.append(f'<div class="hl {size} {"bt" if k == 0 else "bt-show"}" data-l="0" data-o="{k * .5:.2f}" '
+                     f'data-k="{esc(p)}">{esc(p)}</div>')
         h.append("</div>")
         return "".join(h)
     if kind == "K":
@@ -835,7 +839,6 @@ def content(i, kind, arg, line):
                 f'<i class="{"on" if k + 1 == n else ("done" if k + 1 < n else "")}"></i>'
                 for k in range(7)) + '</div>'
         return (f'<div class="stage"><div class="scrim"></div>'
-                f'<div class="chap-kick">STEP</div>'
                 f'<div class="pearl">{esc(label)}</div>'
                 f'<div class="chap-word">{esc(word)}</div>{steps}</div>')
     if kind == "G":
@@ -848,7 +851,7 @@ def content(i, kind, arg, line):
 
 
 # ── main ────────────────────────────────────────────────────────────────────
-NOCAP = ("T", "H", "P", "K")          # sentence already set large mid-frame
+NOCAP = ("T", "H", "K")          # sentence already set large mid-frame
 
 
 def _norm(t):
@@ -876,6 +879,44 @@ def cards_for(line):
         off += n
     out[0][1] = line["s"]
     return out
+
+
+def resolve_keys(body, S, lines):
+    """data-k="words" -> data-t="<sec>": when those words are spoken in the WAV
+    (char clock from timeline.json). Unmatched keys keep their beat timing."""
+    import re
+    import html as _h
+    seg, clock = "", []
+    for L in S["lines"]:
+        n = _norm(lines[L]["text"])
+        ct = lines[L]["ct"][:len(n)]
+        seg += n
+        clock += ct + [lines[L]["e"]] * (len(n) - len(ct))
+    lo = 0
+    while lo < len(clock) and clock[lo] < S["start"] - 0.05:
+        lo += 1
+    state = {"cur": lo}
+
+    def find(raw):
+        txt = _h.unescape(raw)
+        words = [_norm(w) for w in re.split(r"\s+", txt) if len(_norm(w)) >= 2]
+        tries = [_norm(txt)] + sorted(words, key=len, reverse=True)
+        tries += [w[:k] for w in words for k in range(len(w) - 1, 1, -1)]
+        for start in (state["cur"], lo):
+            for t in tries:
+                if len(t) < 2 and t != _norm(txt):
+                    continue
+                i = seg.find(t, start)
+                if i >= 0:
+                    state["cur"] = i + 1
+                    return clock[i]
+        return None
+
+    def sub(m):
+        t = find(m.group(1))
+        _KEYS.append((m.group(1), t))
+        return "" if t is None else f'data-t="{max(t - 0.12, S["start"]):.2f}"'
+    return re.sub(r'data-k="([^"]*)"', sub, body)
 
 
 def build_scenes(lines, total):
@@ -937,6 +978,11 @@ def main():
             arg = dict(arg, msgs=[(m[0], m[1] if m[1] else _q(lines[S["lines"][m[2]]]["text"]))
                                   + tuple(m[2:]) for m in arg["msgs"]])
         body = content(i, kind, arg, S["text"].rstrip("."))
+        body = resolve_keys(body, S, lines)
+        if kind == "T":                 # the headline opens with its sentence
+            import re as _re
+            body = _re.sub(r'data-t="([0-9.]+)"', lambda m: f'data-t="{min(float(m.group(1)), t0 + 0.25):.2f}"',
+                           body, count=1)
         if body:
             fg_html.append(
                 f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
@@ -1005,18 +1051,10 @@ var CAPT = {json.dumps(cap_t, separators=(",", ":"))};
 SC.forEach(function (s) {{
   var id = "#bgm" + String(s.i).padStart(3, "0");
   var dir = (s.i % 2) ? 1 : -1;
-  tl.fromTo(id, {{ scale: 1.0, xPercent: 0 }},
-            {{ scale: 1.05, xPercent: dir * 1.1, duration: s.d, ease: "sine.inOut" }}, s.t);
+  tl.fromTo(id, {{ xPercent: 0 }},
+            {{ xPercent: dir * 0.8, duration: s.d, ease: "sine.inOut" }}, s.t);
 }});
 
-// content micro-motion: slow push-in + drift (settle → subtle motion)
-SC.forEach(function (s) {{
-  if (!s.has) return;
-  var f = "#fg" + String(s.i).padStart(3, "0") + " > .fgm";
-  var dir = (s.i % 3) - 1;
-  tl.fromTo(f, {{ scale: 1.0, x: 0, y: 0 }},
-            {{ scale: 1.028, x: dir * 14, y: -10, duration: s.d, ease: "sine.inOut" }}, s.t);
-}});
 
 // beat-driven elements: arrive on the narration line they belong to
 SC.forEach(function (s) {{
@@ -1030,6 +1068,9 @@ SC.forEach(function (s) {{
       base = s.lb[Math.min(parseInt(el.getAttribute("data-l"), 10), s.lb.length - 1)];
     }}
     var at = base + parseFloat(el.getAttribute("data-o") || "0") + 0.06;
+    if (el.hasAttribute("data-t")) at = parseFloat(el.getAttribute("data-t")) + parseFloat(el.getAttribute("data-o2") || "0");
+    else if (el.hasAttribute("data-o2") && el.closest("[data-t]"))
+      at = parseFloat(el.closest("[data-t]").getAttribute("data-t")) + parseFloat(el.getAttribute("data-o2"));
     if (el.hasAttribute("data-x")) {{
       var xi = parseInt(el.getAttribute("data-x"), 10);
       if (xi < s.lb.length) tl.to(el, {{ opacity: 0, duration: 0.3, ease: "power1.in" }}, s.lb[xi] - 0.05);
@@ -1045,8 +1086,8 @@ SC.forEach(function (s) {{
       tl.fromTo(el, {{ display: "none", opacity: 0, y: 26 }},
                 {{ display: "flex", opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }}, at);
     }} else if (c.contains("bt-pop")) {{
-      tl.fromTo(el, {{ opacity: 0, scale: 0.86 }},
-                {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }}, at);
+      tl.fromTo(el, {{ opacity: 0, y: 16 }},
+                {{ opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }}, at);
     }} else {{
       tl.fromTo(el, {{ opacity: 0, y: 26 }},
                 {{ opacity: 1, y: 0, duration: 0.46, ease: "power3.out" }}, at);
@@ -1060,17 +1101,15 @@ SC.forEach(function (s) {{
   var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
   var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
   if (s.k === "T") {{
-    T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out", stagger: 0.12 }}, t);
   }} else if (s.k === "K") {{
-    T(f + " .bub", {{ scale: 0.93, opacity: 0, yPercent: 10 }},
-              {{ scale: 1, opacity: 1, yPercent: 0, duration: dur, ease: "back.out(1.5)" }}, t);
+    T(f + " .bub", {{ opacity: 0, yPercent: 10 }},
+              {{ opacity: 1, yPercent: 0, duration: dur, ease: "power2.out" }}, t);
     T(f + " .who", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3, ease: "power1.out" }}, t + 0.14);
   }} else if (s.k === "H") {{
     T(f + " .chap-kick", {{ opacity: 0, letterSpacing: "0.6em" }},
               {{ opacity: 1, letterSpacing: "0.3em", duration: 0.7, ease: "power2.out" }}, t);
-    T(f + " .pearl", {{ scale: 0.3, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t + 0.05);
+    T(f + " .pearl", {{ opacity: 0, y: 20 }},
+              {{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }}, t + 0.05);
     T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }}, t + 0.18);
     T(f + " .chap-steps i", {{ scaleX: 0 }},
@@ -1079,30 +1118,29 @@ SC.forEach(function (s) {{
     T(f + " .cut", {{ yPercent: 8, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out", stagger: 0.12 }}, t);
   }} else if (s.k === "I") {{
-    T(f + " .icon3d", {{ scale: 0.86, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: dur, ease: "back.out(1.3)" }}, t);
-    T(f + " .hl", {{ opacity: 0, yPercent: 30 }},
-              {{ opacity: 1, yPercent: 0, duration: 0.42, ease: "power2.out" }}, t + 0.2);
+    T(f + " .icon3d", {{ opacity: 0, y: 24 }},
+              {{ opacity: 1, y: 0, duration: dur, ease: "power2.out" }}, t);
     var fl = Math.max(0, Math.floor((s.d - dur - 0.2) / 1.6) - 1);
     if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.6, rotation: 2.2,
                 duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
   }} else if (s.k === "N") {{
-    T(f + " svg", {{ scale: 0.94, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: dur, ease: "power2.out" }}, t);
+    T(f + " svg", {{ opacity: 0 }},
+              {{ opacity: 1, duration: dur, ease: "power2.out" }}, t);
     T(f + " .fg-draw, " + f + " .fg-draw2", {{ strokeDasharray: 2400, strokeDashoffset: 2400 }},
               {{ strokeDashoffset: 0, duration: Math.min(1.6, s.d * 0.6), ease: "power2.inOut" }}, t + 0.1);
   }} else if (s.k === "P") {{
-    T(f + " .pmark", {{ opacity: 0, scale: 0.84, rotation: -6 }},
-              {{ opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: "back.out(1.6)" }}, t);
-    T(f + " .hl", {{ opacity: 0, yPercent: 26 }},
-              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out" }}, t + 0.14);
+    T(f + " .pmark", {{ opacity: 0, y: 20 }},
+              {{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }}, t);
+    var pf = Math.max(0, Math.floor((s.d - 0.8) / 1.8) - 1);
+    if (pf > 0 && document.querySelector(f + " .pmark")) tl.to(f + " .pmark", {{ y: -10, duration: 0.9,
+                ease: "sine.inOut", yoyo: true, repeat: pf }}, t + 0.6);
   }} else if (s.k === "G") {{
-    T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
+    T(f + " .gtitle:not(.bt)", {{ yPercent: 40, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
-    T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk",
+    T(f + " .row:not(.bt), " + f + " .chip:not(.bt), " + f + " .bars > div:not(.bt), " + f + " .stk",
               {{ yPercent: 36, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out", stagger: 0.14 }}, t + 0.14);
-    T(f + " .bar-fill", {{ scaleX: 0 }},
+    T(f + " .bar-fill:not(.bt-grow)", {{ scaleX: 0 }},
               {{ scaleX: 1, duration: 0.9, ease: "expo.out", stagger: 0.16 }}, t + 0.3);
     T(f + " .hl, " + f + " .sub, " + f + " .gapline",
               {{ opacity: 0, yPercent: 26 }},
@@ -1110,7 +1148,7 @@ SC.forEach(function (s) {{
   }} else if (s.k === "D") {{
     // semantic: the connection actually holds, breaks, restores or stretches
     var L = f + " .lk-l", R = f + " .lk-r", A = f + " .lk-node.a", B = f + " .lk-node.b";
-    T(A + ", " + B, {{ opacity: 0, scale: 0.7 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)", stagger: 0.1 }}, t);
+    T(A + ", " + B, {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }}, t);
     T(L + ", " + R, {{ strokeDasharray: 400, strokeDashoffset: 400 }}, {{ strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }}, t + 0.3);
     var root = document.querySelector(f + " .lnk");
     if (root && root.classList.contains("break")) {{
@@ -1154,6 +1192,8 @@ window.__timelines["main"] = tl;
     print("  bg families:", dict(Counter(background.prev[2:])))
     use = Counter(v for v in _USED)
     print("  asset uses >2:", {k: v for k, v in use.items() if v > 2})
+    miss = [k for k, t in _KEYS if t is None]
+    print(f"  text synced to speech: {len(_KEYS) - len(miss)}/{len(_KEYS)}; beat-timed: {miss}")
     longest = sorted(((S["end"] - S["start"], i) for i, S in enumerate(scenes)), reverse=True)[:6]
     print("  longest scenes:", [(round(a, 1), i) for a, i in longest])
 

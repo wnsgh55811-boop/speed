@@ -14,6 +14,7 @@ const ev = await page.evaluate(() => {
   const SCx = JSON.parse(document.body.innerHTML.match(/var SC = (\[.*?\]);/)[1]);
   const out = [];
   const beat = (s, el) => {
+    if (el.dataset.t) return parseFloat(el.dataset.t) + parseFloat(el.dataset.o2 || "0");
     const base = el.hasAttribute("data-c")
       ? s.cb[Math.min(+el.dataset.c, s.cb.length - 1)]
       : s.lb[Math.min(+el.dataset.l, s.lb.length - 1)];

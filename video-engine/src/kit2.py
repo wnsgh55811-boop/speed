@@ -21,6 +21,11 @@ def _b(l, o=0.0, x=None):
             + (f' data-x="{x}"' if x is not None else ""))
 
 
+def _k(text):
+    """sync key: the element lands when these words are actually spoken"""
+    return f' data-k="{esc(text)}"'
+
+
 def _c(c, o=0.0):
     """beat on a caption card instead of a sentence"""
     return f' data-c="{c}"' + (f' data-o="{o:.2f}"' if o else "")
@@ -64,7 +69,7 @@ def funnel(mode="all", hot=-1):
                      + f'</div><span class="fun-val">{v}%</span></div>')
             continue
         if mode == "build":
-            tag = _b(1, k * 0.62)
+            tag = _b(1, k * 0.62) + _k(lab)
         else:
             tag = _b(0, 0.15 + k * 0.12)
         cls = "fun-row bt"
@@ -138,8 +143,7 @@ def chat(msgs, phone=True, title="소개팅 상대", photo=None):
     for m in msgs:
         side, text, l = m[0], m[1], m[2]
         o = m[3] if len(m) > 3 else 0.0
-        items.append(f'<div class="msg {side} bt-show"{_b(l, o)}><div class="mb">{esc(text)}</div>'
-                     + ('<span class="rd">읽음</span>' if side == "m" and phone else "") + '</div>')
+        items.append(f'<div class="msg {side} bt-show"{_b(l, o)}{_k(text)}><div class="mb">{esc(text)}</div></div>')
     body = f'<div class="chat-body">{"".join(items)}</div>'
     if phone:
         return ('<div class="stage"><div class="phone bt-pop"' + _b(0) + '>'
@@ -158,7 +162,7 @@ def tracker(cur=-1, intro=False, title="소개팅 7단계", walk=False):
          f'<div class="trk-title">{esc(title)}</div>']
     for k, lab in enumerate(STEPS):
         st = "done" if (cur >= 0 and k < cur) else ("cur" if k == cur else "")
-        tag = _b(0, .2 + k * .32) if intro else _b(0, .08 + k * .05)
+        tag = (_b(0, .2 + k * .32) + _k("일곱 가지") + f' data-o2="{k * .3:.2f}"') if intro else _b(0, .08 + k * .05)
         mark = "&#10003;" if st == "done" else str(k + 1)
         hl = (f'<i class="trk-hl bt"{_b(k + 1, 0, k + 2 if k < 6 else None)}></i>'
               f'<i class="trk-ok bt-pop"{_b(k + 2, 0)}>&#10003;</i>' if walk else "")
@@ -185,13 +189,14 @@ def link(mode="break", a="나", b="상대"):
 def contrast(title, left, right, lt="", rt="", lc="neg", rc="pos", gap=.5, rl=1, ro=0.0):
     """rl: line the right column lands on; ro: extra offset (one-line scenes)."""
     def col(items, cls, t, l, base):
-        rows = "".join(f'<div class="cx-item bt"{_b(l, base + .3 + k * gap)}>{esc(x)}</div>'
+        rows = "".join(f'<div class="cx-item bt"{_b(l, base + .3 + k * gap)}{_k(x)}>{esc(x)}</div>'
                        for k, x in enumerate(items))
-        head = f'<div class="cx-head bt"{_b(l, base)}>{esc(t)}</div>' if t else ""
-        return f'<div class="cx-col {cls} bt"{_b(l, base)}>{head}{rows}</div>'
+        head = f'<div class="cx-head bt"{_b(l, base)}{_k(t)}>{esc(t)}</div>' if t else ""
+        first = (t or items[0])
+        return f'<div class="cx-col {cls} bt"{_b(l, base)}{_k(first)}>{head}{rows}</div>'
     return ('<div class="stage"><div class="scrim wide"></div>'
             + (f'<div class="hl md gtitle bt"{_b(0)}>{esc(title)}</div>' if title else "")
-            + '<div class="cx">' + col(left, lc, lt, 0, 0.0) + '<div class="cx-vs bt"' + _b(rl, ro) + '>VS</div>'
+            + '<div class="cx">' + col(left, lc, lt, 0, 0.0) + '<div class="cx-vs bt"' + _b(rl, ro) + _k(rt or right[0]) + '>VS</div>'
             + col(right, rc, rt, rl, ro) + '</div></div>')
 
 
@@ -203,8 +208,8 @@ def checklist(items, title, mode="line"):
         if mode == "stagger":
             return _b(0, .3 + k * .9 + extra)
         return _b(k, extra)
-    rows = "".join(f'<div class="ck-row bt"{tag(k)}><i class="ck-box"><b class="bt-pop"{tag(k, .45)}>'
-                   f'&#10003;</b></i><span>{esc(x)}</span></div>' for k, x in enumerate(items))
+    rows = "".join(f'<div class="ck-row bt"{tag(k)}{_k(x)}><i class="ck-box"><b class="bt-pop"{tag(k, .45)}'
+                   f' data-o2="0.45">&#10003;</b></i><span>{esc(x)}</span></div>' for k, x in enumerate(items))
     return (f'<div class="stage"><div class="scrim wide"></div><div class="ck">'
             f'<div class="ck-title">{esc(title)}</div>{rows}</div></div>')
 
@@ -212,9 +217,8 @@ def checklist(items, title, mode="line"):
 # ── 10. CTA card: points at the description box ────────────────────────────
 def cta():
     return ('<div class="stage"><div class="scrim wide"></div><div class="cta">'
-            '<div class="cta-kick bt"' + _b(0) + '>좋은 사람으로만 끝난다면</div>'
-            '<div class="cta-main bt"' + _b(0, .25) + '>설명란의 <b>비공개 특강</b></div>'
-            '<div class="cta-btn bt-pop"' + _b(0, .6) + '>먼저 확인해 보세요'
+            '<div class="cta-main bt"' + _b(0, .25) + _k("설명란의") + '>설명란의 <b>비공개 특강</b></div>'
+            '<div class="cta-btn bt-pop"' + _b(0, .6) + _k("확인해") + '>확인해 보세요'
             '<svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 6v24M9 20l11 11 11-11" '
             'stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             '</div></div></div>')
