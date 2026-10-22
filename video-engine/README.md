@@ -86,3 +86,23 @@ PROMPT.md 규칙 그대로 따르고, 대본만 새 걸로 갈아끼워.
 
 Claude 아티팩트 페이지는 네트워크 정책상 이미지 CDN을 못 불러오는 환경이라
 사진도 소리도 나오지 않는다. 완성본은 **MP4 링크**로 전달한다 (로그인 불필요).
+
+## WAV 원본 나레이션으로 만들 때 (`examples/sogaeting/`)
+
+Fish Audio 등으로 미리 만든 WAV를 그대로 쓰는 흐름. 음성은 재합성·atempo 없이 원본 타이밍 기준.
+
+```
+WAV → faster-whisper 단어 타임스탬프 → 대본 문장 정렬 → timeline.json (문장별 s/e + 글자별 시각)
+    → plan.py (문장당 씬, "=" 이어붙이기, [a, b] 한 문장 둘로 나누기)
+    → python3 src/emit.py --project examples/sogaeting      # index.html (오디오 없이)
+    → node scripts/grab.mjs <dir> t1,t2,...                 # 실제 프레임 QA (python3 -m http.server 8765)
+    → scripts/render_local.sh                               # 영상 트랙 렌더
+    → node scripts/sfx_events.mjs > renders/sfx.json        # 효과음 큐 = 화면 비트
+    → python3 scripts/master_audio.py <wav> renders/sfx.json renders/master_audio.wav   # -14.5 LUFS / -1.2 dBTP
+    → ffmpeg 로 mux
+```
+
+`src/kit2.py` 새 씬: `S` 스플릿 훅, `F` 전환 퍼널(build/walk), `V` 점 비교, `L` 불안 라인그래프,
+`X` 채팅(폰 / 사진+대화), `R` 7단계 트래커(intro/walk), `D` 연결 유지·끊김·복구, `Y` 대비 카드,
+`Q` 체크리스트, `A` CTA. 요소에 `data-l`(문장)/`data-c`(자막 카드) 비트를 달면 그 발화 순간에 등장한다.
+에셋 원본 URL은 `examples/sogaeting/assets.json`.

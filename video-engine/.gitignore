@@ -4,3 +4,9 @@ renders/
 snapshots/
 assets/audio/
 index.html
+assets/img/
+assets/fonts/
+vendor/
+renders/
+package-lock.json
+test12.html

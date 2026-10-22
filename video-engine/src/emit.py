@@ -11,11 +11,30 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+# A project lives in its own folder (plan.py + timeline.json); default is src/.
+PROJ = sys.argv[sys.argv.index("--project") + 1] if "--project" in sys.argv else HERE
+sys.path.insert(0, PROJ)
 from build import (W, H, CDN, IMG, ALIAS, NEON_FIG, FAMILIES,   # noqa: E402
                    esc, caption_cards, motes)
+import build                                                    # noqa: E402
+build.CAP_PX, build.CAP_MAX = 50, 1180       # one short line, readable on a phone
+import kit2                                                     # noqa: E402
+
 from plan import PLAN                                            # noqa: E402
 
 OUT = os.path.join(HERE, "..", "index.html")
+ROOT = os.path.join(HERE, "..")
+
+# Prefer local copies so a render never depends on the CDN mid-capture.
+for _k in list(IMG):
+    for _x in (".png", ".jpg"):
+        if os.path.exists(os.path.join(ROOT, "assets", "img", "lib", _k + _x)):
+            IMG[_k] = f"assets/img/lib/{_k}{_x}"
+for _f in sorted(os.listdir(os.path.join(ROOT, "assets", "img"))):
+    if _f.endswith((".png", ".jpg")):
+        _k = _f[:-4]
+        IMG[_k] = f"assets/img/{_f}"
+        ALIAS.setdefault(_k, [_k])
 
 
 # ── figures (SVG) ───────────────────────────────────────────────────────────
@@ -669,10 +688,11 @@ GRAPHICS = {
 def src(key):
     """Asset URL. Keyed figures carry a whole URL; the originals are CDN names."""
     v = IMG[key]
-    return v if v.startswith("http") else CDN + v
+    return v if v.startswith(("http", "assets/")) else CDN + v
 
 
 _ROT = {}
+_USED = []
 
 
 def pick(alias, i):
@@ -686,15 +706,18 @@ def pick(alias, i):
     opts = ALIAS[alias]
     n = _ROT.get(alias, 0)
     _ROT[alias] = n + 1
+    _USED.append(opts[n % len(opts)])
     return opts[n % len(opts)]
 
 
 def background(i, kind, arg, section):
     """Return (css_class, inner_html). Photos own their own plate."""
     if kind == "B":
-        key = pick(arg, i)
+        key = pick(arg.partition("|")[0], i)
         return "bg-photo", (f'<img id="ph{i:03d}" src="{src(key)}" alt="">'
                             f'<div class="tint"></div>')
+    if kind == "H":
+        return "bg-ember", ""
     fam = FAMILIES[(section * 3 + i // 2) % len(FAMILIES)]
     # never three alike in a row
     if i >= 2 and fam == background.prev[-1] == background.prev[-2]:
@@ -709,7 +732,44 @@ background.prev = ["", ""]
 def content(i, kind, arg, line):
     sid = f"fg{i:03d}"
     if kind == "B":
-        return ""
+        _, _, tag = arg.partition("|")
+        if not tag:
+            return ""
+        warm = tag.startswith("!")
+        return (f'<div class="ph-tag{" am" if warm else ""} bt-pop" data-l="0" data-o="0.35">'
+                f'{esc(tag.lstrip("!"))}</div>')
+    if kind == "S":
+        a, b = arg.split("|")
+        return kit2.split_hook(src(a), src(b))
+    if kind == "F":
+        mode, _, hot = arg.partition(":")
+        return kit2.funnel(mode, int(hot) if hot else -1)
+    if kind == "V":
+        return kit2.dots_compare()
+    if kind == "L":
+        return kit2.anx_line()
+    if kind == "X":
+        return kit2.chat(arg["msgs"], phone=not arg.get("bg"), title=arg.get("title", "소개팅 상대"),
+                         photo=src(pick(arg["bg"], i)) if arg.get("bg") else None)
+    if kind == "R":
+        cur, _, mode = str(arg).partition(":")
+        title = {"intro": "오늘의 7단계", "walk": "정리 · 7단계"}.get(mode, "지금까지")
+        return kit2.tracker(int(cur), mode == "intro", title, walk=mode == "walk")
+    if kind == "Z":
+        return g_bars(*arg)
+    if kind == "W":
+        title, items, muted, mark = arg
+        return g_rows(title, items, muted=muted, mark=mark)
+    if kind == "U":
+        return g_chips(*arg)
+    if kind == "A":
+        return kit2.cta()
+    if kind == "D":
+        return kit2.link(arg)
+    if kind == "Y":
+        return kit2.contrast(*arg)
+    if kind == "Q":
+        return kit2.checklist(*arg)
     if kind == "C":
         who, _, _bg = arg.partition("@")
         names = who.split("+")
@@ -724,13 +784,13 @@ def content(i, kind, arg, line):
             h.append(f'<div class="cut" style="{col}">'
                      f'<img id="{sid}-c{len(h)}" class="shadowed" '
                      f'src="{src(key)}" alt="" '
-                     f'style="height:{int(820*sc)}px"></div>')
+                     f'style="height:{int(700*sc)}px"></div>')
         return "".join(h)
     if kind == "I":
         key, _, badge = arg.partition("|")
         h = [f'<div class="stage"><div class="scrim tight"></div>'
              f'<img id="{sid}-ic" class="icon3d" src="{src(pick(key, i))}" alt="" '
-             f'style="width:560px;height:auto;filter:drop-shadow(0 22px 40px rgba(0,0,0,.6))">']
+             f'style="height:460px;width:auto;filter:drop-shadow(0 26px 40px rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(90,216,247,.18))">']
         if badge:
             h.append(f'<div class="hl md" style="margin-top:26px">{esc(badge)}</div>')
         h.append("</div>")
@@ -755,10 +815,11 @@ def content(i, kind, arg, line):
         h.append("</div>")
         return "".join(h)
     if kind == "K":
+        arg, _, label = arg.partition("|")
         crossed = arg.endswith("x")
         who = arg[0]
-        side = "right" if who == "m" else "left"
-        tag = "남자" if who == "m" else ("여자" if who == "w" else "내담자")
+        side = "right" if who == "m" else ("center" if label else "left")
+        tag = label or ("남자" if who == "m" else ("여자" if who == "w" else "내담자"))
         strike = ('<svg class="strike" viewBox="0 0 100 100">'
                   '<line x1="10" y1="10" x2="90" y2="90"/><line x1="10" y1="90" x2="90" y2="10"/>'
                   '</svg>') if crossed else ""
@@ -767,9 +828,16 @@ def content(i, kind, arg, line):
     if kind == "H":
         num, _, word = arg.partition("|")
         label = num[1:] if num.startswith("n") else (num.lstrip("0") or num)
+        steps = ""
+        if label.isdigit():
+            n = int(label)
+            steps = '<div class="chap-steps">' + "".join(
+                f'<i class="{"on" if k + 1 == n else ("done" if k + 1 < n else "")}"></i>'
+                for k in range(7)) + '</div>'
         return (f'<div class="stage"><div class="scrim"></div>'
+                f'<div class="chap-kick">STEP</div>'
                 f'<div class="pearl">{esc(label)}</div>'
-                f'<div class="chap-word">{esc(word)}</div></div>')
+                f'<div class="chap-word">{esc(word)}</div>{steps}</div>')
     if kind == "G":
         fn = GRAPHICS.get(arg)
         body = fn() if fn else ""
@@ -780,27 +848,81 @@ def content(i, kind, arg, line):
 
 
 # ── main ────────────────────────────────────────────────────────────────────
+NOCAP = ("T", "H", "P", "K")          # sentence already set large mid-frame
+
+
+def _norm(t):
+    import re
+    return re.sub(r"[^0-9A-Za-z가-힣]", "", t)
+
+
+def load_lines():
+    """WAV-aligned sentence timings: [{text, s, e, ct[]}] + total seconds."""
+    tl = json.load(open(os.path.join(PROJ, "timeline.json"), encoding="utf-8"))
+    return tl["lines"], tl["total"]
+
+
+def cards_for(line):
+    """Caption cards for one sentence, each timed off the WAV char clock."""
+    text = line["text"].strip()
+    if text.endswith("."):
+        text = text[:-1]
+    cards = caption_cards(text)
+    out, off = [], 0
+    for c in cards:
+        n = len(_norm(c))
+        t = line["ct"][min(off, len(line["ct"]) - 1)] if line["ct"] else line["s"]
+        out.append([c, t])
+        off += n
+    out[0][1] = line["s"]
+    return out
+
+
+def build_scenes(lines, total):
+    """Expand the plan into scenes. Plan entries per sentence:
+         (kind, arg)        one scene
+         "="                extend the previous scene over this sentence
+         [spec, spec]       split this sentence into two scenes at a card edge
+    """
+    assert len(PLAN) == len(lines), (len(PLAN), len(lines))
+    starts = [l["s"] for l in lines] + [total]
+    starts[0] = 0.0
+    sc = []
+    for li, (ent, ln) in enumerate(zip(PLAN, lines)):
+        cards = cards_for(ln)
+        if ent == "=":
+            sc[-1]["lines"].append(li)
+            sc[-1]["cards"].extend(cards)
+            sc[-1]["lb"].append(ln["s"])
+            sc[-1]["end"] = starts[li + 1]
+            continue
+        specs = ent if isinstance(ent, list) else [ent]
+        if len(specs) == 2 and len(cards) >= 2:
+            cut = (len(cards) + 1) // 2
+            parts = [(specs[0], cards[:cut], starts[li]), (specs[1], cards[cut:], cards[cut][1])]
+        else:
+            parts = [(specs[0], cards, starts[li])]
+        for k, (spec, cs, t0) in enumerate(parts):
+            if sc:
+                sc[-1]["end"] = t0
+            sc.append({"kind": spec[0], "arg": spec[1], "start": t0, "end": starts[li + 1],
+                       "lines": [li], "cards": cs, "lb": [t0], "text": ln["text"]})
+    return sc
+
+
 def main():
     audio = None
     if "--audio" in sys.argv:
         audio = sys.argv[sys.argv.index("--audio") + 1]
-
-    raw = open(os.path.join(HERE, "timings.txt"), encoding="utf-8").read()
-    total = float(raw.split("TOTAL ")[1].split()[0])
-    times = [tuple(float(x) for x in p.split(","))
-             for p in raw.split("TIMES ")[1].split()]
-    lines = [l for c in json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))
-             for l in c["lines"]]
-    chunk_of = []
-    for si, c in enumerate(json.load(open(os.path.join(HERE, "chunks.json"), encoding="utf-8"))):
-        chunk_of.extend([si] * len(c["lines"]))
-    assert len(lines) == len(times) == len(PLAN) == 251
+    lines, total = load_lines()
+    scenes = build_scenes(lines, total)
 
     bg_html, fg_html, cap_html, anim, cap_t = [], [], [], [], []
     cap_n = 0
-    for i, ((kind, arg), (t0, t1), line) in enumerate(zip(PLAN, times, lines)):
-        d = max(0.4, t1 - t0)
-        fam, inner = background(i, kind, arg, chunk_of[i])
+    for i, S in enumerate(scenes):
+        kind, arg, t0 = S["kind"], S["arg"], S["start"]
+        d = max(0.4, S["end"] - t0)
+        fam, inner = background(i, kind, arg, i // 9)
         background.prev.append(fam)
         bg_html.append(
             f'<div class="clip" id="bgc{i:03d}" data-start="{t0:.2f}" '
@@ -808,34 +930,47 @@ def main():
             f'<div class="layer"><div class="bgmove {fam}" id="bgm{i:03d}" data-layout-allow-overflow>{inner}</div>'
             f'<div class="grain"></div><div class="vig"></div></div></div>')
 
-        body = content(i, kind, arg, line)
+        if kind == "X":                 # bubbles quote the sentence they play on
+            def _q(t):
+                t = t.strip().rstrip(".")
+                return t.strip('"').strip("'").strip("\u201c\u201d")
+            arg = dict(arg, msgs=[(m[0], m[1] if m[1] else _q(lines[S["lines"][m[2]]]["text"]))
+                                  + tuple(m[2:]) for m in arg["msgs"]])
+        body = content(i, kind, arg, S["text"].rstrip("."))
         if body:
             fg_html.append(
                 f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
-                f'data-duration="{d:.2f}" data-track-index="1">{body}</div>')
+                f'data-duration="{d:.2f}" data-track-index="1"><div class="fgm">{body}</div></div>')
         anim.append({"i": i, "t": round(t0, 2), "d": round(d, 2), "k": kind,
-                     "has": bool(body)})
+                     "has": bool(body), "lb": [round(x, 2) for x in S["lb"]],
+                     "cb": [round(c[1], 2) for c in S["cards"]]})
 
-        # Review note: where the sentence is already set large across the middle
-        # of frame, repeating it along the bottom just stacks the same words on
-        # themselves. Those scenes carry no caption card.
-        if kind in ("T", "H", "P"):
+        # captions — skipped where the same words are already on screen
+        if kind in NOCAP:
             continue
-
-        cards = caption_cards(line)
-        per = d / len(cards)
-        for j, c in enumerate(cards):
-            cs, cd = t0 + j * per, per
+        hide = set()
+        if kind == "X":
+            hide = {S["lines"][m[2]] for m in S["arg"]["msgs"] if not m[1]}
+        cs = S["cards"]
+        for j, (c, ct) in enumerate(cs):
+            li = max([L for L in S["lines"] if lines[L]["s"] <= ct + 0.01] or [S["lines"][0]])
+            if li in hide:
+                continue
+            nxt = cs[j + 1][1] if j + 1 < len(cs) else S["end"]
+            end = min(nxt, lines[li]["e"] + 0.7, S["end"])
+            if end - ct < 0.25:
+                end = min(ct + 0.25, S["end"])
             cap_html.append(
-                f'<div class="clip" id="cap{cap_n:03d}" data-start="{cs:.2f}" '
-                f'data-duration="{cd:.2f}" data-track-index="2">'
+                f'<div class="clip" id="cap{cap_n:03d}" data-start="{ct:.2f}" '
+                f'data-duration="{end-ct:.2f}" data-track-index="2">'
                 f'<div class="cap-wrap"><div class="cap-scrim" data-layout-allow-overflow></div>'
                 f'<div class="cap">{esc(c)}</div></div></div>')
-            cap_t.append(round(cs, 2))
+            cap_t.append(round(ct, 2))
             cap_n += 1
 
     css = open(os.path.join(HERE, "style.css"), encoding="utf-8").read()
-    audio_tag = (f'\n  <audio id="vo" src="{audio}" data-start="0"></audio>' if audio else "")
+    audio_tag = (f'\n  <audio id="vo" src="{audio}" data-start="0" data-duration="{total:.3f}" '
+                 f'data-track-index="4" data-volume="1"></audio>' if audio else "")
 
     doc = f"""<!doctype html>
 <html lang="ko">
@@ -859,9 +994,6 @@ def main():
 </div>
 <script>
 var tl = gsap.timeline({{ paused: true }});
-
-// Tween only what exists — recipes are shared across scene kinds, and GSAP
-// logs a console warning for every selector that matches nothing.
 function T(sel, from, to, at) {{
   if (!document.querySelector(sel)) return;
   tl.fromTo(sel, from, to, at);
@@ -869,76 +1001,144 @@ function T(sel, from, to, at) {{
 var SC = {json.dumps(anim, separators=(",", ":"))};
 var CAPT = {json.dumps(cap_t, separators=(",", ":"))};
 
-// plates drift so no frame is ever dead still
+// plates drift for the whole scene so no frame is ever dead still
 SC.forEach(function (s) {{
   var id = "#bgm" + String(s.i).padStart(3, "0");
   var dir = (s.i % 2) ? 1 : -1;
-  var span = Math.min(s.d, 8);
   tl.fromTo(id, {{ scale: 1.0, xPercent: 0 }},
-            {{ scale: 1.045, xPercent: dir * 0.9, duration: span,
-               ease: "sine.inOut" }}, s.t);
+            {{ scale: 1.05, xPercent: dir * 1.1, duration: s.d, ease: "sine.inOut" }}, s.t);
 }});
 
-// content entrances, one recipe per scene kind
+// content micro-motion: slow push-in + drift (settle → subtle motion)
+SC.forEach(function (s) {{
+  if (!s.has) return;
+  var f = "#fg" + String(s.i).padStart(3, "0") + " > .fgm";
+  var dir = (s.i % 3) - 1;
+  tl.fromTo(f, {{ scale: 1.0, x: 0, y: 0 }},
+            {{ scale: 1.028, x: dir * 14, y: -10, duration: s.d, ease: "sine.inOut" }}, s.t);
+}});
+
+// beat-driven elements: arrive on the narration line they belong to
+SC.forEach(function (s) {{
+  if (!s.has) return;
+  var root = document.getElementById("fg" + String(s.i).padStart(3, "0"));
+  root.querySelectorAll("[data-l], [data-c]").forEach(function (el) {{
+    var base;
+    if (el.hasAttribute("data-c")) {{
+      base = s.cb[Math.min(parseInt(el.getAttribute("data-c"), 10), s.cb.length - 1)];
+    }} else {{
+      base = s.lb[Math.min(parseInt(el.getAttribute("data-l"), 10), s.lb.length - 1)];
+    }}
+    var at = base + parseFloat(el.getAttribute("data-o") || "0") + 0.06;
+    if (el.hasAttribute("data-x")) {{
+      var xi = parseInt(el.getAttribute("data-x"), 10);
+      if (xi < s.lb.length) tl.to(el, {{ opacity: 0, duration: 0.3, ease: "power1.in" }}, s.lb[xi] - 0.05);
+    }}
+    var c = el.classList;
+    if (c.contains("bt-grow")) {{
+      tl.fromTo(el, {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.95, ease: "expo.out" }}, at + 0.12);
+    }} else if (c.contains("bt-draw")) {{
+      var len = el.getTotalLength ? el.getTotalLength() : 600;
+      tl.fromTo(el, {{ strokeDasharray: len, strokeDashoffset: len }},
+                {{ strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }}, at);
+    }} else if (c.contains("bt-show")) {{
+      tl.fromTo(el, {{ display: "none", opacity: 0, y: 26 }},
+                {{ display: "flex", opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }}, at);
+    }} else if (c.contains("bt-pop")) {{
+      tl.fromTo(el, {{ opacity: 0, scale: 0.86 }},
+                {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }}, at);
+    }} else {{
+      tl.fromTo(el, {{ opacity: 0, y: 26 }},
+                {{ opacity: 1, y: 0, duration: 0.46, ease: "power3.out" }}, at);
+    }}
+  }});
+}});
+
+// content entrances for the classic kinds, one recipe per kind
 SC.forEach(function (s) {{
   if (!s.has) return;
   var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t + 0.08;
   var dur = Math.min(0.62, Math.max(0.34, s.d * 0.34));
   if (s.k === "T") {{
     T(f + " .hl", {{ yPercent: 42, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out",
-                 stagger: 0.09 }}, t);
+              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power3.out", stagger: 0.12 }}, t);
   }} else if (s.k === "K") {{
     T(f + " .bub", {{ scale: 0.93, opacity: 0, yPercent: 10 }},
-              {{ scale: 1, opacity: 1, yPercent: 0, duration: dur,
-                 ease: "back.out(1.5)" }}, t);
-    T(f + " .who", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3,
-              ease: "power1.out" }}, t + 0.14);
+              {{ scale: 1, opacity: 1, yPercent: 0, duration: dur, ease: "back.out(1.5)" }}, t);
+    T(f + " .who", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3, ease: "power1.out" }}, t + 0.14);
   }} else if (s.k === "H") {{
+    T(f + " .chap-kick", {{ opacity: 0, letterSpacing: "0.6em" }},
+              {{ opacity: 1, letterSpacing: "0.3em", duration: 0.7, ease: "power2.out" }}, t);
     T(f + " .pearl", {{ scale: 0.3, opacity: 0 }},
-              {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t);
+              {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }}, t + 0.05);
     T(f + " .chap-word", {{ yPercent: 50, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.55, ease: "power3.out" }}, t + 0.18);
+    T(f + " .chap-steps i", {{ scaleX: 0 }},
+              {{ scaleX: 1, duration: 0.4, ease: "power2.out", stagger: 0.05 }}, t + 0.3);
   }} else if (s.k === "C") {{
     T(f + " .cut", {{ yPercent: 8, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out",
-                 stagger: 0.12 }}, t);
+              {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out", stagger: 0.12 }}, t);
   }} else if (s.k === "I") {{
     T(f + " .icon3d", {{ scale: 0.86, opacity: 0 }},
               {{ scale: 1, opacity: 1, duration: dur, ease: "back.out(1.3)" }}, t);
     T(f + " .hl", {{ opacity: 0, yPercent: 30 }},
               {{ opacity: 1, yPercent: 0, duration: 0.42, ease: "power2.out" }}, t + 0.2);
     var fl = Math.max(0, Math.floor((s.d - dur - 0.2) / 1.6) - 1);
-    if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.2, duration: 0.8,
-                ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
+    if (fl > 0 && document.querySelector(f + " .icon3d")) tl.to(f + " .icon3d", {{ yPercent: -2.6, rotation: 2.2,
+                duration: 0.8, ease: "sine.inOut", yoyo: true, repeat: fl }}, t + dur + 0.1);
   }} else if (s.k === "N") {{
     T(f + " svg", {{ scale: 0.94, opacity: 0 }},
               {{ scale: 1, opacity: 1, duration: dur, ease: "power2.out" }}, t);
+    T(f + " .fg-draw, " + f + " .fg-draw2", {{ strokeDasharray: 2400, strokeDashoffset: 2400 }},
+              {{ strokeDashoffset: 0, duration: Math.min(1.6, s.d * 0.6), ease: "power2.inOut" }}, t + 0.1);
+  }} else if (s.k === "P") {{
+    T(f + " .pmark", {{ opacity: 0, scale: 0.84, rotation: -6 }},
+              {{ opacity: 1, scale: 1, rotation: 0, duration: 0.55, ease: "back.out(1.6)" }}, t);
+    T(f + " .hl", {{ opacity: 0, yPercent: 26 }},
+              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out" }}, t + 0.14);
   }} else if (s.k === "G") {{
     T(f + " .gtitle", {{ yPercent: 40, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }}, t);
     T(f + " .row, " + f + " .chip, " + f + " .bars > div, " + f + " .stk",
               {{ yPercent: 36, opacity: 0 }},
-              {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out",
-                 stagger: 0.08 }}, t + 0.14);
+              {{ yPercent: 0, opacity: 1, duration: 0.46, ease: "power3.out", stagger: 0.14 }}, t + 0.14);
     T(f + " .bar-fill", {{ scaleX: 0 }},
-              {{ scaleX: 1, duration: 0.7, ease: "expo.out", stagger: 0.1 }}, t + 0.26);
-    T(f + " svg", {{ opacity: 0, scale: 0.95 }},
-              {{ opacity: 1, scale: 1, duration: dur, ease: "power2.out" }}, t);
-    T(f + " .pmark", {{ opacity: 0, scale: 0.84 }},
-              {{ opacity: 1, scale: 1, duration: 0.52, ease: "back.out(1.6)" }}, t + 0.06);
+              {{ scaleX: 1, duration: 0.9, ease: "expo.out", stagger: 0.16 }}, t + 0.3);
     T(f + " .hl, " + f + " .sub, " + f + " .gapline",
               {{ opacity: 0, yPercent: 26 }},
-              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out",
-                 stagger: 0.08 }}, t + 0.1);
+              {{ opacity: 1, yPercent: 0, duration: 0.46, ease: "power2.out", stagger: 0.08 }}, t + 0.1);
+  }} else if (s.k === "D") {{
+    // semantic: the connection actually holds, breaks, restores or stretches
+    var L = f + " .lk-l", R = f + " .lk-r", A = f + " .lk-node.a", B = f + " .lk-node.b";
+    T(A + ", " + B, {{ opacity: 0, scale: 0.7 }}, {{ opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)", stagger: 0.1 }}, t);
+    T(L + ", " + R, {{ strokeDasharray: 400, strokeDashoffset: 400 }}, {{ strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }}, t + 0.3);
+    var root = document.querySelector(f + " .lnk");
+    if (root && root.classList.contains("break")) {{
+      tl.to(L, {{ x: -70, rotation: -8, transformOrigin: "0% 50%", stroke: "#F0538F", duration: 0.5, ease: "power2.in" }}, t + 1.2);
+      tl.to(R, {{ x: 70, rotation: 8, transformOrigin: "100% 50%", stroke: "#F0538F", duration: 0.5, ease: "power2.in" }}, t + 1.2);
+      tl.to(B, {{ x: 60, opacity: 0.45, duration: 0.8, ease: "power2.out" }}, t + 1.3);
+    }} else if (root && root.classList.contains("far")) {{
+      tl.to(A, {{ x: -120, duration: Math.max(1, s.d - 1), ease: "sine.inOut" }}, t + 0.8);
+      tl.to(B, {{ x: 120, duration: Math.max(1, s.d - 1), ease: "sine.inOut" }}, t + 0.8);
+      tl.to(L + ", " + R, {{ opacity: 0.25, duration: 1.2 }}, t + 1.2);
+    }} else if (root && root.classList.contains("restore")) {{
+      tl.fromTo(L, {{ x: -70, rotation: -8, transformOrigin: "0% 50%" }}, {{ x: 0, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }}, t + 1.0);
+      tl.fromTo(R, {{ x: 70, rotation: 8, transformOrigin: "100% 50%" }}, {{ x: 0, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }}, t + 1.0);
+    }} else {{
+      tl.to(L + ", " + R, {{ strokeWidth: 11, duration: 0.6, yoyo: true, repeat: 1, ease: "sine.inOut" }}, t + 1.2);
+    }}
+  }} else if (s.k === "L") {{
+    var n = Math.max(1, Math.round(s.d / 2.5));
+    T(f + " .clock-h", {{ rotation: 0, svgOrigin: "0 0" }},
+              {{ rotation: 360 * 2, svgOrigin: "0 0", duration: s.d - 0.3, ease: "none" }}, t);
   }}
 }});
 
 // captions: one line, fading up at each card's own start
 CAPT.forEach(function (ct, c) {{
   var cid = "#cap" + String(c).padStart(3, "0") + " .cap";
-  tl.fromTo(cid, {{ opacity: 0, yPercent: 26 }},
-            {{ opacity: 1, yPercent: 0, duration: 0.22, ease: "power2.out" }}, ct);
+  tl.fromTo(cid, {{ opacity: 0, yPercent: 22 }},
+            {{ opacity: 1, yPercent: 0, duration: 0.2, ease: "power2.out" }}, ct);
 }});
 
 window.__timelines["main"] = tl;
@@ -948,9 +1148,14 @@ window.__timelines["main"] = tl;
 """
     open(OUT, "w", encoding="utf-8").write(doc)
     print(f"wrote {OUT}")
-    print(f"  duration {total:.2f}s · scenes {len(PLAN)} · caption cards {cap_n}")
+    print(f"  duration {total:.2f}s · scenes {len(scenes)} · caption cards {cap_n}")
     from collections import Counter
+    print("  kinds:", dict(Counter(S["kind"] for S in scenes)))
     print("  bg families:", dict(Counter(background.prev[2:])))
+    use = Counter(v for v in _USED)
+    print("  asset uses >2:", {k: v for k, v in use.items() if v > 2})
+    longest = sorted(((S["end"] - S["start"], i) for i, S in enumerate(scenes)), reverse=True)[:6]
+    print("  longest scenes:", [(round(a, 1), i) for a, i in longest])
 
 
 if __name__ == "__main__":
