@@ -143,7 +143,9 @@ def chat(msgs, phone=True, title="소개팅 상대", photo=None):
     for m in msgs:
         side, text, l = m[0], m[1], m[2]
         o = m[3] if len(m) > 3 else 0.0
-        items.append(f'<div class="msg {side} bt-show"{_b(l, o)}{_k(text)}><div class="mb">{esc(text)}</div></div>')
+        key = m[4] if len(m) > 4 else text
+        items.append(f'<div class="msg {side} bt-show"{_b(l, o)}{_k(key) if key else ""}>'
+                     f'<div class="mb">{esc(text)}</div></div>')
     body = f'<div class="chat-body">{"".join(items)}</div>'
     if phone:
         return ('<div class="stage"><div class="phone bt-pop"' + _b(0) + '>'
@@ -178,9 +180,9 @@ def link(mode="break", a="나", b="상대"):
         mode, a, b = (mode.split("|") + ["나", "상대"])[:3]
     return (f'<div class="diag"><div class="scrim wide"></div><div class="lnk {mode}">'
             f'<div class="lk-node a"><i></i><span>{esc(a)}</span></div>'
-            '<svg class="lk-svg" width="760" height="120" viewBox="0 0 760 120">'
-            '<path class="lk-l edge-hot glow" d="M0 60 L380 60"/>'
-            '<path class="lk-r edge-hot glow" d="M380 60 L760 60"/></svg>'
+            '<svg class="lk-svg" width="860" height="120" viewBox="0 0 860 120">'
+            '<path class="lk-l edge-hot glow" d="M0 60 L430 60"/>'
+            '<path class="lk-r edge-hot glow" d="M430 60 L860 60"/></svg>'
             f'<div class="lk-node b"><i></i><span>{esc(b)}</span></div>'
             '</div></div>')
 
@@ -248,3 +250,39 @@ def journey():
             f'<text class="jr-lab bt"{_k("소개팅에서")} x="{pts[0][0]}" y="{pts[0][1] - 44:.0f}" text-anchor="middle">소개팅</text>'
             f'<text class="jr-lab hot bt"{_k("애프터까지")} x="{pts[6][0]}" y="{pts[6][1] - 44:.0f}" text-anchor="middle">애프터</text>'
             '</svg></div></div>')
+
+
+# ── 12. keyword flow: the five stages as clean words (build / walk) ────────
+FLOW = ["첫인상", "대화", "호감 형성", "애프터", "관계의 발전"]
+WALK = [("관심을", "관심을 얻지 못함"), ("카톡에서", "카톡에서 식음"),
+        ("이성적인", "매력이 전달되지 않음"), ("제안하지", "제안하지 못함")]
+
+
+def keyflow(mode="build"):
+    h = ['<div class="stage"><div class="kf">']
+    for k, w in enumerate(FLOW):
+        tag = _k(w) if mode == "build" else _b(0, .1 + k * .12)
+        if k:
+            h.append(f'<span class="kf-arr bt"{tag}><svg width="44" height="44" viewBox="0 0 44 44">'
+                     '<path d="M12 8l14 14-14 14" fill="none" stroke="currentColor" stroke-width="4" '
+                     'stroke-linecap="round" stroke-linejoin="round"/></svg></span>')
+        hot = ""
+        if mode == "walk" and k < 4:
+            hot = f'<i class="kf-hot bt"{_b(k, 0, k + 1 if k < 3 else None)}{_k(WALK[k][0])}></i>'
+        h.append(f'<span class="kf-w bt"{tag}>{hot}<b>{esc(w)}</b></span>')
+    h.append('</div>')
+    if mode == "walk":
+        h.append('<div class="kf-notes">' + "".join(
+            f'<div class="kf-note bt"{_b(k, .1, k + 1 if k < 3 else None)}{_k(WALK[k][0])}>{esc(WALK[k][1])}</div>'
+            for k in range(4)) + '</div>')
+    h.append('</div>')
+    return "".join(h)
+
+
+# ── 13. two reasons, the second one checked on "두 번째라면" ───────────────
+def reasons(a, b, key):
+    return ('<div class="stage"><div class="rs">'
+            f'<div class="rs-row bt"{_b(0, .05)}><i class="rs-n">1</i><span>{esc(a)}</span></div>'
+            f'<div class="rs-row two bt"{_b(0, .15)}><i class="rs-n">2</i><span>{esc(b)}</span>'
+            f'<i class="rs-hl bt"{_k(key)}></i><b class="rs-ck bt-pop"{_k(key)} data-o2="0.25">&#10003;</b></div>'
+            '</div></div>')

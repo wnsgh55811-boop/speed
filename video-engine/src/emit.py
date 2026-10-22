@@ -711,15 +711,88 @@ def photo_mg(i):
     return '<div class="mg mg-v3"><div class="mg-leak"></div></div>'
 
 
-def icon_stage(url, i):
-    """3D icon on an orbit: rotating rings, travelling lights, breathing glow."""
-    return ('<div class="icon-stage"><div class="icon-glow"></div>'
-            '<svg class="orb" viewBox="-360 -360 720 720">'
+_TSTYLE = [0]
+
+
+def typo(txt):
+    """Keyword typography. '|' splits lines (each lands on its spoken words and
+    the block glides to stay centred), '~' marks a negated phrase (struck
+    through as it is said), '*' an amber emphasis. Ten finishing styles rotate."""
+    parts = [p for p in txt.split("|") if p.strip()]
+    # decorate every other headline, ten styles twice each; the rest stay clean
+    n = _TSTYLE[0]
+    _TSTYLE[0] += 1
+    st = (n // 2) % 10 if (n % 2 == 0 and n // 2 < 20) else -1
+    longest = max(len(p.strip("~*")) for p in parts)
+    size = "xl" if (len(parts) == 1 and longest <= 12) else ("lg" if longest <= 16 else "md")
+    h = [f'<div class="stage"><div class="tgrp ts{st}">']
+    deco = {1: '<i class="tb tl"></i><i class="tb tr"></i><i class="tb bl"></i><i class="tb br"></i>',
+            2: '<i class="t-vbar"></i>',
+            5: '<div class="t-kick"><i></i><b></b></div>',
+            6: '<svg class="t-box"><rect x="2" y="2" rx="22" ry="22"/></svg>',
+            7: '<i class="t-sweep"></i>',
+            8: '<i class="t-quote">&ldquo;</i>'}
+    h.append(deco.get(st, ""))
+    for k, p in enumerate(parts):
+        neg, amb = p.startswith("~"), p.startswith("*")
+        w = p.lstrip("~*")
+        cls = "hl " + size + " tpart" + (" neg" if neg else "") + (" amb" if amb else "")
+        side = '<i class="t-side l"></i>' if st == 4 and k == 0 else ""
+        side2 = '<i class="t-side r"></i>' if st == 4 and k == 0 else ""
+        mark = '<i class="t-mark"></i>' if st == 3 and k == len(parts) - 1 else ""
+        strike = '<i class="t-strike"></i>' if neg else ""
+        h.append(f'<div class="{cls}" data-l="0" data-o="{k * .5:.2f}" data-k="{esc(w)}">'
+                 f'{side}<span class="tw">{mark}{esc(w)}{strike}</span>{side2}</div>')
+    tail = {0: '<i class="t-acc"></i>', 9: '<div class="t-dots"><i></i><i></i><i></i></div>'}
+    h.append(tail.get(st, ""))
+    h.append('</div></div>')
+    return "".join(h)
+
+
+def icon_stage(url, v=1, label=""):
+    """A 3D icon presented one of thirteen ways — each look used at most twice."""
+    rays = "".join(f'<line x1="0" y1="-170" x2="0" y2="{-250 - (k % 3) * 40}" '
+                   f'transform="rotate({k * 22.5})"/>' for k in range(16))
+    motes = "".join(f'<i class="iv-mote" style="left:{(k * 37) % 100}%;top:{55 + (k * 23) % 40}%"></i>'
+                    for k in range(18))
+    shards = "".join(f'<i class="iv-shard" style="left:{12 + (k * 29) % 76}%;top:{20 + (k * 41) % 60}%"></i>'
+                     for k in range(10))
+    hexp = " ".join(f"{300 * __import__('math').cos(__import__('math').radians(60 * k - 90)):.0f},"
+                    f"{300 * __import__('math').sin(__import__('math').radians(60 * k - 90)):.0f}" for k in range(6))
+    hexd = "".join(f'<circle r="8" cx="{300 * __import__("math").cos(__import__("math").radians(60 * k - 90)):.0f}" '
+                   f'cy="{300 * __import__("math").sin(__import__("math").radians(60 * k - 90)):.0f}"/>' for k in range(6))
+    back = {
+        1: ('<svg class="iv-svg orb" viewBox="-360 -360 720 720">'
             '<g class="orb-a"><ellipse rx="330" ry="110"/><circle cx="330" cy="0" r="7"/></g>'
             '<g class="orb-b"><ellipse class="b" rx="290" ry="150" transform="rotate(-24)"/>'
-            '<circle class="am" cx="-290" cy="0" r="6" transform="rotate(-24)"/></g></svg>'
+            '<circle class="am" cx="-290" cy="0" r="6" transform="rotate(-24)"/></g></svg>'),
+        2: '<div class="iv-tile"><i class="iv-tile-sweep"></i></div>',
+        3: f'<svg class="iv-svg iv-rays" viewBox="-360 -360 720 720">{rays}</svg>',
+        4: '<i class="iv-cone"></i><div class="iv-ped"><i></i><b></b></div>',
+        5: ('<svg class="iv-svg iv-ring" viewBox="-360 -360 720 720"><circle class="c" r="300"/>'
+            '<g class="iv-ring-dots"><circle class="d" cx="300" cy="0" r="8"/><circle class="d am" cx="-300" cy="0" r="7"/>'
+            '<circle class="d" cx="0" cy="300" r="5"/></g></svg>'),
+        6: f'<svg class="iv-svg iv-hex" viewBox="-360 -360 720 720"><polygon points="{hexp}"/><g>{hexd}</g></svg>',
+        7: f'<div class="iv-motes">{motes}</div>',
+        9: ('<svg class="iv-svg iv-floor" viewBox="-480 0 960 300">'
+            + "".join(f'<line x1="{x}" y1="0" x2="{x * 2.6:.0f}" y2="300"/>' for x in range(-360, 361, 90))
+            + "".join(f'<line x1="-900" y1="{y}" x2="900" y2="{y}"/>' for y in (40, 100, 180, 290)) + '</svg>'),
+        10: ('<div class="iv-radar"><i class="sweep"></i></div><svg class="iv-svg iv-rad" viewBox="-360 -360 720 720">'
+             '<circle r="120"/><circle r="210"/><circle r="300"/></svg>'),
+        11: (f'<svg class="iv-svg iv-rays gold" viewBox="-360 -360 720 720">{rays}</svg>'
+             f'<div class="iv-motes gold">{motes}</div>'),
+        12: f'<i class="iv-uplight"></i><div class="iv-shards">{shards}</div>',
+        13: ('<svg class="iv-svg iv-app" viewBox="-300 -300 600 600"><defs><linearGradient id="appg" x1="0" y1="0" x2="1" y2="1">'
+             '<stop offset="0" stop-color="#5AD8F7"/><stop offset="1" stop-color="#D8B368"/></linearGradient></defs>'
+             '<rect x="-250" y="-250" width="500" height="500" rx="110"/></svg><i class="iv-appglow"></i>'),
+    }.get(v, "")
+    if v == 8:
+        return ('<div class="icon-stage iv8"><img class="icon3d" src="' + url + '" alt="">'
+                '<i class="iv8-line"></i><div class="iv8-lab">' + esc(label) + '</div></div>')
+    refl = f'<img class="icon3d refl" src="{url}" alt="">' if v == 9 else ""
+    return (f'<div class="icon-stage iv{v}"><div class="icon-glow"></div>{back}'
             '<div class="icon-shadow"></div>'
-            f'<img class="icon3d" src="{url}" alt=""></div>')
+            f'<img class="icon3d" src="{url}" alt="">{refl}</div>')
 
 
 # ── scene builders ──────────────────────────────────────────────────────────
@@ -773,7 +846,7 @@ def content(i, kind, arg, line):
     if kind == "B":
         _, _, tag = arg.partition("|")
         if not tag:
-            return photo_mg(i)
+            return ""
         warm = tag.startswith("!")
         return (f'<div class="ph-tag{" am" if warm else ""} bt-pop" data-l="0" data-o="0.35">'
                 f'{esc(tag.lstrip("!"))}</div>')
@@ -805,6 +878,10 @@ def content(i, kind, arg, line):
         return kit2.cta()
     if kind == "J":
         return kit2.journey()
+    if kind == "KF":
+        return kit2.keyflow(arg)
+    if kind == "RS":
+        return kit2.reasons(*arg)
     if kind == "D":
         return kit2.link(arg)
     if kind == "Y":
@@ -828,10 +905,15 @@ def content(i, kind, arg, line):
                      f'<img id="{sid}-c{len(h)}" class="shadowed" '
                      f'src="{src(key)}" alt="" '
                      f'style="height:{int(700*sc)}px"></div>')
-        return ring + "".join(h)
+        return "".join(h)
     if kind == "I":
-        key, _, badge = arg.partition("|")
-        h = [f'<div class="stage">{icon_stage(src(pick(key, i)), i)}']
+        key, _, rest = arg.partition("|")
+        badge, _, var = rest.partition("|")
+        if var:
+            lab = (f'<div class="hl md bt" data-l="0" data-o=".3" data-k="{esc(badge)}" '
+                   f'style="margin-top:10px">{esc(badge)}</div>') if badge and var != "8" else ""
+            return f'<div class="stage">{icon_stage(src(pick(key, i)), int(var), badge)}{lab}</div>'
+        h = [f'<div class="stage">{icon_stage(src(pick(key, i)), 1)}']
         if badge:
             h.append(f'<div class="hl md bt" data-l="0" data-o=".3" data-k="{esc(badge)}" '
                      f'style="margin-top:26px">{esc(badge)}</div>')
@@ -846,18 +928,10 @@ def content(i, kind, arg, line):
         size = "xl" if len(words) <= 14 else ("lg" if len(words) <= 26 else "md")
         key = "pi_" + mark
         if key in IMG:
-            return f'<div class="stage">{icon_stage(src(pick(key, i)), i)}</div>'
+            return f'<div class="stage">{icon_stage(src(pick(key, i)), 1)}</div>'
         return f'<div class="stage"><div class="pmark">{picto(mark, 300)}</div></div>'
     if kind == "T":
-        txt = arg if arg else line
-        parts = [p for p in txt.split("|") if p.strip()]
-        size = "xl" if (len(parts) == 1 and len(parts[0]) <= 14) else "lg"
-        h = ['<div class="stage"><div class="scrim wide"></div>']
-        for k, p in enumerate(parts):
-            h.append(f'<div class="hl {size} {"bt" if k == 0 else "bt-show"}" data-l="0" data-o="{k * .5:.2f}" '
-                     f'data-k="{esc(p)}">{esc(p)}</div>')
-        h.append('<div class="t-acc"></div></div>')
-        return "".join(h)
+        return typo(arg if arg else line)
     if kind == "K":
         arg, _, label = arg.partition("|")
         crossed = arg.endswith("x")
@@ -892,7 +966,7 @@ def content(i, kind, arg, line):
 
 
 # ── main ────────────────────────────────────────────────────────────────────
-NOCAP = ("T", "H", "K")          # sentence already set large mid-frame
+NOCAP = ("H", "K")          # sentence already set large mid-frame
 
 
 def _norm(t):
@@ -933,6 +1007,16 @@ def cards_for(line):
         out.append([c, t])
         off += n
     out[0][1] = line["s"]
+    # a lead-in spoken in under 0.6 s can't be read on its own: fold it into
+    # the next meaning unit when the pair still fits on one line
+    f = build.font(50, "Bold")
+    j = 0
+    while j + 1 < len(out):
+        if out[j + 1][1] - out[j][1] < 0.75 and build.text_w(out[j][0] + " " + out[j + 1][0], f) <= 1300:
+            out[j] = [out[j][0] + " " + out[j + 1][0], out[j][1]]
+            del out[j + 1]
+            continue
+        j += 1
     return out
 
 
@@ -1034,10 +1118,6 @@ def main():
                                   + tuple(m[2:]) for m in arg["msgs"]])
         body = content(i, kind, arg, S["text"].rstrip("."))
         body = resolve_keys(body, S, lines)
-        if kind == "T":                 # the headline opens with its sentence
-            import re as _re
-            body = _re.sub(r'data-t="([0-9.]+)"', lambda m: f'data-t="{min(float(m.group(1)), t0 + 0.25):.2f}"',
-                           body, count=1)
         if body:
             fg_html.append(
                 f'<div class="clip" id="fg{i:03d}" data-start="{t0:.2f}" '
@@ -1049,6 +1129,8 @@ def main():
         # captions — skipped where the same words are already on screen
         if kind in NOCAP:
             continue
+        if kind == "T" and _norm(arg.replace("|", "").replace("~", "").replace("*", "")) == _norm(S["text"]):
+            continue
         hide = set()
         if kind == "X":
             hide = {S["lines"][m[2]] for m in S["arg"]["msgs"] if not m[1]}
@@ -1057,11 +1139,16 @@ def main():
             li = max([L for L in S["lines"] if lines[L]["s"] <= ct + 0.01] or [S["lines"][0]])
             if li in hide:
                 continue
+            if kind == "T":                 # headline already shows these words
+                tn = _norm(arg.replace("|", "").replace("~", "").replace("*", ""))
+                cn = _norm(c)
+                if cn and (cn in tn or tn in cn) and min(len(cn), len(tn)) >= 0.6 * max(len(cn), len(tn)):
+                    continue
             ct = max(ct - 0.10, S["start"], cap_t[-1] + 0.05 if cap_t else 0)
             nxt = cs[j + 1][1] - 0.10 if j + 1 < len(cs) else S["end"]
             end = min(nxt, lines[li]["e"] + 0.7, S["end"])
             if end - ct < 0.25:
-                end = min(ct + 0.25, S["end"])
+                end = min(ct + 0.25, S["end"], nxt if j + 1 < len(cs) else S["end"])
             cap_html.append(
                 f'<div class="clip" id="cap{cap_n:03d}" data-start="{ct:.2f}" '
                 f'data-duration="{end-ct:.2f}" data-track-index="2">'
@@ -1132,6 +1219,7 @@ SC.forEach(function (s) {{
       if (xi < s.lb.length) tl.to(el, {{ opacity: 0, duration: 0.3, ease: "power1.in" }}, s.lb[xi] - 0.05);
     }}
     var c = el.classList;
+    if (c.contains("tpart")) return;      // typography runs its own centred reveal
     if (c.contains("bt-grow")) {{
       tl.fromTo(el, {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.95, ease: "expo.out" }}, at + 0.12);
     }} else if (c.contains("bt-draw")) {{
@@ -1205,19 +1293,19 @@ SC.forEach(function (s) {{
     // semantic: the connection actually holds, breaks, restores or stretches
     var L = f + " .lk-l", R = f + " .lk-r", A = f + " .lk-node.a", B = f + " .lk-node.b";
     T(A + ", " + B, {{ opacity: 0, y: 16 }}, {{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }}, t);
-    T(L + ", " + R, {{ strokeDasharray: 400, strokeDashoffset: 400 }}, {{ strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }}, t + 0.3);
+    T(L + ", " + R, {{ opacity: 0 }}, {{ opacity: 1, duration: 0.5, ease: "power2.out" }}, t + 0.3);
     var root = document.querySelector(f + " .lnk");
     if (root && root.classList.contains("break")) {{
-      tl.to(L, {{ x: -70, rotation: -8, transformOrigin: "0% 50%", stroke: "#F0538F", duration: 0.5, ease: "power2.in" }}, t + 1.2);
-      tl.to(R, {{ x: 70, rotation: 8, transformOrigin: "100% 50%", stroke: "#F0538F", duration: 0.5, ease: "power2.in" }}, t + 1.2);
-      tl.to(B, {{ x: 60, opacity: 0.45, duration: 0.8, ease: "power2.out" }}, t + 1.3);
+      tl.to(L, {{ attr: {{ d: "M0 60 L330 60" }}, stroke: "#F0538F", duration: 0.5, ease: "power2.inOut" }}, t + 1.2);
+      tl.to(R, {{ attr: {{ d: "M530 60 L860 60" }}, stroke: "#F0538F", duration: 0.5, ease: "power2.inOut" }}, t + 1.2);
+      tl.to(B, {{ opacity: 0.5, duration: 0.8, ease: "power2.out" }}, t + 1.3);
     }} else if (root && root.classList.contains("far")) {{
       tl.to(A, {{ x: -120, duration: Math.max(1, s.d - 1), ease: "sine.inOut" }}, t + 0.8);
       tl.to(B, {{ x: 120, duration: Math.max(1, s.d - 1), ease: "sine.inOut" }}, t + 0.8);
       tl.to(L + ", " + R, {{ opacity: 0.25, duration: 1.2 }}, t + 1.2);
     }} else if (root && root.classList.contains("restore")) {{
-      tl.fromTo(L, {{ x: -70, rotation: -8, transformOrigin: "0% 50%" }}, {{ x: 0, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }}, t + 1.0);
-      tl.fromTo(R, {{ x: 70, rotation: 8, transformOrigin: "100% 50%" }}, {{ x: 0, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }}, t + 1.0);
+      tl.fromTo(L, {{ attr: {{ d: "M0 60 L330 60" }} }}, {{ attr: {{ d: "M0 60 L430 60" }}, duration: 0.7, ease: "power2.inOut" }}, t + 1.0);
+      tl.fromTo(R, {{ attr: {{ d: "M530 60 L860 60" }} }}, {{ attr: {{ d: "M430 60 L860 60" }}, duration: 0.7, ease: "power2.inOut" }}, t + 1.0);
     }} else {{
       tl.to(L + ", " + R, {{ strokeWidth: 11, duration: 0.6, yoyo: true, repeat: 1, ease: "sine.inOut" }}, t + 1.2);
     }}
@@ -1255,15 +1343,110 @@ SC.forEach(function (s) {{
     var img3 = document.querySelector("#ph" + String(s.i).padStart(3, "0"));
     if (img3) tl.fromTo(img3, {{ clipPath: "inset(0 0 100% 0)" }}, {{ clipPath: "inset(0 0 0% 0)", duration: 0.65, ease: "power3.inOut" }}, t);
   }}
-  if (root.querySelector(".icon-stage")) {{
-    tl.fromTo(f + " .orb-a", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 360, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
-    tl.fromTo(f + " .orb-b", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: -300, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
-    tl.fromTo(f + " .orb", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.6 }}, t + 0.1);
-    tl.fromTo(f + " .icon-glow", {{ opacity: 0.4 }}, {{ opacity: 1, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: Math.max(1, Math.floor(D / 1.2)) }}, t);
-    tl.fromTo(f + " .icon-stage .icon3d", {{ opacity: 0, y: 40, rotation: -4 }}, {{ opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out" }}, t);
-    var nf = Math.max(1, Math.floor((D - 0.6) / 1.4));
-    tl.to(f + " .icon-stage .icon3d", {{ y: -16, rotation: 2, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
-    tl.to(f + " .icon-shadow", {{ x: 12, opacity: 0.55, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+  var st = root.querySelector(".icon-stage");
+  if (st) {{
+    var I = f + " .icon-stage", nf = Math.max(1, Math.floor((D - 0.6) / 1.4));
+    var main = I + " .icon3d:not(.refl)";
+    tl.fromTo(main, {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }}, t);
+    T(I + " .icon-glow", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.8 }}, t);
+    var c = st.classList;
+    if (c.contains("iv1")) {{
+      tl.fromTo(I + " .orb-a", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 360, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
+      tl.fromTo(I + " .orb-b", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: -300, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
+      tl.fromTo(I + " .orb", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.6 }}, t + 0.1);
+      tl.to(main, {{ y: -16, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+    }} else if (c.contains("iv2")) {{
+      tl.fromTo(I + " .iv-tile", {{ opacity: 0, y: 30 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, t);
+      tl.fromTo(I + " .iv-tile-sweep", {{ xPercent: -160 }}, {{ xPercent: 260, duration: 1.6, ease: "power2.inOut", repeat: Math.max(0, Math.floor(D / 3) - 1), repeatDelay: 1.4 }}, t + 0.5);
+    }} else if (c.contains("iv3") || c.contains("iv11")) {{
+      tl.fromTo(I + " .iv-rays", {{ rotation: 0, svgOrigin: "0 0", opacity: 0 }}, {{ rotation: 40, svgOrigin: "0 0", opacity: 1, duration: D, ease: "none" }}, t);
+      root.querySelectorAll(".iv-rays line").forEach(function (ln, k) {{
+        tl.fromTo(ln, {{ strokeDasharray: 120, strokeDashoffset: 120 }}, {{ strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }}, t + 0.2 + k * 0.03);
+      }});
+      root.querySelectorAll(".iv-motes i").forEach(function (m, k) {{
+        tl.fromTo(m, {{ y: 30, opacity: 0 }}, {{ y: -140 - (k % 4) * 30, opacity: 1, duration: D * 0.5, ease: "sine.out", yoyo: true, repeat: 1 }}, t + (k % 6) * 0.12);
+      }});
+    }} else if (c.contains("iv4")) {{
+      tl.fromTo(I + " .iv-ped", {{ opacity: 0, y: 30 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, t);
+      tl.fromTo(I + " .iv-cone", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.9, ease: "power2.out" }}, t + 0.3);
+      tl.to(I + " .iv-cone", {{ opacity: 0.6, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 1.2);
+    }} else if (c.contains("iv5")) {{
+      tl.fromTo(I + " .iv-ring .c", {{ strokeDasharray: 1885, strokeDashoffset: 1885 }}, {{ strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }}, t + 0.1);
+      tl.fromTo(I + " .iv-ring-dots", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 200, svgOrigin: "0 0", duration: D, ease: "none" }}, t);
+      tl.to(main, {{ y: -14, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+    }} else if (c.contains("iv6")) {{
+      tl.fromTo(I + " .iv-hex polygon", {{ strokeDasharray: 1800, strokeDashoffset: 1800 }}, {{ strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" }}, t + 0.1);
+      root.querySelectorAll(".iv-hex circle").forEach(function (d, k) {{
+        tl.fromTo(d, {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3 }}, t + 0.3 + k * 0.17);
+      }});
+      tl.fromTo(I + " .iv-hex", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 30, svgOrigin: "0 0", duration: D, ease: "sine.inOut" }}, t);
+    }} else if (c.contains("iv7")) {{
+      root.querySelectorAll(".iv-motes i").forEach(function (m, k) {{
+        tl.fromTo(m, {{ y: 40, opacity: 0 }}, {{ y: -200 - (k % 5) * 30, opacity: 1, duration: D * 0.5, ease: "sine.out", yoyo: true, repeat: 1 }}, t + (k % 6) * 0.15);
+      }});
+      tl.to(main, {{ y: -14, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+    }} else if (c.contains("iv8")) {{
+      tl.fromTo(main, {{ x: -60 }}, {{ x: 0, duration: 0.6, ease: "power3.out" }}, t);
+      tl.fromTo(I + " .iv8-line", {{ scaleY: 0 }}, {{ scaleY: 1, duration: 0.6, ease: "power3.out" }}, t + 0.25);
+      tl.fromTo(I + " .iv8-lab", {{ opacity: 0, x: 30 }}, {{ opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }}, t + 0.4);
+    }} else if (c.contains("iv9")) {{
+      root.querySelectorAll(".iv-floor line").forEach(function (ln, k) {{
+        tl.fromTo(ln, {{ strokeDasharray: 1200, strokeDashoffset: 1200 }}, {{ strokeDashoffset: 0, duration: 0.9, ease: "power2.out" }}, t + k * 0.04);
+      }});
+      tl.fromTo(I + " .refl", {{ opacity: 0 }}, {{ opacity: 0.22, duration: 0.8 }}, t + 0.4);
+    }} else if (c.contains("iv10")) {{
+      tl.fromTo(I + " .iv-radar .sweep", {{ rotation: 0 }}, {{ rotation: 360 * Math.max(1, Math.round(D / 3)), duration: D, ease: "none" }}, t);
+      root.querySelectorAll(".iv-rad circle").forEach(function (cc, k) {{
+        tl.fromTo(cc, {{ opacity: 0 }}, {{ opacity: 1, duration: 0.5 }}, t + 0.1 + k * 0.15);
+      }});
+    }} else if (c.contains("iv12")) {{
+      tl.fromTo(I + " .iv-uplight", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.9 }}, t);
+      root.querySelectorAll(".iv-shard").forEach(function (m, k) {{
+        tl.fromTo(m, {{ y: 60, rotation: 0, opacity: 0 }}, {{ y: -160, rotation: 120 + k * 20, opacity: 0.9, duration: D, ease: "sine.out" }}, t + (k % 5) * 0.1);
+      }});
+      tl.to(main, {{ y: -14, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+    }} else if (c.contains("iv13")) {{
+      tl.fromTo(I + " .iv-app rect", {{ strokeDasharray: 1900, strokeDashoffset: 1900 }}, {{ strokeDashoffset: 0, duration: 1.2, ease: "power2.inOut" }}, t + 0.1);
+      tl.fromTo(I + " .iv-appglow", {{ opacity: 0 }}, {{ opacity: 1, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.4);
+    }}
+  }}
+  // keyword typography: the block stays centred while lines fade in on their words
+  var tg = root.querySelector(".tgrp");
+  if (tg) {{
+    var parts = Array.prototype.slice.call(tg.querySelectorAll(".tpart"));
+    var hts = parts.map(function (p) {{ return p.offsetHeight; }});
+    var rest = function (k) {{ var r = 0; for (var j = k + 1; j < hts.length; j++) r += hts[j]; return r / 2; }};
+    parts.forEach(function (p, k) {{
+      var pt = p.hasAttribute("data-t") ? parseFloat(p.getAttribute("data-t")) : t + k * 0.5;
+      tl.fromTo(p, {{ opacity: 0, y: 18 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }}, pt);
+      if (k === 0) tl.set(tg, {{ y: rest(0) }}, t);
+      else tl.to(tg, {{ y: rest(k), duration: 0.6, ease: "power2.inOut" }}, pt);
+      var sk = p.querySelector(".t-strike");
+      if (sk) tl.fromTo(sk, {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.45, ease: "power2.inOut" }}, pt + 0.5);
+      var mk = p.querySelector(".t-mark");
+      if (mk) tl.fromTo(mk, {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.5, ease: "power2.out" }}, pt + 0.25);
+    }});
+    var last = t + 0.4;
+    T(f + " .t-acc", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.6, ease: "power3.out" }}, last);
+    root.querySelectorAll(".tb").forEach(function (b, k) {{
+      tl.fromTo(b, {{ opacity: 0, x: (k % 2 ? 14 : -14), y: (k < 2 ? -14 : 14) }}, {{ opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }}, t + 0.15);
+    }});
+    T(f + " .t-vbar", {{ scaleY: 0 }}, {{ scaleY: 1, duration: 0.6, ease: "power3.out" }}, t + 0.1);
+    T(f + " .t-side", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.6, ease: "power3.out" }}, t + 0.3);
+    T(f + " .t-kick i", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.3 }}, t + 0.05);
+    T(f + " .t-kick b", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.5, ease: "power3.out" }}, t + 0.15);
+    var bx = root.querySelector(".t-box");
+    if (bx) {{
+      var r = bx.querySelector("rect"); r.setAttribute("width", tg.offsetWidth + 56); r.setAttribute("height", tg.offsetHeight + 40);
+      bx.setAttribute("width", tg.offsetWidth + 60); bx.setAttribute("height", tg.offsetHeight + 44);
+      var per = 2 * (tg.offsetWidth + tg.offsetHeight + 96);
+      tl.fromTo(r, {{ strokeDasharray: per, strokeDashoffset: per }}, {{ strokeDashoffset: 0, duration: 1.0, ease: "power2.inOut" }}, t + 0.15);
+    }}
+    T(f + " .t-sweep", {{ xPercent: -120 }}, {{ xPercent: 320, duration: 1.4, ease: "power2.inOut" }}, t + 0.5);
+    T(f + " .t-quote", {{ opacity: 0, y: 20 }}, {{ opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }}, t + 0.05);
+    root.querySelectorAll(".t-dots i").forEach(function (d, k) {{
+      tl.fromTo(d, {{ opacity: 0, y: 10 }}, {{ opacity: 1, y: 0, duration: 0.35 }}, t + 0.5 + k * 0.15);
+    }});
   }}
   if (root.querySelector(".cut-ring")) {{
     tl.fromTo(f + " .cut-ring .r1", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 120, svgOrigin: "0 0", duration: D, ease: "none" }}, t);
