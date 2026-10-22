@@ -222,3 +222,29 @@ def cta():
             '<svg width="40" height="40" viewBox="0 0 40 40"><path d="M20 6v24M9 20l11 11 11-11" '
             'stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
             '</div></div></div>')
+
+
+# ── 11. journey: 소개팅 → 애프터 along seven lit steps (replaces the list) ───
+def journey():
+    import math
+    pts = []
+    for k in range(7):
+        x = 220 + k * 230
+        y = 330 - 150 * math.sin(math.pi * k / 6) + (k - 3) * -12
+        pts.append((x, y))
+    d = f"M{pts[0][0]} {pts[0][1]:.0f} " + " ".join(
+        f"C {pts[k-1][0]+115} {pts[k-1][1]:.0f}, {pts[k][0]-115} {pts[k][1]:.0f}, {pts[k][0]} {pts[k][1]:.0f}"
+        for k in range(1, 7))
+    nodes = "".join(
+        f'<circle class="jn bt-pop"{_k("일곱 가지")} data-o2="{k * .22:.2f}" cx="{x}" cy="{y:.0f}" r="{15 if k in (0, 6) else 11}"/>'
+        f'<text class="jn-num bt"{_k("일곱 가지")} data-o2="{k * .22 + .1:.2f}" x="{x}" y="{y + 52:.0f}" '
+        f'text-anchor="middle">{k + 1}</text>'
+        for k, (x, y) in enumerate(pts))
+    return ('<div class="diag"><div class="jrn">'
+            '<svg width="1800" height="560" viewBox="0 0 1800 560">'
+            f'<path class="jr-base" d="{d}"/>'
+            f'<path class="jr-line bt-draw"{_k("일곱 가지")} d="{d}"/>'
+            f'{nodes}'
+            f'<text class="jr-lab bt"{_k("소개팅에서")} x="{pts[0][0]}" y="{pts[0][1] - 44:.0f}" text-anchor="middle">소개팅</text>'
+            f'<text class="jr-lab hot bt"{_k("애프터까지")} x="{pts[6][0]}" y="{pts[6][1] - 44:.0f}" text-anchor="middle">애프터</text>'
+            '</svg></div></div>')

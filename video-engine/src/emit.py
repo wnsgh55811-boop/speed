@@ -687,6 +687,41 @@ GRAPHICS = {
 }
 
 
+# ── motion graphics (no zoom: wipes, sweeps, orbits, drifting light) ──────
+def photo_mg(i):
+    """One of four overlays per photo plate, rotating so neighbours differ."""
+    v = i % 4
+    if v == 0:
+        return '<div class="mg mg-v0"><div class="mg-sweep"></div></div>'
+    if v == 1:
+        return ('<div class="mg mg-v1"><svg class="mg-frame" width="1920" height="1080" viewBox="0 0 1920 1080">'
+                '<path d="M120 200 L120 120 L200 120"/><path d="M1720 120 L1800 120 L1800 200"/>'
+                '<path d="M120 880 L120 960 L200 960"/><path d="M1720 960 L1800 960 L1800 880"/></svg></div>')
+    if v == 2:
+        s, out = i * 7919 + 11, []
+        for _ in range(16):
+            s = (s * 1103515245 + 12345) & 0x7FFFFFFF
+            x = 5 + (s >> 7) % 90
+            s = (s * 1103515245 + 12345) & 0x7FFFFFFF
+            y = 30 + (s >> 7) % 60
+            s = (s * 1103515245 + 12345) & 0x7FFFFFFF
+            r = 3 + (s >> 9) % 6
+            out.append(f'<i class="mg-mote" style="left:{x}%;top:{y}%;width:{r}px;height:{r}px"></i>')
+        return '<div class="mg mg-v2">' + "".join(out) + '</div>'
+    return '<div class="mg mg-v3"><div class="mg-leak"></div></div>'
+
+
+def icon_stage(url, i):
+    """3D icon on an orbit: rotating rings, travelling lights, breathing glow."""
+    return ('<div class="icon-stage"><div class="icon-glow"></div>'
+            '<svg class="orb" viewBox="-360 -360 720 720">'
+            '<g class="orb-a"><ellipse rx="330" ry="110"/><circle cx="330" cy="0" r="7"/></g>'
+            '<g class="orb-b"><ellipse class="b" rx="290" ry="150" transform="rotate(-24)"/>'
+            '<circle class="am" cx="-290" cy="0" r="6" transform="rotate(-24)"/></g></svg>'
+            '<div class="icon-shadow"></div>'
+            f'<img class="icon3d" src="{url}" alt=""></div>')
+
+
 # ── scene builders ──────────────────────────────────────────────────────────
 def src(key):
     """Asset URL. Keyed figures carry a whole URL; the originals are CDN names."""
@@ -738,7 +773,7 @@ def content(i, kind, arg, line):
     if kind == "B":
         _, _, tag = arg.partition("|")
         if not tag:
-            return ""
+            return photo_mg(i)
         warm = tag.startswith("!")
         return (f'<div class="ph-tag{" am" if warm else ""} bt-pop" data-l="0" data-o="0.35">'
                 f'{esc(tag.lstrip("!"))}</div>')
@@ -768,6 +803,8 @@ def content(i, kind, arg, line):
         return g_chips(*arg)
     if kind == "A":
         return kit2.cta()
+    if kind == "J":
+        return kit2.journey()
     if kind == "D":
         return kit2.link(arg)
     if kind == "Y":
@@ -777,6 +814,8 @@ def content(i, kind, arg, line):
     if kind == "C":
         who, _, _bg = arg.partition("@")
         names = who.split("+")
+        ring = ('<svg class="cut-ring" viewBox="-450 -450 900 900"><circle class="r3" r="430"/>'
+                '<circle class="r1" r="360"/><circle class="r2" r="300"/></svg>')
         # each figure gets its own column and centres inside it, so nothing
         # depends on a transform the entrance tween will overwrite
         cols = ["left:0;right:0"] if len(names) == 1 else ["left:0;width:50%",
@@ -789,12 +828,10 @@ def content(i, kind, arg, line):
                      f'<img id="{sid}-c{len(h)}" class="shadowed" '
                      f'src="{src(key)}" alt="" '
                      f'style="height:{int(700*sc)}px"></div>')
-        return "".join(h)
+        return ring + "".join(h)
     if kind == "I":
         key, _, badge = arg.partition("|")
-        h = [f'<div class="stage"><div class="scrim tight"></div>'
-             f'<img id="{sid}-ic" class="icon3d" src="{src(pick(key, i))}" alt="" '
-             f'style="height:460px;width:auto;filter:drop-shadow(0 26px 40px rgba(0,0,0,.55)) drop-shadow(0 0 30px rgba(90,216,247,.18))">']
+        h = [f'<div class="stage">{icon_stage(src(pick(key, i)), i)}']
         if badge:
             h.append(f'<div class="hl md bt" data-l="0" data-o=".3" data-k="{esc(badge)}" '
                      f'style="margin-top:26px">{esc(badge)}</div>')
@@ -807,6 +844,9 @@ def content(i, kind, arg, line):
         mark, _, txt = arg.partition("|")
         words = txt or line
         size = "xl" if len(words) <= 14 else ("lg" if len(words) <= 26 else "md")
+        key = "pi_" + mark
+        if key in IMG:
+            return f'<div class="stage">{icon_stage(src(pick(key, i)), i)}</div>'
         return f'<div class="stage"><div class="pmark">{picto(mark, 300)}</div></div>'
     if kind == "T":
         txt = arg if arg else line
@@ -816,7 +856,7 @@ def content(i, kind, arg, line):
         for k, p in enumerate(parts):
             h.append(f'<div class="hl {size} {"bt" if k == 0 else "bt-show"}" data-l="0" data-o="{k * .5:.2f}" '
                      f'data-k="{esc(p)}">{esc(p)}</div>')
-        h.append("</div>")
+        h.append('<div class="t-acc"></div></div>')
         return "".join(h)
     if kind == "K":
         arg, _, label = arg.partition("|")
@@ -839,8 +879,9 @@ def content(i, kind, arg, line):
                 f'<i class="{"on" if k + 1 == n else ("done" if k + 1 < n else "")}"></i>'
                 for k in range(7)) + '</div>'
         return (f'<div class="stage"><div class="scrim"></div>'
-                f'<div class="pearl">{esc(label)}</div>'
-                f'<div class="chap-word">{esc(word)}</div>{steps}</div>')
+                f'<div class="pearl-wrap"><svg class="chap-ring" viewBox="-100 -100 200 200">'
+                f'<circle r="92"/></svg><div class="pearl">{esc(label)}</div></div>'
+                f'<div class="chap-word">{esc(word)}</div><div class="chap-line"></div>{steps}</div>')
     if kind == "G":
         fn = GRAPHICS.get(arg)
         body = fn() if fn else ""
@@ -865,12 +906,26 @@ def load_lines():
     return tl["lines"], tl["total"]
 
 
+_SPLITS = None
+
+
 def cards_for(line):
-    """Caption cards for one sentence, each timed off the WAV char clock."""
+    """Caption cards for one sentence, each timed off the WAV char clock.
+    A project's captions.txt (one sentence per line, ' / ' between meaning
+    units) wins over the width-based splitter."""
+    global _SPLITS
+    if _SPLITS is None:
+        cp = os.path.join(PROJ, "captions.txt")
+        _SPLITS = [l.rstrip("\n") for l in open(cp, encoding="utf-8")] if os.path.exists(cp) else []
     text = line["text"].strip()
     if text.endswith("."):
         text = text[:-1]
-    cards = caption_cards(text)
+    idx = line.get("i")
+    sp = _SPLITS[idx] if _SPLITS and idx is not None and idx < len(_SPLITS) else None
+    if sp and _norm(sp.replace(" / ", "")) == _norm(text):
+        cards = [c.strip() for c in sp.split(" / ")]
+    else:
+        cards = caption_cards(text)
     out, off = [], 0
     for c in cards:
         n = len(_norm(c))
@@ -915,7 +970,7 @@ def resolve_keys(body, S, lines):
     def sub(m):
         t = find(m.group(1))
         _KEYS.append((m.group(1), t))
-        return "" if t is None else f'data-t="{max(t - 0.12, S["start"]):.2f}"'
+        return "" if t is None else f'data-t="{max(t - 0.22, S["start"]):.2f}"'
     return re.sub(r'data-k="([^"]*)"', sub, body)
 
 
@@ -1002,7 +1057,8 @@ def main():
             li = max([L for L in S["lines"] if lines[L]["s"] <= ct + 0.01] or [S["lines"][0]])
             if li in hide:
                 continue
-            nxt = cs[j + 1][1] if j + 1 < len(cs) else S["end"]
+            ct = max(ct - 0.10, S["start"], cap_t[-1] + 0.05 if cap_t else 0)
+            nxt = cs[j + 1][1] - 0.10 if j + 1 < len(cs) else S["end"]
             end = min(nxt, lines[li]["e"] + 0.7, S["end"])
             if end - ct < 0.25:
                 end = min(ct + 0.25, S["end"])
@@ -1060,11 +1116,11 @@ SC.forEach(function (s) {{
 SC.forEach(function (s) {{
   if (!s.has) return;
   var root = document.getElementById("fg" + String(s.i).padStart(3, "0"));
-  root.querySelectorAll("[data-l], [data-c]").forEach(function (el) {{
-    var base;
+  root.querySelectorAll("[data-l], [data-c], [data-t]").forEach(function (el) {{
+    var base = s.t;
     if (el.hasAttribute("data-c")) {{
       base = s.cb[Math.min(parseInt(el.getAttribute("data-c"), 10), s.cb.length - 1)];
-    }} else {{
+    }} else if (el.hasAttribute("data-l")) {{
       base = s.lb[Math.min(parseInt(el.getAttribute("data-l"), 10), s.lb.length - 1)];
     }}
     var at = base + parseFloat(el.getAttribute("data-o") || "0") + 0.06;
@@ -1084,13 +1140,13 @@ SC.forEach(function (s) {{
                 {{ strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }}, at);
     }} else if (c.contains("bt-show")) {{
       tl.fromTo(el, {{ display: "none", opacity: 0, y: 26 }},
-                {{ display: "flex", opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }}, at);
+                {{ display: "flex", opacity: 1, y: 0, duration: 0.28, ease: "power2.out" }}, at);
     }} else if (c.contains("bt-pop")) {{
       tl.fromTo(el, {{ opacity: 0, y: 16 }},
-                {{ opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }}, at);
+                {{ opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }}, at);
     }} else {{
-      tl.fromTo(el, {{ opacity: 0, y: 26 }},
-                {{ opacity: 1, y: 0, duration: 0.46, ease: "power3.out" }}, at);
+      tl.fromTo(el, {{ opacity: 0, y: 22 }},
+                {{ opacity: 1, y: 0, duration: 0.32, ease: "power3.out" }}, at);
     }}
   }});
 }});
@@ -1117,7 +1173,7 @@ SC.forEach(function (s) {{
   }} else if (s.k === "C") {{
     T(f + " .cut", {{ yPercent: 8, opacity: 0 }},
               {{ yPercent: 0, opacity: 1, duration: dur, ease: "power2.out", stagger: 0.12 }}, t);
-  }} else if (s.k === "I") {{
+  }} else if (s.k === "I" && !document.querySelector(f + " .icon-stage")) {{
     T(f + " .icon3d", {{ opacity: 0, y: 24 }},
               {{ opacity: 1, y: 0, duration: dur, ease: "power2.out" }}, t);
     var fl = Math.max(0, Math.floor((s.d - dur - 0.2) / 1.6) - 1);
@@ -1169,6 +1225,62 @@ SC.forEach(function (s) {{
     var n = Math.max(1, Math.round(s.d / 2.5));
     T(f + " .clock-h", {{ rotation: 0, svgOrigin: "0 0" }},
               {{ rotation: 360 * 2, svgOrigin: "0 0", duration: s.d - 0.3, ease: "none" }}, t);
+  }}
+}});
+
+// motion graphics: every image element keeps moving — never by zooming
+SC.forEach(function (s) {{
+  var f = "#fg" + String(s.i).padStart(3, "0"), t = s.t;
+  var root = document.querySelector(f);
+  if (!root) return;
+  var D = Math.max(1, s.d);
+  if (root.querySelector(".mg-v0")) {{
+    var img0 = document.querySelector("#ph" + String(s.i).padStart(3, "0"));
+    if (img0 && s.i > 0) tl.fromTo(img0, {{ clipPath: "inset(0 100% 0 0)" }}, {{ clipPath: "inset(0 0% 0 0)", duration: 0.7, ease: "power3.inOut" }}, t);
+    tl.fromTo(f + " .mg-sweep", {{ xPercent: -120 }}, {{ xPercent: 330, duration: Math.min(2.4, D), ease: "power1.inOut" }}, t + 0.5);
+  }}
+  if (root.querySelector(".mg-v1")) {{
+    root.querySelectorAll(".mg-frame path").forEach(function (p, k) {{
+      tl.fromTo(p, {{ strokeDasharray: 170, strokeDashoffset: 170 }}, {{ strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }}, t + 0.15 + k * 0.08);
+    }});
+    tl.fromTo(f + " .mg-frame", {{ x: 0 }}, {{ x: 18, duration: D, ease: "sine.inOut" }}, t);
+  }}
+  if (root.querySelector(".mg-v2")) {{
+    root.querySelectorAll(".mg-mote").forEach(function (m, k) {{
+      tl.fromTo(m, {{ y: 40, opacity: 0 }}, {{ y: -120 - (k % 5) * 30, opacity: 0.9, duration: D * 0.5, ease: "sine.out", yoyo: true, repeat: 1 }}, t + (k % 6) * 0.15);
+    }});
+  }}
+  if (root.querySelector(".mg-v3")) {{
+    tl.fromTo(f + " .mg-leak", {{ xPercent: -80, opacity: 0 }}, {{ xPercent: 90, opacity: 1, duration: D, ease: "sine.inOut" }}, t);
+    var img3 = document.querySelector("#ph" + String(s.i).padStart(3, "0"));
+    if (img3) tl.fromTo(img3, {{ clipPath: "inset(0 0 100% 0)" }}, {{ clipPath: "inset(0 0 0% 0)", duration: 0.65, ease: "power3.inOut" }}, t);
+  }}
+  if (root.querySelector(".icon-stage")) {{
+    tl.fromTo(f + " .orb-a", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 360, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
+    tl.fromTo(f + " .orb-b", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: -300, svgOrigin: "0 0", duration: Math.max(D, 6), ease: "none" }}, t);
+    tl.fromTo(f + " .orb", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.6 }}, t + 0.1);
+    tl.fromTo(f + " .icon-glow", {{ opacity: 0.4 }}, {{ opacity: 1, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: Math.max(1, Math.floor(D / 1.2)) }}, t);
+    tl.fromTo(f + " .icon-stage .icon3d", {{ opacity: 0, y: 40, rotation: -4 }}, {{ opacity: 1, y: 0, rotation: 0, duration: 0.55, ease: "power3.out" }}, t);
+    var nf = Math.max(1, Math.floor((D - 0.6) / 1.4));
+    tl.to(f + " .icon-stage .icon3d", {{ y: -16, rotation: 2, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+    tl.to(f + " .icon-shadow", {{ x: 12, opacity: 0.55, duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: nf }}, t + 0.6);
+  }}
+  if (root.querySelector(".cut-ring")) {{
+    tl.fromTo(f + " .cut-ring .r1", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: 120, svgOrigin: "0 0", duration: D, ease: "none" }}, t);
+    tl.fromTo(f + " .cut-ring .r2", {{ rotation: 0, svgOrigin: "0 0" }}, {{ rotation: -90, svgOrigin: "0 0", duration: D, ease: "none" }}, t);
+    tl.fromTo(f + " .cut-ring", {{ opacity: 0 }}, {{ opacity: 1, duration: 0.5 }}, t);
+    tl.fromTo(f + " .cut img", {{ clipPath: "inset(100% 0 0 0)" }}, {{ clipPath: "inset(0% 0 0 0)", duration: 0.6, ease: "power3.out" }}, t);
+    tl.fromTo(f + " .cut", {{ x: 0 }}, {{ x: (s.i % 2 ? 16 : -16), duration: D, ease: "sine.inOut" }}, t);
+  }}
+  if (root.querySelector(".t-acc")) {{
+    tl.fromTo(f + " .t-acc", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.6, ease: "power3.out" }}, t + 0.3);
+  }}
+  if (root.querySelector(".chap-ring")) {{
+    tl.fromTo(f + " .chap-ring circle", {{ strokeDasharray: 580, strokeDashoffset: 580 }}, {{ strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }}, t + 0.1);
+    tl.fromTo(f + " .chap-line", {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.8, ease: "power3.out" }}, t + 0.3);
+  }}
+  if (root.querySelector(".talk-photo img")) {{
+    tl.fromTo(f + " .talk-photo img", {{ xPercent: -2 }}, {{ xPercent: 2, duration: D, ease: "sine.inOut" }}, t);
   }}
 }});
 

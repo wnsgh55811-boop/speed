@@ -421,3 +421,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0B0B0D;color:var(--
 .fun-axis{padding-left:0}
 .talk-wrap{padding:0 120px 170px}
 .hl.bt-show{justify-content:center}
+
+/* ═══ revision 3 — motion graphics layer (no zoom) ═════════════════════ */
+.jr-base{fill:none;stroke:rgba(90,216,247,.16);stroke-width:6;stroke-linecap:round}
+.jr-line{fill:none;stroke:#5AD8F7;stroke-width:6;stroke-linecap:round;filter:drop-shadow(0 0 12px rgba(90,216,247,.7))}
+.jn{fill:#0E1A22;stroke:#5AD8F7;stroke-width:5;filter:drop-shadow(0 0 10px rgba(90,216,247,.7))}
+.jn-num{font-family:var(--font);font-weight:700;font-size:30px;fill:var(--ink-2)}
+.jr-lab{font-family:var(--font);font-weight:800;font-size:54px;fill:var(--ink)}
+.jr-lab.hot{fill:var(--amber)}
+/* photo overlays */
+.mg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.mg-sweep{position:absolute;top:-20%;bottom:-20%;left:0;width:34%;
+  background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.10) 45%,rgba(255,255,255,.16) 50%,rgba(255,255,255,.10) 55%,transparent 100%)}
+.mg-leak{position:absolute;top:-30%;left:0;width:70%;height:160%;
+  background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(232,170,90,.22) 0%,rgba(232,170,90,.08) 45%,transparent 70%)}
+.mg-mote{position:absolute;border-radius:50%;background:rgba(255,240,215,.75);box-shadow:0 0 12px rgba(255,220,170,.8)}
+.mg-frame line,.mg-frame path{stroke:rgba(90,216,247,.85);stroke-width:3;fill:none;stroke-linecap:round}
+.mg-blind{position:absolute;top:0;bottom:0;background:#0B0B0D}
+/* icon stage */
+.icon-stage{position:relative;display:flex;align-items:center;justify-content:center;width:760px;height:600px}
+.icon-stage .orb{position:absolute;left:50%;top:50%;width:720px;height:720px;margin:-360px 0 0 -360px;overflow:visible}
+.orb ellipse{fill:none;stroke:rgba(90,216,247,.35);stroke-width:2}
+.orb ellipse.b{stroke:rgba(216,179,104,.30);stroke-dasharray:6 14}
+.orb circle{fill:#5AD8F7;filter:drop-shadow(0 0 8px rgba(90,216,247,.9))}
+.orb circle.am{fill:#D8B368;filter:drop-shadow(0 0 8px rgba(216,179,104,.9))}
+.icon-glow{position:absolute;left:50%;top:50%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(90,216,247,.20) 0%,rgba(90,216,247,.06) 45%,transparent 70%)}
+.icon-shadow{position:absolute;left:50%;bottom:40px;width:300px;height:36px;margin-left:-150px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,0,0,.55),transparent 70%)}
+.icon-stage .icon3d{position:relative;height:430px;width:auto;filter:drop-shadow(0 26px 40px rgba(0,0,0,.5))}
+/* cutout rings */
+.cut-ring{position:absolute;left:50%;top:44%;width:900px;height:900px;margin:-450px 0 0 -450px;overflow:visible}
+.cut-ring circle{fill:none;stroke-width:2}
+.cut-ring .r1{stroke:rgba(90,216,247,.30);stroke-dasharray:4 12}
+.cut-ring .r2{stroke:rgba(216,179,104,.25);stroke-dasharray:80 40 10 40}
+.cut-ring .r3{stroke:rgba(255,255,255,.08)}
+/* typography accents */
+.t-acc{width:180px;height:6px;border-radius:3px;margin-top:34px;background:linear-gradient(90deg,var(--amber),rgba(216,179,104,0));transform-origin:left center}
+.chap-ring{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;overflow:visible}
+.chap-ring circle{fill:none;stroke:var(--amber);stroke-width:3;filter:drop-shadow(0 0 10px rgba(216,179,104,.7))}
+.pearl-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:200px;height:200px}
+.chap-line{width:520px;height:2px;margin-top:30px;background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.talk-photo img{left:-3%;width:106%}
