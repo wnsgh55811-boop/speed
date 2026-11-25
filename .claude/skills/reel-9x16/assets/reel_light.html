@@ -1,0 +1,128 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 9:16 light reel template (marketing account). Scene types: text, meme, comments, dm, chart, versus, split, compare, cta -->
+<style>
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Bold.ttf);font-weight:700}
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Black.ttf);font-weight:900}
+@font-face{font-family:Emo;src:url(fonts/NotoColorEmoji-Regular.ttf)}
+:root{--bg:#F4F1EA;--ink:#151515;--mute:#8a857c;--acc:#FF5A1F;--card:#fff}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg);font-family:GA1;font-weight:700;color:var(--ink)}
+#bg{position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,.10) 2px,transparent 2.5px);background-size:44px 44px}
+#stage{position:absolute;inset:0}
+.el{position:absolute;left:50%;top:860px;height:700px;width:1080px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#sub{position:absolute;left:0;right:0;display:flex;justify-content:center}
+#sub span{display:inline-block;background:var(--ink);color:#fff;padding:6px 24px 12px;border-radius:10px;white-space:nowrap;line-height:1.15;font-size:74px}
+#sub span.b{background:var(--acc)}
+#title{position:absolute;left:0;right:0;top:170px;text-align:center;line-height:1.15;letter-spacing:-3px}
+#title .t1{font-size:104px;font-weight:900}
+#title .t2{display:inline-block;margin-top:10px;font-size:104px;font-weight:900;color:#fff;background:var(--acc);padding:0 26px 10px;border-radius:14px}
+.emo{font-family:Emo}
+.cap{font-size:46px;margin-bottom:26px}
+.meme{border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.18);border:6px solid #fff}
+.card{background:var(--card);border-radius:28px;box-shadow:0 18px 50px rgba(0,0,0,.12)}
+.cm{width:900px;height:640px;padding:40px 44px;display:flex;flex-direction:column;gap:30px}
+.cm h4{font-size:36px;color:var(--mute);border-bottom:2px solid #eee;padding-bottom:18px}
+.row{display:flex;align-items:center;gap:22px}
+.av{width:74px;height:74px;border-radius:50%;flex:none}
+.row .u{font-size:30px;color:var(--mute)}
+.row .t{font-size:42px}
+.row .h{margin-left:auto;font-size:40px;color:#e0245e}
+.dm{width:900px;height:620px;padding:40px 44px;display:flex;flex-direction:column}
+.dm h4{font-size:44px;display:flex;justify-content:space-between}
+.dm .tabs{display:flex;gap:40px;font-size:32px;color:var(--mute);margin:26px 0 0;border-bottom:2px solid #eee;padding-bottom:18px}
+.dm .tabs b{color:var(--ink);border-bottom:6px solid var(--ink);padding-bottom:14px}
+.dm .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.dm .empty .e{font-family:Emo;font-size:150px}
+.dm .empty .z{font-size:84px;font-weight:900}
+.dm .empty .z b{color:var(--acc)}
+.ch{width:900px;height:640px;padding:44px}
+.vs{display:flex;gap:40px}
+.vc{width:440px;height:560px;padding:40px 30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center}
+.vc .who{font-size:48px;line-height:1.2}
+.vc .e{font-family:Emo;font-size:170px}
+.vc .act{font-size:56px;font-weight:900}
+.vc.hot{background:var(--ink);color:#fff}
+.vc.hot .act{color:var(--acc)}
+.off{opacity:.12}
+.sp{width:920px;display:flex;flex-direction:column;gap:30px}
+.sr{display:flex;align-items:center;gap:26px;padding:34px 40px}
+.sr .k{font-size:62px;font-weight:900;width:230px;white-space:nowrap}
+.sr .en{font-size:30px;color:var(--mute);width:120px}
+.sr .arr{font-size:50px;color:var(--mute)}
+.sr .v{margin-left:auto;font-size:46px;padding:14px 28px;border-radius:999px;background:#EEE9DF}
+.sr.hot{background:var(--ink);color:#fff}
+.sr.hot .v{background:var(--acc);color:#fff}
+.cp{display:flex;flex-direction:column;gap:40px;width:900px}
+.cc{padding:46px 44px;display:flex;align-items:center;gap:26px;font-size:54px;white-space:nowrap}
+.cc .m{font-size:80px;font-weight:900;width:80px;text-align:center}
+.cc.no{color:var(--mute)}
+.cc.no .t{text-decoration:line-through;text-decoration-thickness:6px}
+.cc.yes{background:var(--ink);color:#fff}
+.cc.yes .m{color:var(--acc)}
+.cta{display:flex;flex-direction:column;align-items:center;gap:40px}
+.pill{display:flex;align-items:center;gap:22px;background:var(--ink);color:#fff;border-radius:999px;padding:30px 60px;font-size:64px}
+.doc{width:620px;padding:46px;display:flex;flex-direction:column;gap:24px}
+.doc .ttl{font-size:46px;font-weight:900}
+.doc .ln{display:flex;align-items:center;gap:18px;font-size:36px;color:#555}
+.doc .bx{width:40px;height:40px;border:4px solid var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--acc);font-size:34px}
+</style></head>
+<body>
+<div id="bg"></div>
+<div id="stage"></div>
+<div id="sub"></div>
+<div id="title"></div>
+<script>
+const on=(t,at)=>at==null||t>=at;
+const esc=s=>s.replace(/(\p{Extended_Pictographic}(?:‍\p{Extended_Pictographic}|️)*)/gu,'<span class="emo">$1</span>');
+const AV=['#FFB4A2','#A2D2FF','#BDE0FE','#CDB4DB','#B9FBC0','#FFD6A5'];
+function chartSVG(t,sc){ // sc.up / sc.down labels
+  const k=Math.min(Math.max((t-sc.start)/1.2,0),1);
+  const pts=[[80,470],[230,420],[380,340],[530,270],[680,200],[810,140]], pts2=[[80,140],[230,180],[380,250],[530,320],[680,400],[810,460]];
+  const path=p=>'M'+p.map(q=>q.join(',')).join(' L'), L=760, dash=`stroke-dasharray:${L*1.3};stroke-dashoffset:${L*1.3*(1-k)}`;
+  return `<svg viewBox="0 0 900 560" width="812" height="505">
+   <line x1="70" y1="500" x2="860" y2="500" stroke="#ccc" stroke-width="4"/><line x1="70" y1="40" x2="70" y2="500" stroke="#ccc" stroke-width="4"/>
+   <path d="${path(pts)}" fill="none" stroke="#151515" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" style="${dash}"/>
+   <path d="${path(pts2)}" fill="none" stroke="#FF5A1F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" style="${dash}"/>
+   <line x1="110" y1="40" x2="160" y2="40" stroke="#151515" stroke-width="10" stroke-linecap="round"/><text x="180" y="54" font-size="40" fill="#151515" font-family="GA1" font-weight="700">${sc.up||'알려준 양'}</text>
+   <line x1="420" y1="40" x2="470" y2="40" stroke="#FF5A1F" stroke-width="10" stroke-linecap="round"/><text x="490" y="54" font-size="40" fill="#FF5A1F" font-family="GA1" font-weight="700">${sc.down||'문의'}</text></svg>`;
+}
+function sceneHTML(sc,t){
+  const T=sc.type;
+  if(T==='meme') return `<div class="el">${sc.cap?`<div class="cap">${sc.cap}</div>`:''}<img class="meme" src="memes/${sc.img}.jpg" style="width:${sc.w}px;height:${sc.h}px"></div>`;
+  if(T==='comments'){ // ev: [at, text, username]
+    const rows=sc.ev.filter(e=>on(t,e[0])).map((e,i)=>`<div class="row"><div class="av" style="background:${AV[i%6]}"></div><div><div class="u">${e[2]||''}</div><div class="t">${esc(e[1])}</div></div><div class="h">♥</div></div>`).join('');
+    return `<div class="el"><div class="card cm"><h4>댓글 ${sc.count||''}</h4>${rows}</div></div>`;
+  }
+  if(T==='dm') return `<div class="el"><div class="card dm"><h4><span>메시지</span><span class="emo">✏️</span></h4><div class="tabs"><b>주요</b><span>일반</span><span>요청</span></div><div class="empty"><div class="e">📭</div><div class="z">문의 <b>0</b>건</div></div></div></div>`;
+  if(T==='chart') return `<div class="el"><div class="card ch">${chartSVG(t,sc)}</div></div>`;
+  if(T==='versus'){ // a:{who,e,act} b:{who,e,act}; ev:[[at_a],[at_b]]
+    const A=sc.a||{who:'고마운 사람',e:'👋',act:'인사만'}, B=sc.b||{who:'내 문제를<br>해결해줄 사람',e:'💳',act:'돈을 냄'};
+    return `<div class="el"><div class="vs">
+      <div class="card vc ${on(t,sc.ev[0][0])?'':'off'}"><div class="who">${A.who}</div><div class="e">${A.e}</div><div class="act">${A.act}</div></div>
+      <div class="card vc hot ${on(t,sc.ev[1][0])?'':'off'}"><div class="who">${B.who}</div><div class="e">${B.e}</div><div class="act">${B.act}</div></div></div></div>`;
+  }
+  if(T==='split'){ // rows:[[word,EN,value,isPaid]], ev:[[at],...]
+    const R=sc.rows||[['무엇','WHAT','무료 콘텐츠',0],['왜','WHY','무료 콘텐츠',0],['어떻게','HOW','상담 · 유료',1]];
+    return `<div class="el"><div class="sp">${R.map((r,i)=>`<div class="card sr ${r[3]?'hot':''} ${on(t,sc.ev[i][0])?'':'off'}"><div class="k">${r[0]}</div><div class="en">${r[1]}</div><div class="arr">→</div><div class="v">${r[2]}</div></div>`).join('')}</div></div>`;
+  }
+  if(T==='compare'){ // no, yes; ev:[[at_yes]]
+    return `<div class="el"><div class="cp"><div class="card cc no"><div class="m">✕</div><div class="t">${sc.no||'퍼주는 콘텐츠'}</div></div><div class="card cc yes ${on(t,sc.ev[0][0])?'':'off'}"><div class="m">○</div><div>${sc.yes||'맡기고 싶게 만드는 콘텐츠'}</div></div></div></div>`;
+  }
+  if(T==='cta') return `<div class="el"><div class="cta"><div class="pill"><span class="emo">💬</span>${sc.pill||'아무 댓글이나'}</div>
+     <div class="card doc"><div class="ttl"><span class="emo">📋</span> ${sc.doc||'무료 vs 유료 점검표'}</div>
+     ${(sc.items||['무엇 · 왜 → 무료','어떻게 → 상담','저장만 되는 콘텐츠 체크']).map(x=>`<div class="ln"><div class="bx">✓</div>${x}</div>`).join('')}</div></div></div>`;
+  return '';
+}
+window.renderAt=function(t){
+  document.getElementById('title').innerHTML=(TL.title&&t<TL.title.end)?`<div class="t1">${TL.title.t1}</div><div class="t2">${TL.title.t2}</div>`:'';
+  const sc=TL.scenes.filter(s=>s.start<=t).pop();
+  const st=document.getElementById('stage'); st.innerHTML=sceneHTML(sc,t);
+  const ch=TL.chunks.find(c=>c.s<=t&&t<c.e), sub=document.getElementById('sub');
+  if(!ch){sub.innerHTML='';return;}
+  sub.innerHTML=`<span class="${ch.b?'b':''}">${ch.t}</span>`;
+  const sp=sub.firstChild, wd=sp.getBoundingClientRect().width;
+  if(wd>1000) sp.style.fontSize=(74*1000/wd)+'px';
+  sub.style.top= st.querySelector('.el') ? '1260px' : (960-sp.getBoundingClientRect().height/2)+'px';
+};
+</script></body></html>

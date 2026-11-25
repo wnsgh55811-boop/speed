@@ -1,0 +1,136 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 9:16 dark reel template (dating series). Scene types: text, meme, card, icons, kakao, cta. -->
+<style>
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Bold.ttf);font-weight:700}
+@font-face{font-family:Pen;src:url(fonts/NanumPenScript-Regular.ttf)}
+@font-face{font-family:Emo;src:url(fonts/NotoColorEmoji-Regular.ttf)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#111}
+#bg,#dust{position:absolute;inset:0}
+#stage{position:absolute;inset:0}
+.el{position:absolute;left:50%;top:860px;height:700px;width:1080px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#sub{position:absolute;left:0;right:0;display:flex;justify-content:center}
+#sub span{display:inline-block;color:#fff;background:rgba(0,0,0,.55);padding:2px 20px 8px;border-radius:6px;white-space:nowrap;line-height:1.15;font-family:GA1;font-weight:700}
+.cap{font-family:GA1;font-weight:700;color:#fff;font-size:46px;margin-bottom:26px;text-shadow:0 2px 8px #000;letter-spacing:-1px}
+.card{width:560px;height:560px;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.card .e{font-family:Emo;font-size:330px;line-height:1}
+.meme{border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.icons{display:flex;gap:250px;align-items:flex-end;height:560px}
+.who{position:relative;width:260px;display:flex;flex-direction:column;align-items:center}
+.who svg{width:260px;height:325px}
+.say{position:absolute;bottom:370px;left:50%;transform:translateX(-50%);width:max-content;max-width:470px;font-family:Pen;color:#111;font-size:56px;text-align:center;line-height:1.08;word-break:keep-all;background:#fff;border:5px solid #111;border-radius:26px;padding:14px 26px 16px;box-shadow:0 8px 0 rgba(0,0,0,.35)}
+.say:after{content:"";position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);border:16px solid transparent;border-top:22px solid #111}
+.say:before{content:"";position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);border:11px solid transparent;border-top:16px solid #fff;z-index:1}
+.say.th{border-radius:44px}
+.say.th:after,.say.th:before{border:none}
+.say.th:after{width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid #111;bottom:-44px}
+.say.th:before{width:14px;height:14px;border-radius:50%;background:#fff;border:4px solid #111;bottom:-72px;left:56%;z-index:0}
+.say.plain{background:none;border:none;box-shadow:none;padding:0}
+.say.plain:after,.say.plain:before{display:none}
+.say.none{display:none}
+.say .emo,.emo{font-family:Emo}
+.say .emo{font-size:70px}
+.kakao{width:920px;height:600px;display:flex;flex-direction:column;justify-content:flex-start;gap:22px;padding-top:20px}
+.time{font-family:GA1;font-weight:700;color:#bbb;font-size:30px;align-self:flex-end;margin-right:8px}
+.row{display:flex;align-items:center;gap:18px}
+.row.out{justify-content:flex-end}
+.av{width:70px;height:70px;border-radius:26px;background:#7fd3c0;display:flex;align-items:center;justify-content:center}
+.av:after{content:"";width:28px;height:28px;border-radius:50%;background:#fff;opacity:.85}
+.bub{font-family:GA1;font-weight:700;font-size:44px;padding:18px 28px;border-radius:18px;color:#191919;max-width:840px;word-break:keep-all}
+.out .bub{background:#FEE500}
+.in .bub{background:#fff}
+.bub .emo{font-size:40px}
+.cta{display:flex;flex-direction:column;align-items:center;gap:30px;height:330px;justify-content:center}
+.pill{display:flex;align-items:center;gap:22px;background:#fff;color:#111;border-radius:999px;padding:26px 54px;font-family:GA1;font-weight:700;font-size:58px;box-shadow:0 14px 50px rgba(255,255,255,.15)}
+.pill .emo{font-size:56px}
+.brand{font-family:GA1;font-weight:700;color:#ddd;font-size:40px;letter-spacing:2px}
+#title{position:absolute;left:0;right:0;top:150px;text-align:center;font-family:GA1;font-weight:700;line-height:1.12;letter-spacing:-3px;paint-order:stroke fill;-webkit-text-stroke:14px #000}
+#title .t1{font-size:118px;color:#fff}
+#title .t2{font-size:104px;color:#FEE500}
+</style></head>
+<body>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<canvas id="dust" width="1080" height="1920"></canvas>
+<div id="stage"></div>
+<div id="sub"></div>
+<div id="title"></div>
+<script>
+// ---------- hand-drawn chibi characters: w = coral hair woman, m = blue hair man ----------
+// moods: neutral smile happy sweat annoyed cool(sunglasses) flat
+const HAIR={w:'#FF8A7A',m:'#7DB4FF'};
+const GL='<path d="M74 108 H118 V124 Q118 142 96 142 Q74 142 74 124 Z" fill="#000" stroke-width="7"/><path d="M122 108 H166 V124 Q166 142 144 142 Q122 142 122 124 Z" fill="#000" stroke-width="7"/><path d="M118 114 H122"/><path d="M74 112 L60 104 M166 112 L180 104"/><path d="M84 128 L96 114 M132 128 L144 114" stroke="#FEE500" stroke-width="5"/>';
+function face(mood){
+  const dots='<circle cx="98" cy="124" r="6" fill="#fff" stroke="none"/><circle cx="142" cy="124" r="6" fill="#fff" stroke="none"/>';
+  const arcs='<path d="M89 127 Q98 115 107 127"/><path d="M133 127 Q142 115 151 127"/>';
+  const eyes={neutral:dots,smile:arcs,happy:arcs,sweat:dots,cool:GL,
+    flat:'<path d="M90 124 L106 124"/><path d="M134 124 L150 124"/>',
+    annoyed:'<path d="M88 121 L108 125"/><path d="M152 121 L132 125"/><path d="M88 128 L108 128"/><path d="M132 128 L152 128"/>'}[mood];
+  const mouth={neutral:'<path d="M111 152 Q120 157 129 152"/>',smile:'<path d="M106 147 Q120 164 134 147"/>',
+    happy:'<path d="M104 146 Q120 168 136 146 Z" fill="#fff"/>',sweat:'<path d="M105 154 Q112 147 120 154 Q128 161 135 154"/>',
+    cool:'<path d="M108 156 Q124 162 134 150"/>',flat:'<path d="M110 154 L130 154"/>',annoyed:'<path d="M110 156 Q120 150 130 156"/>'}[mood];
+  let x='';
+  if(mood==='happy'||mood==='smile') x+='<ellipse cx="82" cy="142" rx="11" ry="6" fill="#FF9DB5" stroke="none" opacity=".75"/><ellipse cx="158" cy="142" rx="11" ry="6" fill="#FF9DB5" stroke="none" opacity=".75"/>';
+  if(mood==='sweat') x+='<path d="M186 74 C178 90 176 98 186 104 C196 98 194 90 186 74Z" fill="#8FD0FF" stroke="#fff" stroke-width="4"/>';
+  if(mood==='annoyed') x+='<g stroke="#FF6B6B" stroke-width="6"><path d="M178 52 Q186 60 194 52"/><path d="M178 68 Q186 60 194 68"/><path d="M178 52 Q186 60 178 68"/><path d="M194 52 Q186 60 194 68"/></g>';
+  return eyes+mouth+x;
+}
+function charSVG(kind,mood,t){
+  const seed=Math.floor(t*8)%4+1, id='r'+kind+seed, hair=HAIR[kind];
+  const back=kind==='w'?`<path d="M50 118 C40 60 80 26 120 26 C160 26 200 60 190 118 L200 214 C176 226 152 216 146 200 L94 200 C88 216 64 226 40 214 Z" fill="${hair}"/>`:'';
+  const torso=`<path d="M62 300 C64 238 88 204 120 204 C152 204 176 238 178 300" fill="#2b2b2b"/>`+(kind==='m'?'<path d="M104 206 L120 228 L136 206"/>':'<path d="M100 208 Q120 226 140 208"/>');
+  const head=`<path d="M110 178 L110 206 M130 178 L130 206"/><ellipse cx="120" cy="118" rx="62" ry="64" fill="#1e1e1e"/>`+(kind==='w'
+    ?`<path d="M58 108 C64 58 108 46 128 62 C142 50 178 60 182 108 C162 96 142 88 130 72 C114 92 86 102 58 108Z" fill="${hair}"/>`
+    :`<path d="M58 112 C50 62 88 36 122 38 C160 38 190 64 182 112 C170 94 150 86 142 70 C126 90 96 100 58 112Z" fill="${hair}"/><path d="M112 40 L118 18 L130 40" fill="${hair}"/><path d="M58 122 Q48 126 56 140"/><path d="M182 122 Q192 126 184 140"/>`);
+  return `<svg viewBox="0 0 240 300" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+   <defs><filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="${seed}"/><feDisplacementMap in="SourceGraphic" scale="6"/></filter></defs>
+   <g filter="url(#${id})">${back}${torso}${head}${face(mood||'neutral')}</g></svg>`;
+}
+// ---------- background: dark woven texture + grain + dust ----------
+(function(){const c=document.getElementById('bg').getContext('2d');const img=c.createImageData(1080,1920);let seed=7;
+  const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  for(let y=0;y<1920;y++)for(let x=0;x<1080;x++){const weave=((x+y)%6<3?6:0)+((x-y+6000)%6<3?4:0);const v=20+weave+(r()-.5)*16,i=(y*1080+x)*4;
+    img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
+  c.putImageData(img,0,0);const g=c.createRadialGradient(540,900,300,540,960,1200);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=g;c.fillRect(0,0,1080,1920);})();
+function dust(t){const c=document.getElementById('dust').getContext('2d');c.clearRect(0,0,1080,1920);
+  let seed=Math.floor(t*12)+11;const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  for(let k=0;k<14;k++){c.fillStyle=`rgba(255,255,255,${.12+r()*.3})`;const x=r()*1080,y=r()*1920,len=r()<.3?6+r()*14:0;
+    if(len){c.save();c.translate(x,y);c.rotate(r()*3);c.fillRect(0,0,len,1.6);c.restore();}else{c.beginPath();c.arc(x,y,1+r()*2,0,7);c.fill();}}}
+const esc=s=>s.replace(/(\p{Extended_Pictographic}(?:‍\p{Extended_Pictographic}|️)*|♡)/gu,'<span class="emo">$1</span>');
+function cls(txt,th){ if(!txt) return 'none'; if(!/[가-힣A-Za-z0-9?!…]/.test(txt.replace(/<[^>]+>/g,''))) return 'plain'; return th?'th':''; }
+function sceneHTML(sc,t){
+  if(sc.type==='card') return `<div class="el">${sc.cap?`<div class="cap">${sc.cap}</div>`:''}<div class="card" style="background:radial-gradient(circle at 50% 40%,${sc.bg[0]},${sc.bg[1]})"><div class="e">${sc.emoji}</div></div></div>`;
+  if(sc.type==='meme'){
+    const ov=(sc.ov||[]).map(o=>`<div style="position:absolute;left:${o[0]}%;top:${o[1]}%;width:${o[2]}%;transform:translate(-50%,-50%);text-align:center;font-family:GA1;font-weight:700;font-size:${o[4]||36}px;color:#111;line-height:1.15;word-break:keep-all">${o[3]}</div>`).join('');
+    return `<div class="el">${sc.cap?`<div class="cap">${sc.cap}</div>`:''}<div style="position:relative;width:${sc.w}px;height:${sc.h}px"><img class="meme" src="memes/${sc.img}.jpg" style="width:${sc.w}px;height:${sc.h}px">${ov}</div></div>`;
+  }
+  if(sc.type==='icons'){
+    const th={w:false,m:false}, said={w:'',m:''}, mood={w:'neutral',m:'neutral'};
+    for(const [at,who,txt,app,md] of sc.ev) if(t>=at){
+      if(txt!==null&&txt!==undefined){ const tx=esc(txt.replace(/^~/,'')); said[who]=app?said[who]+'<br>'+tx:tx; if(!app) th[who]=txt.startsWith('~'); }
+      if(md) mood[who]=md;
+    }
+    return `<div class="el"><div class="icons">
+      <div class="who w"><div class="say ${cls(said.w,th.w)}">${said.w}</div>${charSVG('w',mood.w,t)}</div>
+      <div class="who m"><div class="say ${cls(said.m,th.m)}">${said.m}</div>${charSVG('m',mood.m,t)}</div></div></div>`;
+  }
+  if(sc.type==='kakao'){
+    let rows=''; for(const [at,dir,txt] of sc.ev) if(t>=at) rows+=`<div class="row ${dir}">${dir==='in'?'<div class="av"></div>':''}<div class="bub">${esc(txt)}</div></div>`;
+    return `<div class="el"><div class="kakao"><div class="time">오후 11:42</div>${rows}</div></div>`;
+  }
+  if(sc.type==='cta') return `<div class="el"><div class="cta"><div class="pill">${sc.pill||'<span class="emo">🔗</span>프로필 링크'}</div>${sc.sub===''?'':`<div class="brand">${sc.sub||'이다사 태도 부트캠프'}</div>`}</div></div>`;
+  return '';
+}
+window.renderAt=function(t){
+  dust(t);
+  document.getElementById('title').innerHTML=(TL.title&&t<TL.title.end)?`<div class="t1">${TL.title.t1}</div><div class="t2">${TL.title.t2}</div>`:'';
+  const sc=TL.scenes.filter(s=>s.start<=t).pop();
+  const stage=document.getElementById('stage'); stage.innerHTML=sceneHTML(sc,t);
+  const ch=TL.chunks.find(c=>c.s<=t&&t<c.e), sub=document.getElementById('sub');
+  if(!ch){sub.innerHTML='';return;}
+  sub.innerHTML=`<span style="font-size:76px${ch.b?';color:#FEE500':''}">${ch.t}</span>`;
+  const sp=sub.firstChild, wd=sp.getBoundingClientRect().width;
+  if(wd>1000) sp.style.fontSize=(76*1000/wd)+'px';
+  sub.style.top = stage.querySelector('.el') ? '1260px' : (960-sp.getBoundingClientRect().height/2)+'px';
+};
+</script></body></html>

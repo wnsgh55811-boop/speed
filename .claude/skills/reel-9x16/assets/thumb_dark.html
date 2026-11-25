@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 9:16 dark thumbnail (1080x1920). Edit the .th block: .pre (gray small line), .h (white), .h b (accent),
+     then ONE visual: <img class="mm" src="memes/x.jpg">, characters (<div class="chr" data-c="w:happy"> / data-c="m:sweat"
+     with optional <div class="bubble">), or kakao bubbles (.kk). Keep everything between y=285..1635 (3:4 grid crop).
+     Accent: red #FF3B3B (default), pink #FF6FA8 for women-targeted videos, yellow #FEE500 also ok. -->
+<style>
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Bold.ttf);font-weight:700}
+@font-face{font-family:Pen;src:url(fonts/NanumPenScript-Regular.ttf)}
+@font-face{font-family:Emo;src:url(fonts/NotoColorEmoji-Regular.ttf)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;background:#111;overflow:hidden;position:relative}
+canvas{position:absolute;inset:0}
+.th{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;font-family:GA1;font-weight:700;color:#fff}
+.pre{margin-top:360px;font-size:96px;color:#d0d0d0;letter-spacing:-3px}
+.h{font-size:150px;line-height:1.12;text-align:center;letter-spacing:-6px}
+.h b{color:#FF3B3B;font-size:180px}
+.mm{margin-top:70px;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);max-width:820px;max-height:500px}
+.cap2{margin-top:30px;font-size:56px}
+.chars{margin-top:150px;display:flex;gap:180px;align-items:flex-end}
+.chr{position:relative} .chr svg{width:290px;height:363px}
+.bubble{position:absolute;bottom:375px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:Pen;font-size:66px;color:#fff;text-align:center;line-height:1.05}
+.emo{font-family:Emo}
+.kk{margin-top:80px;width:880px;display:flex;flex-direction:column;gap:22px}
+.kk .in{display:flex;align-items:center;gap:16px}.kk .in i{width:76px;height:76px;border-radius:28px;background:#7fd3c0}
+.kk .in b{background:#fff;color:#191919;font-size:52px;padding:20px 30px;border-radius:22px}
+.kk .out{align-self:flex-end;background:#FEE500;color:#191919;font-size:52px;padding:20px 30px;border-radius:22px}
+</style></head><body>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<div class="th">
+  <div class="pre">썸 단계에서 돈 쓰면</div>
+  <div class="h"><b>호구 됩니다</b></div>
+  <!-- pick one visual -->
+  <div class="chars">
+    <div class="chr" data-c="w:flat"><div class="bubble">…</div></div>
+    <div class="chr" data-c="m:sweat"><div class="bubble">아무 데나 좋아요…</div></div>
+  </div>
+  <!-- <img class="mm" src="memes/make_rain.jpg"> -->
+  <!-- <div class="kk"><div class="in"><i></i><b>아 그날은 좀 바빠서요ㅠ</b></div><div class="out">그럼 토요일은요?</div></div> -->
+</div>
+<script>
+const HAIR={w:'#FF8A7A',m:'#7DB4FF'};
+const GL='<path d="M74 108 H118 V124 Q118 142 96 142 Q74 142 74 124 Z" fill="#000" stroke-width="7"/><path d="M122 108 H166 V124 Q166 142 144 142 Q122 142 122 124 Z" fill="#000" stroke-width="7"/><path d="M118 114 H122"/><path d="M74 112 L60 104 M166 112 L180 104"/><path d="M84 128 L96 114 M132 128 L144 114" stroke="#FEE500" stroke-width="5"/>';
+function face(mood){const dots='<circle cx="98" cy="124" r="6" fill="#fff" stroke="none"/><circle cx="142" cy="124" r="6" fill="#fff" stroke="none"/>',arcs='<path d="M89 127 Q98 115 107 127"/><path d="M133 127 Q142 115 151 127"/>';
+ const eyes={neutral:dots,smile:arcs,happy:arcs,sweat:dots,cool:GL,flat:'<path d="M90 124 L106 124"/><path d="M134 124 L150 124"/>',annoyed:'<path d="M88 121 L108 125"/><path d="M152 121 L132 125"/><path d="M88 128 L108 128"/><path d="M132 128 L152 128"/>'}[mood];
+ const mouth={neutral:'<path d="M111 152 Q120 157 129 152"/>',smile:'<path d="M106 147 Q120 164 134 147"/>',happy:'<path d="M104 146 Q120 168 136 146 Z" fill="#fff"/>',sweat:'<path d="M105 154 Q112 147 120 154 Q128 161 135 154"/>',cool:'<path d="M108 156 Q124 162 134 150"/>',flat:'<path d="M110 154 L130 154"/>',annoyed:'<path d="M110 156 Q120 150 130 156"/>'}[mood];
+ let x='';if(mood==='happy'||mood==='smile')x+='<ellipse cx="82" cy="142" rx="11" ry="6" fill="#FF9DB5" stroke="none" opacity=".75"/><ellipse cx="158" cy="142" rx="11" ry="6" fill="#FF9DB5" stroke="none" opacity=".75"/>';
+ if(mood==='sweat')x+='<path d="M186 74 C178 90 176 98 186 104 C196 98 194 90 186 74Z" fill="#8FD0FF" stroke="#fff" stroke-width="4"/>';
+ if(mood==='annoyed')x+='<g stroke="#FF6B6B" stroke-width="6"><path d="M178 52 Q186 60 194 52"/><path d="M178 68 Q186 60 194 68"/><path d="M178 52 Q186 60 178 68"/><path d="M194 52 Q186 60 194 68"/></g>';
+ return eyes+mouth+x;}
+function charSVG(k,mood){const id='r'+k,hair=HAIR[k];
+ const back=k==='w'?`<path d="M50 118 C40 60 80 26 120 26 C160 26 200 60 190 118 L200 214 C176 226 152 216 146 200 L94 200 C88 216 64 226 40 214 Z" fill="${hair}"/>`:'';
+ const torso=`<path d="M62 300 C64 238 88 204 120 204 C152 204 176 238 178 300" fill="#2b2b2b"/>`+(k==='m'?'<path d="M104 206 L120 228 L136 206"/>':'<path d="M100 208 Q120 226 140 208"/>');
+ const head=`<path d="M110 178 L110 206 M130 178 L130 206"/><ellipse cx="120" cy="118" rx="62" ry="64" fill="#1e1e1e"/>`+(k==='w'?`<path d="M58 108 C64 58 108 46 128 62 C142 50 178 60 182 108 C162 96 142 88 130 72 C114 92 86 102 58 108Z" fill="${hair}"/>`:`<path d="M58 112 C50 62 88 36 122 38 C160 38 190 64 182 112 C170 94 150 86 142 70 C126 90 96 100 58 112Z" fill="${hair}"/><path d="M112 40 L118 18 L130 40" fill="${hair}"/><path d="M58 122 Q48 126 56 140"/><path d="M182 122 Q192 126 184 140"/>`);
+ return `<svg viewBox="0 0 240 300" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><defs><filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="2"/><feDisplacementMap in="SourceGraphic" scale="6"/></filter></defs><g filter="url(#${id})">${back}${torso}${head}${face(mood)}</g></svg>`;}
+document.querySelectorAll('[data-c]').forEach(el=>{const [k,m]=el.dataset.c.split(':');el.insertAdjacentHTML('beforeend',charSVG(k,m||'neutral'))});
+document.querySelectorAll('.bubble,.kk b,.kk .out').forEach(el=>el.innerHTML=el.innerHTML.replace(/(\p{Extended_Pictographic}(?:‍\p{Extended_Pictographic}|️)*|♡)/gu,'<span class="emo">$1</span>'));
+(function(){const c=document.getElementById('bg').getContext('2d');const img=c.createImageData(1080,1920);let seed=7;const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+ for(let y=0;y<1920;y++)for(let x=0;x<1080;x++){const w=((x+y)%6<3?6:0)+((x-y+6000)%6<3?4:0);const v=20+w+(r()-.5)*16,i=(y*1080+x)*4;img.data[i]=img.data[i+1]=img.data[i+2]=v;img.data[i+3]=255;}
+ c.putImageData(img,0,0);const g=c.createRadialGradient(540,900,300,540,960,1200);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=g;c.fillRect(0,0,1080,1920);})();
+</script></body></html>

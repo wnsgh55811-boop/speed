@@ -1,0 +1,177 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- 16:9 YouTube infographic template (1920x1080). Scene types: chapter, big, list, vs, table, flow, lock, branch, grid,
+     example, caption, thread, check, comments, dm, profile, bars, meme, end. Header shows CHAPTER n + progress bar. -->
+<style>
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Bold.ttf);font-weight:700}
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Black.ttf);font-weight:900}
+@font-face{font-family:GA1;src:url(fonts/GothicA1-Medium.ttf);font-weight:500}
+@font-face{font-family:Emo;src:url(fonts/NotoColorEmoji-Regular.ttf)}
+:root{--bg:#F5F3EE;--ink:#141414;--mute:#8C877E;--line:#E4DFD5;--acc:#FF5A1F;--ok:#12A150;--card:#fff}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:GA1;font-weight:700;color:var(--ink)}
+#bg{position:absolute;inset:0;background:var(--bg)}
+#bg:after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.035) 2px,transparent 2px),linear-gradient(90deg,rgba(0,0,0,.035) 2px,transparent 2px);background-size:90px 90px}
+.emo{font-family:Emo;font-weight:400}
+#hdr{position:absolute;left:90px;right:90px;top:46px}
+#hdr .row{display:flex;align-items:center;gap:20px}
+#hdr .no{font-size:30px;color:#fff;background:var(--ink);border-radius:10px;padding:8px 16px;letter-spacing:2px}
+#hdr .tt{font-size:38px}
+#hdr .bar{display:flex;gap:10px;margin-top:18px}
+#hdr .bar i{flex:1;height:8px;border-radius:4px;background:var(--line)}
+#hdr .bar i.done{background:var(--ink)}
+#hdr .bar i.cur{background:var(--acc)}
+#stage{position:absolute;inset:0}
+.el{position:absolute;left:50%;top:505px;width:1740px;height:640px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.card{background:var(--card);border-radius:26px;box-shadow:0 14px 40px rgba(0,0,0,.08);border:2px solid #EEEAE2}
+.cap{font-size:44px;margin-bottom:28px}
+.ttl{font-size:44px;margin-bottom:26px;display:flex;align-items:center;gap:16px}
+.ttl:before{content:"";width:12px;height:46px;background:var(--acc);border-radius:4px}
+.dim{opacity:.18} .hide{visibility:hidden}
+#sub{position:absolute;left:90px;right:90px;top:880px;display:flex;justify-content:center}
+#sub span{display:inline-block;max-width:1500px;text-align:center;background:rgba(20,20,20,.94);color:#fff;padding:14px 32px 18px;border-radius:14px;font-size:56px;line-height:1.3;word-break:keep-all}
+#sub span.b{background:var(--acc)}
+.meme{border-radius:18px;border:8px solid #fff;box-shadow:0 14px 40px rgba(0,0,0,.14)}
+.big{text-align:center;display:flex;flex-direction:column;gap:34px;align-items:center}
+.big .t{font-size:92px;font-weight:900;line-height:1.2;letter-spacing:-2px;word-break:keep-all}
+.big .t2{font-size:68px;font-weight:900;line-height:1.25;color:#fff;background:var(--ink);padding:22px 40px;border-radius:20px;word-break:keep-all;max-width:1500px}
+.big .s{font-size:40px;color:var(--mute)}
+.lst{width:1300px;display:flex;flex-direction:column;gap:18px}
+.li{display:flex;align-items:center;gap:30px;padding:24px 40px}
+.li .n{width:78px;height:78px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;flex:none}
+.li .tx{font-size:48px;line-height:1.25} .li .sb{font-size:34px;color:var(--mute);margin-top:6px}
+.li.hl{background:var(--ink);color:#fff;border-color:var(--ink)} .li.hl .n{background:var(--acc);color:#fff}
+.vs{display:flex;gap:40px;align-items:stretch}
+.vc{width:640px;min-height:440px;padding:36px 34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center}
+.vc .h{font-size:42px;line-height:1.25;color:var(--mute)} .vc .e{font-family:Emo;font-size:130px;line-height:1}
+.vc .t{font-size:52px;font-weight:900;line-height:1.25;word-break:keep-all}
+.vc.hot{background:var(--ink);color:#fff;border-color:var(--ink)} .vc.hot .h{color:#bbb} .vc.hot .t{color:var(--acc)}
+.vsmid{align-self:center;font-size:60px;font-weight:900;color:var(--mute)}
+.tb{width:1500px;padding:20px 40px}
+.tr{display:grid;grid-template-columns:300px 1fr 1fr;gap:20px;padding:15px 6px;border-bottom:2px solid var(--line);align-items:center}
+.tr:last-child{border-bottom:none}
+.tr div{font-size:38px;line-height:1.25;word-break:keep-all} .tr .k{color:var(--mute);font-size:34px}
+.tr.hd div{font-size:44px;font-weight:900} .tr .win{color:var(--acc);font-weight:900}
+.fl{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:20px;width:1740px}
+.fs{width:400px;min-height:320px;padding:36px 26px;display:flex;flex-direction:column;justify-content:center;text-align:center;align-items:center;gap:20px}
+.fl.h .fs{width:420px}
+.fs .e{font-family:Emo;font-size:96px;flex:none} .fs .t{font-size:50px;line-height:1.25;word-break:keep-all}
+.fs.hl{background:var(--ink);color:#fff;border-color:var(--ink)}
+.ar{font-size:50px;color:var(--mute);line-height:1}
+.note{margin-top:34px;font-size:46px;padding:20px 34px;border-radius:16px;background:#FFE9E0;color:var(--acc)}
+.cm{width:1200px;padding:30px 44px;display:flex;flex-direction:column;gap:20px}
+.cm h4{font-size:36px;color:var(--mute);border-bottom:2px solid var(--line);padding-bottom:18px}
+.crow{display:flex;align-items:center;gap:22px} .av{width:72px;height:72px;border-radius:50%;flex:none}
+.crow .u{width:180px;height:24px;border-radius:12px;background:#E6E2DA;margin-bottom:12px}
+.crow .t{font-size:42px} .crow .hrt{margin-left:auto;font-size:40px;color:#e0245e}
+.dm{width:1000px;height:600px;padding:40px 44px;display:flex;flex-direction:column}
+.dm h4{font-size:44px} .dm .tabs{display:flex;gap:40px;font-size:32px;color:var(--mute);margin-top:26px;border-bottom:2px solid var(--line);padding-bottom:18px}
+.dm .tabs b{color:var(--ink)} .dm .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.dm .empty .e{font-family:Emo;font-size:150px} .dm .empty .z{font-size:84px;font-weight:900} .dm .empty .z b{color:var(--acc)}
+.pf{width:1300px;padding:36px 44px;display:flex;gap:50px;align-items:center}
+.pf .lft{flex:none} .pf .top{display:flex;align-items:center;gap:40px}
+.pf .pic{width:170px;height:170px;border-radius:50%;background:linear-gradient(135deg,#FFB199,#FF5A1F)}
+.pf .st{display:flex;gap:46px;text-align:center} .pf .st b{display:block;font-size:50px} .pf .st span{font-size:30px;color:var(--mute)}
+.pf .nm{margin-top:26px;width:260px;height:30px;border-radius:15px;background:#E6E2DA}
+.pf .grid{flex:1;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.pf .grid i{aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#EDE8DF,#DCD5C8)}
+.badges{display:flex;gap:20px;margin-top:30px} .bdg{font-size:40px;padding:16px 28px;border-radius:999px;background:#E3F6EA;color:var(--ok)}
+.bars{width:1000px;height:540px;padding:50px 60px;display:flex;align-items:flex-end;justify-content:space-around}
+.bw{display:flex;flex-direction:column;align-items:center;gap:20px;width:220px}
+.bw .v{font-size:56px;font-weight:900} .bw .b{width:180px;border-radius:16px 16px 6px 6px} .bw .l{font-size:42px;color:var(--mute)}
+/* chapter card: centered, minimal, premium (house style) */
+.chp{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,#232220 0%,#121212 70%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:170px}
+.chp .k{display:flex;align-items:center;gap:26px;font-size:26px;letter-spacing:12px;color:#9C958A;font-weight:500}
+.chp .k:before,.chp .k:after{content:"";width:70px;height:2px;background:#4a4742}
+.chp .n{font-size:150px;font-weight:500;color:var(--acc);line-height:1;margin:34px 0 30px;letter-spacing:4px}
+.chp .ln{width:56px;height:3px;background:rgba(255,255,255,.35);margin-bottom:40px}
+.chp .t{font-size:78px;font-weight:700;line-height:1.3;letter-spacing:-1px;word-break:keep-all}
+.lk{display:flex;gap:26px}
+.lt{width:440px;height:470px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+.lt .w{font-size:92px;font-weight:900} .lt .en{font-size:30px;color:var(--mute);letter-spacing:4px} .lt .s{font-family:Emo;font-size:96px}
+.lt .f{font-size:38px;padding:10px 24px;border-radius:999px;background:#E3F6EA;color:var(--ok)}
+.lt.pay{background:var(--ink);color:#fff} .lt.pay .f{background:var(--acc);color:#fff}
+.br{display:flex;flex-direction:column;align-items:center;gap:26px}
+.bub{font-size:46px;padding:26px 40px;border-radius:30px;background:var(--ink);color:#fff;position:relative}
+.bub:after{content:"";position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);border:16px solid transparent;border-top:22px solid var(--ink)}
+.bcs{display:flex;gap:22px;margin-top:20px}
+.bc{width:480px;padding:26px 22px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center}
+.bc .who{font-size:32px;color:var(--mute)} .bc .e{font-family:Emo;font-size:80px}
+.bc .p{font-size:40px;line-height:1.3;word-break:keep-all;min-height:52px}
+.bc .sol{font-size:42px;font-weight:900;color:#fff;background:var(--acc);border-radius:14px;padding:12px 18px;width:100%}
+.gd{width:1300px;padding:26px 40px}
+.gr{display:flex;align-items:center;gap:20px;padding:22px 0;border-bottom:2px solid var(--line)} .gr:last-child{border-bottom:none}
+.gr .who{width:240px;font-size:42px} .gr .dots{display:flex;gap:18px}
+.gr .d{width:130px;height:100px;border-radius:18px;background:#EEEAE2;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;color:#bbb}
+.gr .d.try{background:#E9E5DC;color:#9a958c} .gr .d.hit{background:var(--ok);color:#fff} .gr .d.miss{background:#F3D9D0;color:var(--acc)}
+.ex{width:1700px;display:flex;flex-direction:column;gap:24px} .exw{display:flex;gap:30px} .exw .exr{flex:1;min-height:330px}
+.ex .hd{font-size:50px;font-weight:900;display:flex;align-items:center;gap:16px}
+.exr{padding:34px 38px;display:flex;flex-direction:column;gap:14px}
+.exr .tag{align-self:flex-start;font-size:32px;padding:8px 20px;border-radius:999px;background:#E3F6EA;color:var(--ok)}
+.exr.pay .tag{background:var(--acc);color:#fff} .exr .q{font-size:42px;line-height:1.38;word-break:keep-all} .exr.pay{background:var(--ink);color:#fff}
+.cpn{width:1400px;padding:34px 50px}
+.cpn .hd{display:flex;align-items:center;gap:16px;font-size:36px;margin-bottom:24px}
+.cpn .hd .tag{padding:8px 22px;border-radius:999px;font-size:32px;color:#fff;background:var(--mute)} .cpn.after .hd .tag{background:var(--ok)}
+.cpn .ln{font-size:42px;line-height:1.4;word-break:keep-all;margin-bottom:10px} .cpn .ln.q{color:var(--acc)}
+.th{width:1400px;padding:38px 44px;display:flex;flex-direction:column;gap:26px}
+.th .c{display:flex;gap:20px;align-items:flex-start}
+.th .c .t{font-size:42px;line-height:1.35;padding:18px 26px;border-radius:22px;background:#F1EEE7;word-break:keep-all}
+.th .c.me{padding-left:70px} .th .c.me .t{background:var(--ink);color:#fff}
+.th .c.bad .t{text-decoration:line-through;text-decoration-thickness:4px;color:#aaa;background:#F6F3EE}
+.th .lab{font-size:30px;color:var(--mute);margin-top:6px}
+.ck{width:1300px;padding:44px;display:flex;flex-direction:column;gap:26px}
+.ck .r{display:flex;gap:24px;align-items:center;font-size:46px;word-break:keep-all}
+.ck .bx{width:62px;height:62px;border:6px solid var(--ink);border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--acc);font-size:46px}
+.ck .res{font-size:42px;color:var(--acc);padding-left:86px}
+.end{display:flex;flex-direction:column;align-items:center;gap:40px}
+.pill{display:flex;align-items:center;gap:20px;border-radius:999px;padding:28px 56px;font-size:58px}
+.pill.dk{background:var(--ink);color:#fff} .pill.rd{background:#FF0033;color:#fff}
+</style></head>
+<body>
+<div id="bg"></div><div id="hdr"></div><div id="stage"></div><div id="sub"></div>
+<script>
+const on=(t,a)=>a==null||t>=a;
+const E=s=>(s||'').replace(/(\p{Extended_Pictographic}(?:‍\p{Extended_Pictographic}|️)*)/gu,'<span class="emo">$1</span>');
+const AV=['#FFB4A2','#A2D2FF','#BDE0FE','#CDB4DB','#B9FBC0','#FFD6A5'];
+const C={
+ meme:(s,t)=>{const ov=(s.ov||[]).map(o=>`<div style="position:absolute;left:${o[0]}%;top:${o[1]}%;width:${o[2]}%;transform:translate(-50%,-50%);text-align:center;font-weight:700;font-size:${o[4]||36}px;color:#111;line-height:1.15;word-break:keep-all">${o[3]}</div>`).join('');
+   return `${s.cap?`<div class="cap">${E(s.cap)}</div>`:''}<div style="position:relative"><img class="meme" src="memes/${s.img}.jpg" style="width:${s.w}px;height:${s.h}px">${ov}</div>`},
+ big:(s,t)=>`<div class="big">${s.t?`<div class="t">${E(s.t)}</div>`:''}${s.t2?`<div class="t2 ${on(t,s.at2)?'':'hide'}">${E(s.t2)}</div>`:''}${s.s?`<div class="s">${E(s.s)}</div>`:''}</div>`,
+ list:(s,t)=>{const vis=s.items.filter(i=>on(t,i.at)).length;const hl=s.hl!=null?s.hl:vis-1;
+   return `${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="lst">${s.items.map((i,k)=>`<div class="card li ${k===hl?'hl':''} ${on(t,i.at)?(s.hl!=null&&k!==hl?'dim':''):'hide'}"><div class="n">${k+1}</div><div><div class="tx">${E(i.t)}</div>${i.s?`<div class="sb">${E(i.s)}</div>`:''}</div></div>`).join('')}</div>`},
+ vs:(s,t)=>{const side=(c,hot,a)=>`<div class="card vc ${hot?'hot':''} ${on(t,a)?'':'dim'}">${c.h?`<div class="h">${E(c.h)}</div>`:''}${c.e?`<div class="e">${c.e}</div>`:''}<div class="t">${E(c.t)}</div></div>`;
+   return `${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="vs">${side(s.a,false,s.ata)}${s.mid?`<div class="vsmid">${s.mid}</div>`:''}${side(s.b,s.hotb!==false,s.atb)}</div>`},
+ table:(s,t)=>`${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="card tb">${s.rows.map((r,k)=>`<div class="tr ${k===0?'hd':''}">${r.map((c,j)=>{const [tx,a,w]=Array.isArray(c)?c:[c,null,0];return `<div class="${j===0?'k':''} ${w?'win':''} ${on(t,a)?'':'hide'}">${E(tx)}</div>`}).join('')}</div>`).join('')}</div>`,
+ flow:(s,t)=>{const vis=s.steps.filter(i=>on(t,i.at)).length;
+   return `${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="fl ${s.h?'h':''}">${s.steps.map((i,k)=>`${k?`<div class="ar ${on(t,i.at)?'':'hide'}">→</div>`:''}<div class="card fs ${s.hlast&&k===vis-1?'hl':''} ${on(t,i.at)?'':'hide'}"><div class="e">${i.e}</div><div class="t">${E(i.t)}</div></div>`).join('')}</div>${s.note?`<div class="note ${on(t,s.atn)?'':'hide'}">${E(s.note)}</div>`:''}`},
+ comments:(s,t)=>`<div class="card cm"><h4>댓글 ${s.count||''}</h4>${s.items.filter(i=>on(t,i[1])).map((i,k)=>`<div class="crow"><div class="av" style="background:${AV[k%6]}"></div><div><div class="u"></div><div class="t">${E(i[0])}</div></div><div class="hrt">♥</div></div>`).join('')}</div>`,
+ dm:(s,t)=>`<div class="card dm"><h4>메시지</h4><div class="tabs"><b>주요</b><span>일반</span><span>요청</span></div><div class="empty"><div class="e">📭</div><div class="z">문의 <b>0</b>건</div></div></div>`,
+ profile:(s,t)=>`<div class="card pf"><div class="lft"><div class="top"><div class="pic"></div><div class="st"><div><b>312</b><span>게시물</span></div><div><b>2.4만</b><span>팔로워</span></div><div><b>180</b><span>팔로잉</span></div></div></div><div class="nm"></div></div><div class="grid">${'<i></i>'.repeat(6)}</div></div><div class="badges">${(s.badges||[]).map(b=>`<div class="bdg ${on(t,b[1])?'':'hide'}">✓ ${b[0]}</div>`).join('')}</div>`,
+ bars:(s,t)=>{const k=Math.min(Math.max((t-s.start)/0.9,0),1);
+   return `${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="card bars">${s.bars.map(b=>`<div class="bw"><div class="v" style="color:${b.c}">${b.v}</div><div class="b" style="height:${Math.max(b.h*k,10)}px;background:${b.c}"></div><div class="l">${b.l}</div></div>`).join('')}</div>`},
+ lock:(s,t)=>`<div class="lk">${s.tiles.map(x=>`<div class="card lt ${x.pay?'pay':''} ${on(t,x.at)?'':'dim'}"><div class="en">${x.en}</div><div class="w">${x.w}</div><div class="s">${x.s}</div><div class="f">${x.f}</div></div>`).join('')}</div>`,
+ branch:(s,t)=>`<div class="br"><div class="bub">${E(s.q)}</div><div class="bcs">${s.cards.map(c=>`<div class="card bc ${on(t,c.at)?'':'dim'}"><div class="who">${c.who}</div><div class="e">${c.e}</div><div class="p">${E(c.p)}</div><div class="sol ${on(t,c.at2)?'':'hide'}">${c.sol}</div></div>`).join('')}</div></div>`,
+ grid:(s,t)=>{const tried=on(t,s.at1),hit=on(t,s.at2);
+   return `${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="card gd">${s.rows.map(r=>`<div class="gr"><div class="who">${r.who}</div><div class="dots">${[0,1,2,3,4].map(i=>`<div class="d ${hit?(i===r.hit?'hit':'miss'):(tried?'try':'')}">${hit?(i===r.hit?'✓':'✕'):(i+1)}</div>`).join('')}</div></div>`).join('')}</div>`},
+ example:(s,t)=>`<div class="ex"><div class="hd"><span class="emo">${s.e}</span>${s.h}</div><div class="exw"><div class="card exr ${on(t,s.at1)?'':'dim'}"><div class="tag">${s.ltag||'무료 콘텐츠'}</div><div class="q">${E(s.free)}</div></div><div class="card exr pay ${on(t,s.at2)?'':'dim'}"><div class="tag">${s.rtag||'유료 상담'}</div><div class="q">${E(s.paid)}</div></div></div></div>`,
+ caption:(s,t)=>`<div class="card cpn ${s.after?'after':''}"><div class="hd"><span class="tag">${s.after?'AFTER':'BEFORE'}</span>${s.label||'캡션 예시'}</div>${s.lines.filter(l=>on(t,l[1])).map(l=>`<div class="ln ${l[2]?'q':''}">${E(l[0])}</div>`).join('')}</div>`,
+ thread:(s,t)=>`<div class="card th">${s.items.filter(i=>on(t,i.at)).map(i=>`<div class="c ${i.me?'me':''} ${i.bad?'bad':''}"><div class="av" style="background:${i.me?'#141414':'#A2D2FF'};width:58px;height:58px"></div><div><div class="t">${E(i.t)}</div>${i.lab?`<div class="lab">${i.lab}</div>`:''}</div></div>`).join('')}</div>`,
+ check:(s,t)=>`${s.title?`<div class="ttl">${s.title}</div>`:''}<div class="card ck">${s.rows.map(r=>`<div class="r"><div class="bx">${on(t,r.at)?'✓':''}</div>${E(r.t)}</div>${r.res?`<div class="res ${on(t,r.at2)?'':'hide'}">→ ${E(r.res)}</div>`:''}`).join('')}</div>`,
+ end:(s,t)=>`<div class="end"><div class="pill dk"><span class="emo">💬</span>${s.p1||'궁금한 점은 댓글로'}</div><div class="pill rd ${on(t,s.at)?'':'hide'}">${s.p2||'구독하고 다음 영상 보기'}</div></div>`,
+};
+function header(t){
+  const ch=(TL.chapters||[]).filter(c=>c.s<=t).pop(); if(!ch||ch.n===0) return '';
+  const all=TL.chapters.filter(c=>c.n>0), last=Math.max(...all.map(c=>c.n));
+  const bars=all.map(c=>`<i class="${c.n<ch.n?'done':(c.n===ch.n?'cur':'')}"></i>`).join('');
+  const lab=(TL.outro_n&&ch.n===TL.outro_n)?'OUTRO':'CHAPTER '+ch.n;
+  return `<div class="row"><div class="no">${lab}</div><div class="tt">${ch.t}</div></div><div class="bar">${bars}</div>`;
+}
+window.renderAt=function(t){
+  const sc=TL.scenes.filter(s=>s.start<=t).pop(), st=document.getElementById('stage'), isCh=sc.type==='chapter';
+  document.getElementById('hdr').innerHTML=isCh?'':header(t);
+  st.innerHTML=isCh?`<div class="chp"><div class="k">CHAPTER</div><div class="n">${String(sc.n).padStart(2,'0')}</div><div class="ln"></div><div class="t">${sc.t.replace(/<br>/g,' ')}</div></div>`
+     :`<div class="el">${(C[sc.type]||(()=>''))(sc,t)}</div>`;
+  const ch=TL.chunks.find(c=>c.s<=t&&t<c.e), sub=document.getElementById('sub');
+  sub.innerHTML=ch?`<span class="${ch.b?'b':''}">${ch.t}</span>`:'';
+};
+</script></body></html>
