@@ -63,8 +63,12 @@ for k, s in enumerate(scenes[:-1]):
         nxt['line'] = li
         nxt['t0'] = lines[li]['show']
         print(f'card {s["anchor"]!r} extended to line {li}')
+# 챕터가 바뀌는 장면은 이전 줄 자막이 내려가는 순간 바로 시작 (말 사이 공백에 화면이 붕 뜨지 않게)
+for k, s in enumerate(scenes[1:], 1):
+    if s['ch'] != scenes[k - 1]['ch'] and s['line'] > 0:
+        s['t0'] = min(s['t0'], lines[s['line'] - 1]['hide'])
 for k, s in enumerate(scenes):
-    s['t1'] = scenes[k + 1]['t0'] if k + 1 < len(scenes) else dur + 1
+    s['t1'] =scenes[k + 1]['t0'] if k + 1 < len(scenes) else dur + 1
     s['pos'] = lines[s['line']]['pos']
 
 # ---- HTML
