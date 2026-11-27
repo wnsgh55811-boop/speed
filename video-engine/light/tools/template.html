@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head>
+<body>
+<div id="bg"></div>
+<!--SCENES-->
+<div id="hdr"><div class="hl"><div class="lab"></div><div class="ht"></div></div><div class="pb"></div></div>
+<div id="sub"><span></span></div>
+<script>
+/*TL*/
+const S = [...document.querySelectorAll('.scene')];
+const hdr = document.getElementById('hdr'), sub = document.querySelector('#sub span');
+const pb = hdr.querySelector('.pb');
+for (let i = 1; i <= TL.nch; i++) pb.appendChild(document.createElement('i'));
+let cur = -1, curLine = -2, curCh = -1;
+const ease = p => 1 - Math.pow(1 - p, 3);
+function setHeader(ch) {
+  if (ch === curCh) return; curCh = ch;
+  if (!ch) { hdr.style.display = 'none'; return; }
+  hdr.style.display = 'block';
+  hdr.querySelector('.lab').textContent = TL.labels[ch];
+  hdr.querySelector('.ht').textContent = TL.titles[ch];
+  [...pb.children].forEach((b, i) => b.className = (i + 1 < ch) ? 'p' : (i + 1 === ch ? 'c' : ''));
+}
+function renderAt(t) {
+  let si = S.findIndex(s => t >= +s.dataset.t0 && t < +s.dataset.t1);
+  if (si < 0) si = S.length - 1;
+  if (si !== cur) { if (cur >= 0) S[cur].style.display = 'none'; S[si].style.display = 'block'; cur = si; }
+  const sc = S[si], key = [si];
+  setHeader(+sc.dataset.ch);
+  for (const e of sc.querySelectorAll('[data-on]')) { const v = t >= +e.dataset.on; e.classList.toggle('on', v); key.push(v ? 1 : 0); }
+  for (const e of sc.querySelectorAll('[data-a0]')) { const v = t >= +e.dataset.a0 && t < +e.dataset.a1; e.classList.toggle('act', v); key.push(v ? 1 : 0); }
+  for (const e of sc.querySelectorAll('[data-off]')) { const v = t >= +e.dataset.off; e.classList.toggle('gone', v); key.push(v ? 1 : 0); }
+  for (const e of sc.querySelectorAll('[data-grow]')) {
+    const p = Math.max(0, Math.min(1, (t - e.dataset.grow) / 0.9));
+    e.style.width = `calc(var(--w) * ${ease(p).toFixed(4)})`; key.push(Math.round(p * 1000));
+  }
+  let li = -1;
+  for (let i = 0; i < TL.lines.length; i++) { const l = TL.lines[i]; if (t >= l.show && t < l.hide) { li = i; break; } }
+  if (li !== curLine) {
+    curLine = li;
+    if (li < 0) sub.style.display = 'none';
+    else { sub.style.display = 'inline-block'; sub.textContent = TL.lines[li].text; sub.className = TL.lines[li].hl ? 'hl' : ''; }
+  }
+  key.push(li);
+  return key.join(',');
+}
+window.renderAt = renderAt;
+</script>
+</body></html>
